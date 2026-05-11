@@ -4,6 +4,8 @@ import { useToast } from '../../components/common/Toast.jsx';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { COACHES, SPECIALTIES, PRICE_RANGES } from '../../data/coaches.js';
+import { useCoaches } from '../../hooks/useCoaches.js';
+import Avatar from '../../components/common/Avatar.jsx';
 import './CoachDiscoveryPage.css';
 
 const EXPERIENCE_OPTIONS = ['Under 1 year', '1–2 years', '3–5 years', '5–10 years', '10+ years'];
@@ -247,8 +249,16 @@ export default function CoachDiscoveryPage() {
   const [sortBy, setSortBy] = useState('rating');
   const [showApply, setShowApply] = useState(false);
 
+  const { coaches: realCoaches, loading: coachesLoading } = useCoaches();
+
+  // Merge real coaches first, then sample coaches as fallback
+  const allCoaches = useMemo(() => {
+    if (realCoaches.length > 0) return realCoaches;
+    return COACHES;
+  }, [realCoaches]);
+
   const filtered = useMemo(() => {
-    let list = COACHES.filter(c => {
+    let list = allCoaches.filter(c => {
       const matchSearch = !search ||
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.specialty.toLowerCase().includes(search.toLowerCase()) ||

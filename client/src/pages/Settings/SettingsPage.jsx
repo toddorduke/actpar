@@ -16,6 +16,7 @@ const LF_CATEGORIES = [
 const SECTIONS = [
   { id: 'account', label: 'Account', icon: '👤' },
   { id: 'profile', label: 'My Profile', icon: '✨' },
+  { id: 'coach', label: 'Coach Profile', icon: '🏅', coachOnly: true },
   { id: 'password', label: 'Password', icon: '🔒' },
   { id: 'notifications', label: 'Notifications', icon: '🔔' },
   { id: 'about', label: 'About ActPar', icon: 'ℹ️' },
@@ -63,6 +64,18 @@ export default function SettingsPage() {
   const [savingNotifs, setSavingNotifs] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
 
+  // Coach profile
+  const [coachSpecialty, setCoachSpecialty] = useState('');
+  const [coachTagline, setCoachTagline] = useState('');
+  const [coachRate, setCoachRate] = useState('');
+  const [coachRateNum, setCoachRateNum] = useState('');
+  const [coachExperience, setCoachExperience] = useState('');
+  const [coachClients, setCoachClients] = useState('');
+  const [coachBio, setCoachBio] = useState('');
+  const [coachSessionTypes, setCoachSessionTypes] = useState([]);
+  const [savingCoach, setSavingCoach] = useState(false);
+  const [coachSaved, setCoachSaved] = useState(false);
+
   // Delete account
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
@@ -82,6 +95,15 @@ export default function SettingsPage() {
       setNotifSparks(prefs.sparks ?? true);
       setNotifPact(prefs.pact ?? true);
       setNotifTribe(prefs.tribe ?? false);
+      // Coach fields
+      setCoachSpecialty(profile.coach_specialty ?? '');
+      setCoachTagline(profile.coach_tagline ?? '');
+      setCoachRate(profile.coach_rate ?? '');
+      setCoachRateNum(profile.coach_rate_num ?? '');
+      setCoachExperience(profile.coach_experience ?? '');
+      setCoachClients(profile.coach_clients_helped ?? '');
+      setCoachBio((profile.coach_bio ?? []).join('\n\n'));
+      setCoachSessionTypes(profile.coach_session_types ?? []);
     }
   }, [profile]);
 
@@ -168,6 +190,25 @@ export default function SettingsPage() {
     setTimeout(() => setNotifSaved(false), 2500);
   }
 
+  async function handleSaveCoach(e) {
+    e.preventDefault();
+    setSavingCoach(true);
+    const bioArray = coachBio.split(/\n\n+/).map(s => s.trim()).filter(Boolean);
+    await updateProfile({
+      coach_specialty: coachSpecialty.trim() || null,
+      coach_tagline: coachTagline.trim() || null,
+      coach_rate: coachRate.trim() || null,
+      coach_rate_num: coachRateNum ? Number(coachRateNum) : null,
+      coach_experience: coachExperience.trim() || null,
+      coach_clients_helped: coachClients.trim() || null,
+      coach_bio: bioArray,
+      coach_session_types: coachSessionTypes,
+    });
+    setSavingCoach(false);
+    setCoachSaved(true);
+    setTimeout(() => setCoachSaved(false), 2500);
+  }
+
   async function handleDeleteAccount() {
     if (deleteInput !== 'DELETE') return;
     setDeleting(true);
@@ -187,7 +228,7 @@ export default function SettingsPage() {
         <aside className="settings-sidebar">
           <h2 className="settings-title">Settings</h2>
           <nav className="settings-nav">
-            {SECTIONS.map((s) => (
+            {SECTIONS.filter(s => !s.coachOnly || profile?.account_type === 'Coach').map((s) => (
               <button
                 key={s.id}
                 className={`settings-nav-item${activeSection === s.id ? ' active' : ''}${s.id === 'danger' ? ' danger' : ''}`}
@@ -346,6 +387,63 @@ export default function SettingsPage() {
           )}
 
           {/* Password */}
+          {/* Coach Profile */}
+          {activeSection === 'coach' && profile?.account_type === 'Coach' && (
+            <section className="settings-section">
+              <h3 className="settings-section-title">Coach Profile</h3>
+              <p className="settings-desc">This is what clients see when they browse the coach marketplace.</p>
+              <form onSubmit={handleSaveCoach} className="settings-form">
+                <div className="settings-field">
+                  <label>Specialty</label>
+                  <input type="text" className="settings-input" value={coachSpecialty} onChange={e => setCoachSpecialty(e.target.value)} placeholder="e.g. Fitness & Mindset, Financial Wellness" />
+                </div>
+                <div className="settings-field">
+                  <label>Coach Tagline</label>
+                  <input type="text" className="settings-input" value={coachTagline} onChange={e => setCoachTagline(e.target.value)} placeholder="e.g. Certified Executive & Fitness Coach" maxLength={100} />
+                </div>
+                <div className="settings-field-row">
+                  <div className="settings-field">
+                    <label>Hourly Rate (display)</label>
+                    <input type="text" className="settings-input" value={coachRate} onChange={e => setCoachRate(e.target.value)} placeholder="e.g. $75/hr" />
+                  </div>
+                  <div className="settings-field">
+                    <label>Rate (number only)</label>
+                    <input type="number" className="settings-input" value={coachRateNum} onChange={e => setCoachRateNum(e.target.value)} placeholder="75" min={0} />
+                  </div>
+                </div>
+                <div className="settings-field-row">
+                  <div className="settings-field">
+                    <label>Years of Experience</label>
+                    <input type="text" className="settings-input" value={coachExperience} onChange={e => setCoachExperience(e.target.value)} placeholder="e.g. 5 years" />
+                  </div>
+                  <div className="settings-field">
+                    <label>Clients Helped</label>
+                    <input type="text" className="settings-input" value={coachClients} onChange={e => setCoachClients(e.target.value)} placeholder="e.g. 50+" />
+                  </div>
+                </div>
+                <div className="settings-field">
+                  <label>Session Types</label>
+                  <div className="settings-radio-group">
+                    {['virtual', 'in-person'].map(t => (
+                      <label key={t} className={`settings-radio-option${coachSessionTypes.includes(t) ? ' selected' : ''}`}>
+                        <input type="checkbox" checked={coachSessionTypes.includes(t)} onChange={() => setCoachSessionTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])} />
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="settings-field">
+                  <label>Bio</label>
+                  <textarea className="settings-input" value={coachBio} onChange={e => setCoachBio(e.target.value)} rows={6} placeholder="Write your bio here. Separate paragraphs with a blank line." style={{ resize: 'vertical' }} />
+                  <span className="settings-hint">Separate paragraphs with a blank line between them.</span>
+                </div>
+                <button type="submit" className="settings-save-btn" disabled={savingCoach}>
+                  {coachSaved ? '✓ Saved' : savingCoach ? 'Saving...' : 'Save Coach Profile'}
+                </button>
+              </form>
+            </section>
+          )}
+
           {activeSection === 'password' && (
             <section className="settings-section">
               <h3 className="settings-section-title">Change Password</h3>

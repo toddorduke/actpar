@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { COACHES } from '../../data/coaches.js';
+import { useCoachProfile } from '../../hooks/useCoaches.js';
 import './CoachProfilePage.css';
 
 const TABS = ['Overview', 'Sessions', 'Workouts', 'Videos', 'Team'];
@@ -19,7 +20,11 @@ export default function CoachProfilePage() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const coach = COACHES.find(c => String(c.id) === String(coachId));
+  // Try real DB coach first (UUID), fall back to sample data (numeric id)
+  const isUuid = coachId && coachId.includes('-');
+  const { coach: dbCoach, loading: dbLoading } = useCoachProfile(isUuid ? coachId : null);
+  const sampleCoach = isUuid ? null : COACHES.find(c => String(c.id) === String(coachId));
+  const coach = dbCoach ?? sampleCoach;
 
   const [activeTab, setActiveTab] = useState('Overview');
   const [showBooking, setShowBooking] = useState(false);
@@ -28,6 +33,10 @@ export default function CoachProfilePage() {
   const [videoPreview, setVideoPreview] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', goal: '', time: 'Morning (9am – 12pm)' });
   const [submitting, setSubmitting] = useState(false);
+
+  if (isUuid && dbLoading) {
+    return <div className="coach-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}><div className="loading-spinner" /></div>;
+  }
 
   if (!coach) {
     return (
