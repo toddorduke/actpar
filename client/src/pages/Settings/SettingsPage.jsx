@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useToast } from '../../components/common/Toast.jsx';
+import { usePushNotifications } from '../../hooks/usePushNotifications.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './SettingsPage.css';
@@ -29,6 +30,7 @@ export default function SettingsPage() {
   const avatarInputRef = useRef(null);
 
   const [activeSection, setActiveSection] = useState('account');
+  const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush, permission: pushPermission } = usePushNotifications();
 
   // Account
   const [firstName, setFirstName] = useState('');
@@ -385,6 +387,28 @@ export default function SettingsPage() {
             <section className="settings-section">
               <h3 className="settings-section-title">Notification Preferences</h3>
               <p className="settings-desc">Choose what you want to be notified about.</p>
+
+              {pushSupported && (
+                <div className="settings-push-row">
+                  <div className="settings-toggle-info">
+                    <div className="settings-toggle-title">Browser Push Notifications</div>
+                    <div className="settings-toggle-desc">
+                      {pushPermission === 'denied'
+                        ? 'Notifications blocked — enable them in your browser settings.'
+                        : 'Get notified even when the app is closed.'}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className={`toggle-switch${pushSubscribed ? ' on' : ''}`}
+                    onClick={pushSubscribed ? unsubscribePush : subscribePush}
+                    disabled={pushLoading || pushPermission === 'denied'}
+                  >
+                    <span className="toggle-knob" />
+                  </button>
+                </div>
+              )}
+
               <div className="settings-toggles">
                 {[
                   [notifDailyReminder, setNotifDailyReminder, 'Daily Check-In Reminder', 'Remind you to check in on your goals each day'],

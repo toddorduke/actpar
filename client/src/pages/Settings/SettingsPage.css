@@ -161,6 +161,18 @@
 .settings-msg.error { background: #fee2e2; color: #991b1b; }
 
 /* Notification Toggles */
+.settings-push-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
 .settings-toggles {
   display: flex;
   flex-direction: column;
