@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Profile - Goal Tracker</title>
+    <link rel="stylesheet" href="css/coach-profile.css">
+</head>
+<body>
+    <!-- Navigation Tabs -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">GoalTracker</div>
+            <div class="nav-tabs">
+                <a href="home.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="tribe-community.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Tribe Community
+                </a>
+                <a href="#" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    The Pact
+                </a>
+            </div>
+            <a href="profile.html" class="profile-link">
+                <div class="profile-avatar"></div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        
+        <!-- Hero Section - At a Glance -->
+        <section class="hero-section">
+            <div class="hero-background"></div>
+            <div class="hero-content">
+                <div class="coach-photo-container">
+                    <div class="coach-photo" id="coach-photo"></div>
+                    <div class="verified-badge">
+                        <svg fill="currentColor" viewBox="0 0 20 20" width="20" height="20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Certified
+                    </div>
+                </div>
+                <div class="hero-info">
+                    <h1 class="coach-name" id="coach-name">Loading...</h1>
+                    <p class="coach-tagline" id="coach-tagline">Certified Executive Coach</p>
+                    <div class="quick-stats">
+                        <div class="stat-badge">
+                            <span class="stat-icon">🎯</span>
+                            <div>
+                                <div class="stat-label">Focus</div>
+                                <div class="stat-value" id="focus-areas">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="stat-badge">
+                            <span class="stat-icon">⚡</span>
+                            <div>
+                                <div class="stat-label">Method</div>
+                                <div class="stat-value" id="method">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="stat-badge">
+                            <span class="stat-icon">📊</span>
+                            <div>
+                                <div class="stat-label">Results</div>
+                                <div class="stat-value" id="results">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cta-buttons">
+                        <button class="primary-cta" onclick="openBookingModal()">
+                            📅 Book Discovery Call
+                        </button>
+                        <button class="secondary-cta" onclick="scrollToSection('services')">
+                            View Services
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            
+            <!-- Left Column -->
+            <div class="main-content">
+                
+                <!-- About / Personal Statement -->
+                <section class="content-card" id="about">
+                    <h2 class="section-title">
+                        <span class="title-icon">💬</span>
+                        About Me
+                    </h2>
+                    <div class="video-intro" id="video-intro">
+                        <div class="video-placeholder">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="60" height="60">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p>Watch My Introduction</p>
+                        </div>
+                    </div>
+                    <div class="bio-content" id="bio-content">
+                        <!-- Bio will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Coaching Philosophy -->
+                <section class="content-card">
+                    <h2 class="section-title">
+                        <span class="title-icon">🎯</span>
+                        My Coaching Philosophy
+                    </h2>
+                    <div class="philosophy-content" id="philosophy-content">
+                        <!-- Philosophy will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Signature Framework -->
+                <section class="content-card framework-card">
+                    <h2 class="section-title">
+                        <span class="title-icon">⚡</span>
+                        My Signature Framework
+                    </h2>
+                    <div class="framework-visual" id="framework-visual">
+                        <!-- Framework will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Services & Packages -->
+                <section class="content-card" id="services">
+                    <h2 class="section-title">
+                        <span class="title-icon">💼</span>
+                        Coaching Services
+                    </h2>
+                    <div class="services-grid" id="services-grid">
+                        <!-- Services will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Client Success Stories -->
+                <section class="content-card">
+                    <h2 class="section-title">
+                        <span class="title-icon">⭐</span>
+                        Client Success Stories
+                    </h2>
+                    <div class="testimonials-container" id="testimonials-container">
+                        <!-- Testimonials will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Before & After Transformations -->
+                <section class="content-card">
+                    <h2 class="section-title">
+                        <span class="title-icon">📈</span>
+                        Transformation Stories
+                    </h2>
+                    <div class="transformations-container" id="transformations-container">
+                        <!-- Transformations will be populated by JavaScript -->
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Right Sidebar -->
+            <aside class="sidebar">
+                
+                <!-- Quick Info Card -->
+                <div class="sidebar-card sticky-card">
+                    <h3 class="sidebar-title">Quick Info</h3>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-icon">🏆</span>
+                            <div>
+                                <div class="info-label">Experience</div>
+                                <div class="info-value" id="experience">10+ years</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">👥</span>
+                            <div>
+                                <div class="info-label">Clients Helped</div>
+                                <div class="info-value" id="clients-helped">120+</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">⏱️</span>
+                            <div>
+                                <div class="info-label">Session Length</div>
+                                <div class="info-value" id="session-length">60 min</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">🌐</span>
+                            <div>
+                                <div class="info-label">Format</div>
+                                <div class="info-value" id="format">Online & In-Person</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="sidebar-cta" onclick="openBookingModal()">
+                        Schedule a Call
+                    </button>
+                </div>
+
+                <!-- Certifications & Credentials -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">Certifications</h3>
+                    <div class="credentials-list" id="credentials-list">
+                        <!-- Credentials will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Core Values -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">Core Values</h3>
+                    <div class="values-list" id="values-list">
+                        <!-- Values will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Awards & Recognition -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">Awards & Recognition</h3>
+                    <div class="awards-list" id="awards-list">
+                        <!-- Awards will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Free Resources -->
+                <div class="sidebar-card resource-card">
+                    <h3 class="sidebar-title">Free Resources</h3>
+                    <div class="resources-list" id="resources-list">
+                        <!-- Resources will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Social Links -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">Connect With Me</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="LinkedIn">
+                            <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter">
+                            <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube">
+                            <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal" id="booking-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Book Your Discovery Call</h2>
+                <button class="close-modal" onclick="closeBookingModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">Ready to start your transformation journey? Book a free 30-minute discovery call to discuss your goals and see if we're a good fit.</p>
+                
+                <form class="booking-form" id="booking-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" class="input-field" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="input-field" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="input-field" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal">What's your primary goal?</label>
+                        <textarea id="goal" class="input-field" rows="4" placeholder="Tell me about what you'd like to achieve..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeline">Preferred Time</label>
+                        <select id="timeline" class="input-field">
+                            <option>Morning (9am - 12pm)</option>
+                            <option>Afternoon (12pm - 5pm)</option>
+                            <option>Evening (5pm - 8pm)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn" onclick="submitBooking(event)">
+                        Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/coach-profile.js"></script>
+</body>
+</html>

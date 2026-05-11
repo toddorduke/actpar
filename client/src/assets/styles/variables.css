@@ -1,0 +1,19 @@
+:root {
+  --color-background: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-primary: #f59e0b;
+  --color-primary-end: #d97706;
+  --color-orange: #10b981;
+  --color-secondary: #b45309;
+  --color-accent: #d97706;
+  --color-text: #1f2933;
+  --color-muted: #6b7280;
+  --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-secondary: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  --radius-large: 24px;
+  --radius-medium: 16px;
+  --radius-small: 12px;
+  --shadow-card: 0 20px 45px rgba(245, 158, 11, 0.12);
+  --shadow-subtle: 0 8px 20px rgba(15, 23, 42, 0.08);
+  --transition-base: 0.2s ease-in-out;
+}

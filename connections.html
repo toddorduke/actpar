@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections - Goal Tracker</title>
+    <link rel="stylesheet" href="css/connections.css">
+</head>
+<body>
+    <!-- Navigation Tabs -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">GoalTracker</div>
+            <div class="nav-tabs">
+                <a href="home.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="connections.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Connections
+                </a>
+                <a href="tribe-community.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Tribe Community
+                </a>
+                <a href="pact.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    The Pact
+                </a>
+            </div>
+            <a href="profile.html" class="profile-link">
+                <div class="profile-avatar"></div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        
+        <!-- Page Header -->
+        <section class="page-header">
+            <h1 class="page-title">⚡ Find Your Tribe</h1>
+            <p class="page-subtitle">Connect with goal-driven individuals who inspire your journey</p>
+        </section>
+
+        <!-- Main Grid -->
+        <div class="connections-grid">
+            
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                
+                <!-- Search Section -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Search by Alter Ego
+                    </h3>
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            id="alter-ego-search" 
+                            class="search-input" 
+                            placeholder="e.g., The Phoenix, The Warrior..."
+                            onkeyup="searchAlterEgo(event)"
+                        />
+                        <button class="search-btn" onclick="executeSearch()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="search-results" id="search-results" style="display: none;">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+
+                <!-- Spark Received -->
+                <div class="sidebar-card spark-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Sparks Received
+                        <span class="spark-count" id="spark-count">3</span>
+                    </h3>
+                    <p class="spark-description">People who want to connect with you!</p>
+                    <div class="sparks-list" id="sparks-list">
+                        <!-- Sparks will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Connection Stats -->
+                <div class="sidebar-card stats-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Your Stats
+                    </h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="connections-count">12</div>
+                            <div class="stat-label">Connections</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="viewed-count">34</div>
+                            <div class="stat-label">Viewed Today</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="matched-count">8</div>
+                            <div class="stat-label">Matches</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Filters -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        Quick Filters
+                    </h3>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterProfiles('all')">All</button>
+                        <button class="filter-btn" onclick="filterProfiles('fitness')">💪 Fitness</button>
+                        <button class="filter-btn" onclick="filterProfiles('career')">💼 Career</button>
+                        <button class="filter-btn" onclick="filterProfiles('mindfulness')">🧘 Mindfulness</button>
+                        <button class="filter-btn" onclick="filterProfiles('creativity')">🎨 Creativity</button>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Main Card Stack -->
+            <main class="card-stack-container">
+                <div class="card-stack" id="card-stack">
+                    <!-- Profile cards will be populated by JavaScript -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="action-btn skip-btn" onclick="skipProfile()" title="Skip">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <button class="action-btn spark-btn" onclick="sendSpark()" title="Send Spark">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </button>
+                    <button class="action-btn connect-btn" onclick="connectProfile()" title="Connect">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Swipe Instructions -->
+                <div class="swipe-instructions" id="swipe-instructions">
+                    <p>✓ Swipe checkmark to connect • ✗ Swipe X to skip • ⚡ Send spark to show interest</p>
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                
+                <!-- Recent Connections -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        Recent Connections
+                    </h3>
+                    <div class="connections-list" id="connections-list">
+                        <!-- Recent connections will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Suggested Pacts -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        Suggested Pacts
+                    </h3>
+                    <div class="pacts-list" id="pacts-list">
+                        <!-- Suggested pacts will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Connection Tips -->
+                <div class="sidebar-card tips-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Connection Tips
+                    </h3>
+                    <div class="tips-list">
+                        <div class="tip-item">💡 Be genuine in your profile</div>
+                        <div class="tip-item">⚡ Send sparks to show extra interest</div>
+                        <div class="tip-item">🎯 Focus on aligned goals</div>
+                        <div class="tip-item">💬 Start conversations meaningfully</div>
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+    <!-- Profile Detail Modal -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-name">Profile Details</h2>
+                <button class="close-modal" onclick="closeProfileModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Profile details will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/connections.js"></script>
+</body>
+</html>

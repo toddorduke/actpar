@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tribe Community - Goal Tracker</title>
+    <link rel="stylesheet" href="css/tribe-community.css">
+</head>
+<body>
+    <!-- Navigation Tabs -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">GoalTracker</div>
+            <div class="nav-tabs">
+                <a href="/home.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="connections.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Connections
+                </a>
+                <a href="tribe-community.html" class="nav-tab active">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Tribe Community
+                </a>
+                <a href="pact.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    The Pact
+                </a>
+            </div>
+            <a href="profile.html" class="profile-link">
+                <div class="profile-avatar"></div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <section class="page-header">
+            <h1 class="page-title">Tribe Community</h1>
+            <p class="page-subtitle">Connect, share, and grow together</p>
+        </section>
+
+        <!-- Community Grid -->
+        <div class="community-grid">
+            
+            <!-- Left Sidebar - Trending & Filters -->
+            <aside class="left-sidebar">
+                
+                <!-- Create Post Button -->
+                <button class="create-post-btn" onclick="openCreatePostModal()">
+                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create Post
+                </button>
+
+                <!-- Filter Options -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">Filter Posts</h3>
+                    <div class="filter-options">
+                        <button class="filter-btn active" onclick="filterPosts('all')">All Posts</button>
+                        <button class="filter-btn" onclick="filterPosts('achievements')">
+                            🏆 Achievements
+                        </button>
+                        <button class="filter-btn" onclick="filterPosts('meetups')">
+                            📅 Meetups
+                        </button>
+                        <button class="filter-btn" onclick="filterPosts('general')">
+                            💬 General
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trending Topics -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">🔥 Trending Now</h3>
+                    <div class="trending-list" id="trending-list">
+                        <!-- Trending topics will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Upcoming Meetups -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">📅 Upcoming Meetups</h3>
+                    <div class="upcoming-meetups" id="upcoming-meetups-sidebar">
+                        <!-- Upcoming meetups will be populated by JavaScript -->
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Main Feed -->
+            <main class="main-feed">
+                <div class="feed-container" id="feed-container">
+                    <!-- Posts will be populated by JavaScript -->
+                </div>
+            </main>
+
+            <!-- Right Sidebar - Community Stats -->
+            <aside class="right-sidebar">
+                
+                <!-- Community Stats -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">📊 Community Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">1,247</div>
+                            <div class="stat-label">Members</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">342</div>
+                            <div class="stat-label">Active Today</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">89</div>
+                            <div class="stat-label">New This Week</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">523</div>
+                            <div class="stat-label">Posts Today</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Contributors -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">⭐ Top Contributors</h3>
+                    <div class="top-contributors" id="top-contributors">
+                        <!-- Top contributors will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Achievement Leaderboard -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">🏆 This Week's Leaders</h3>
+                    <div class="leaderboard" id="leaderboard">
+                        <!-- Leaderboard will be populated by JavaScript -->
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div class="modal" id="create-post-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create New Post</h2>
+                <button class="close-modal" onclick="closeCreatePostModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Post Type Selection -->
+                <div class="form-group">
+                    <label>Post Type</label>
+                    <div class="post-type-buttons">
+                        <button class="type-btn active" onclick="selectPostType('general')" data-type="general">
+                            💬 General
+                        </button>
+                        <button class="type-btn" onclick="selectPostType('achievement')" data-type="achievement">
+                            🏆 Achievement
+                        </button>
+                        <button class="type-btn" onclick="selectPostType('meetup')" data-type="meetup">
+                            📅 Meetup
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post Content -->
+                <div class="form-group">
+                    <label for="post-content">What's on your mind?</label>
+                    <textarea 
+                        id="post-content" 
+                        class="post-textarea" 
+                        placeholder="Share your thoughts, achievements, or organize a meetup..."
+                        rows="6"
+                    ></textarea>
+                </div>
+
+                <!-- Achievement Specific Fields -->
+                <div class="form-group achievement-fields" style="display: none;">
+                    <label for="achievement-milestone">Milestone Reached</label>
+                    <input 
+                        type="text" 
+                        id="achievement-milestone" 
+                        class="input-field" 
+                        placeholder="e.g., 30-day streak, Lost 10 lbs, etc."
+                    />
+                </div>
+
+                <!-- Meetup Specific Fields -->
+                <div class="meetup-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="meetup-title">Meetup Title</label>
+                        <input 
+                            type="text" 
+                            id="meetup-title" 
+                            class="input-field" 
+                            placeholder="e.g., Morning Run Group"
+                        />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="meetup-date">Date</label>
+                            <input type="date" id="meetup-date" class="input-field" />
+                        </div>
+                        <div class="form-group">
+                            <label for="meetup-time">Time</label>
+                            <input type="time" id="meetup-time" class="input-field" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="meetup-location">Location</label>
+                        <input 
+                            type="text" 
+                            id="meetup-location" 
+                            class="input-field" 
+                            placeholder="Virtual or Physical Location"
+                        />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="submit-post-btn" onclick="submitPost()">
+                    Post to Community
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/tribe-community.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="css/SignUp.css" />
+</head>
+
+<body>
+  <!-- Background bubbles -->
+  <div id="quote-bubble-container"></div>
+
+  <!-- Sign-up form -->
+  <div class="container">
+    <section id="SignUpBox">
+      <form id="signupForm">
+        <h2>Create Account</h2>
+        <h4>Fill in the section below</h4>
+
+        <div class="form-group">
+          <label for="FirstName">First Name</label>
+          <input type="text" name="FirstName" id="FirstName" autocomplete="given-name" />
+
+          <label for="LastName">Last Name</label>
+          <input type="text" name="LastName" id="LastName" autocomplete="family-name" />
+        </div>
+
+        <fieldset>
+          <legend>Select your Gender:</legend>
+          <input type="radio" id="male" name="Gender" value="Male" />
+          <label for="male">Male</label>
+
+          <input type="radio" id="female" name="Gender" value="Female" />
+          <label for="female">Female</label>
+        </fieldset>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" name="Email" id="Email" autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" autocomplete="new-password" />
+        </div>
+
+        <div class="form-group">
+          <label for="Age">Age</label>
+          <input type="number" name="Age" id="Age" autocomplete="bday" />
+        </div>
+
+        <div class="form-group">
+          <label for="AlterEgoName">What is your Alter Ego name</label>
+          <input type="text" name="AlterEgoName" id="AlterEgoName" autocomplete="nickname" />
+        </div>
+
+        <div class="form-group">
+          <label for="City">What city are you in?</label>
+          <input type="text" name="City" id="City" autocomplete="address-level2" />
+        </div>
+
+        <div class="form-group">
+          <label for="AccountType">What kind of account are you setting up:</label>
+          <select name="AccountType" id="AccountType" required>
+            <option value="" disabled selected>Select account type</option>
+            <option value="Personal">Personal</option>
+            <option value="Coach">Coach</option>
+          </select>
+        </div>
+
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- === FORM HANDLER === -->
+  <script>
+    const form = document.getElementById("signupForm");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = {
+        firstName: document.getElementById("FirstName").value,
+        lastName: document.getElementById("LastName").value,
+        gender: document.querySelector('input[name="Gender"]:checked')?.value,
+        email: document.getElementById("Email").value,
+        password: document.getElementById("password").value,
+        age: parseInt(document.getElementById("Age").value),
+        alterEgoName: document.getElementById("AlterEgoName").value,
+        city: document.getElementById("City").value,
+        accountType: document.getElementById("AccountType").value,
+      };
+
+      try {
+        const response = await fetch("http://localhost:8080/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.text();
+        alert("✅ " + result);
+      } catch (error) {
+        alert("❌ Error submitting form");
+        console.error(error);
+      }
+    });
+  </script>
+
+  <!-- === BUBBLE GENERATOR === -->
+  <script>
+    async function loadBubbles() {
+      const container = document.getElementById("quote-bubble-container");
+      const numBubbles = 7;
+      const safeZone = { xStart: 30, xEnd: 70, yStart: 20, yEnd: 80 }; // no-fly zone for form
+      const placedBubbles = [];
+      const bubbleSize = window.innerWidth < 768 ? 110 : 160;
+      const minDistance = bubbleSize * 1.3;
+
+      function overlaps(x, y) {
+        for (const b of placedBubbles) {
+          const dx = b.x - x;
+          const dy = b.y - y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < minDistance) return true;
+        }
+        return false;
+      }
+
+      for (let i = 0; i < numBubbles; i++) {
+        const bubble = document.createElement("div");
+        bubble.classList.add("bubble");
+
+        let top, left, tries = 0;
+        do {
+          top = Math.random() * 90;
+          left = Math.random() * 90;
+          tries++;
+          if (tries > 200) break;
+        } while (
+          (left > safeZone.xStart &&
+            left < safeZone.xEnd &&
+            top > safeZone.yStart &&
+            top < safeZone.yEnd) ||
+          overlaps(left, top)
+        );
+
+        placedBubbles.push({ x: left, y: top });
+
+        bubble.style.top = `${top}%`;
+        bubble.style.left = `${left}%`;
+        bubble.style.width = `${bubbleSize}px`;
+        bubble.style.height = `${bubbleSize}px`;
+
+        try {
+          const res = await fetch("http://localhost:8080/api/quotes/random");
+          const data = await res.json();
+          bubble.textContent = `"${data.quote}" — ${data.author}`;
+        } catch (err) {
+          bubble.textContent = "Keep going, you’re amazing!";
+        }
+
+        bubble.style.animationDelay = `${Math.random() * 10}s`;
+        container.appendChild(bubble);
+      }
+    }
+
+    window.addEventListener("load", loadBubbles);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pact - Goal Tracker</title>
+    <link rel="stylesheet" href="css/pact.css">
+</head>
+<body>
+
+    
+    <!-- Navigation Tabs -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">GoalTracker</div>
+            <div class="nav-tabs">
+                <a href="home.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="connections.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Connections
+                </a>
+                <a href="tribe-community.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Tribe Community
+                </a>
+                <a href="pact.html" class="nav-tab active">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    The Pact
+                </a>
+            </div>
+            <a href="profile.html" class="profile-link">
+                <div class="profile-avatar"></div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        
+        <!-- Pact Header -->
+        <section class="pact-header">
+            <div class="pact-banner">
+                <div class="pact-icon">🔐</div>
+            </div>
+            <div class="pact-info">
+                <div class="invite-badge">
+                    <svg fill="currentColor" viewBox="0 0 20 20" width="16" height="16">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    Invite Only
+                </div>
+                <h1 class="pact-name" id="pact-name">The Phoenix Circle</h1>
+                <p class="pact-description" id="pact-description">An elite accountability group for ambitious goal-crushers</p>
+                <div class="pact-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="member-count">8</span>
+                        <span class="stat-label">Members</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="created-date">Jan 2025</span>
+                        <span class="stat-label">Created</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="total-posts">47</span>
+                        <span class="stat-label">Posts</span>
+                    </div>
+                </div>
+                <button class="invite-btn" onclick="openInviteModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                    Invite Member
+                </button>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <div class="pact-grid">
+            
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                
+                <!-- Create Post Button -->
+                <button class="create-post-btn" onclick="openCreatePostModal()">
+                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create Post
+                </button>
+
+                <!-- Pact Members -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        Pact Members
+                    </h3>
+                    <div class="members-list" id="members-list">
+                        <!-- Members will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Pact Rules -->
+                <div class="sidebar-card rules-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        Pact Rules
+                    </h3>
+                    <div class="rules-list">
+                        <div class="rule-item">1. Post weekly progress updates</div>
+                        <div class="rule-item">2. Support fellow members</div>
+                        <div class="rule-item">3. Be honest and accountable</div>
+                        <div class="rule-item">4. Respect privacy - what's shared here stays here</div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Upcoming Events
+                    </h3>
+                    <div class="events-list" id="events-list">
+                        <!-- Events will be populated by JavaScript -->
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Main Feed -->
+            <main class="main-feed">
+                <div class="feed-header">
+                    <div class="feed-tabs">
+                        <button class="feed-tab active" onclick="switchFeedTab('all')">All Posts</button>
+                        <button class="feed-tab" onclick="switchFeedTab('updates')">Updates</button>
+                        <button class="feed-tab" onclick="switchFeedTab('wins')">Wins</button>
+                        <button class="feed-tab" onclick="switchFeedTab('challenges')">Challenges</button>
+                    </div>
+                </div>
+                <div class="feed-container" id="feed-container">
+                    <!-- Posts will be populated by JavaScript -->
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                
+                <!-- Group Challenge -->
+                <div class="sidebar-card challenge-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Current Challenge
+                    </h3>
+                    <div class="challenge-content">
+                        <h4 class="challenge-name">30-Day Consistency Sprint</h4>
+                        <p class="challenge-description">Complete daily goal actions for 30 consecutive days</p>
+                        <div class="challenge-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%"></div>
+                            </div>
+                            <div class="progress-label">Day 18 of 30</div>
+                        </div>
+                        <div class="challenge-participants">
+                            <span>6 of 8 members active today</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Leaderboard -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                        </svg>
+                        This Week's Leaders
+                    </h3>
+                    <div class="leaderboard" id="leaderboard">
+                        <!-- Leaderboard will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Shared Resources -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        Shared Resources
+                    </h3>
+                    <div class="resources-list" id="resources-list">
+                        <!-- Resources will be populated by JavaScript -->
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+    <!-- Create Post Modal -->
+    <div class="modal" id="create-post-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Share with The Pact</h2>
+                <button class="close-modal" onclick="closeCreatePostModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Post Type</label>
+                    <div class="post-type-buttons">
+                        <button class="type-btn active" onclick="selectPostType('update')" data-type="update">
+                            📊 Progress Update
+                        </button>
+                        <button class="type-btn" onclick="selectPostType('win')" data-type="win">
+                            🎉 Win
+                        </button>
+                        <button class="type-btn" onclick="selectPostType('challenge')" data-type="challenge">
+                            💪 Challenge
+                        </button>
+                        <button class="type-btn" onclick="selectPostType('event')" data-type="event">
+                            📅 Event
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="post-content">Share your thoughts</label>
+                    <textarea 
+                        id="post-content" 
+                        class="post-textarea" 
+                        placeholder="What's happening with your goals?"
+                        rows="6"
+                    ></textarea>
+                </div>
+
+                <!-- Event Specific Fields -->
+                <div class="event-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="event-title">Event Title</label>
+                        <input 
+                            type="text" 
+                            id="event-title" 
+                            class="input-field" 
+                            placeholder="e.g., Weekly Check-In Call"
+                        />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="event-date">Date</label>
+                            <input type="date" id="event-date" class="input-field" />
+                        </div>
+                        <div class="form-group">
+                            <label for="event-time">Time</label>
+                            <input type="time" id="event-time" class="input-field" />
+                        </div>
+                    </div>
+                </div>
+
+                <button class="submit-post-btn" onclick="submitPost()">
+                    Share with Pact
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite Member Modal -->
+    <div class="modal" id="invite-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Invite to The Pact</h2>
+                <button class="close-modal" onclick="closeInviteModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">Invite someone you trust to join your exclusive accountability circle.</p>
+                
+                <form class="invite-form" id="invite-form">
+                    <div class="form-group">
+                        <label for="invite-email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="invite-email" 
+                            class="input-field" 
+                            placeholder="friend@example.com" 
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="invite-message">Personal Message (Optional)</label>
+                        <textarea 
+                            id="invite-message" 
+                            class="input-field" 
+                            rows="4" 
+                            placeholder="Add a personal note to your invitation..."
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn" onclick="sendInvite(event)">
+                        Send Invitation
+                    </button>
+                </form>
+
+                <div class="invite-link-section">
+                    <h4>Or share this invite link:</h4>
+                    <div class="link-container">
+                        <input 
+                            type="text" 
+                            class="link-input" 
+                            value="https://goaltracker.app/join/phoenix-circle-xyz123" 
+                            readonly 
+                            id="invite-link"
+                        />
+                        <button class="copy-btn" onclick="copyInviteLink()">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/the-pact.js"></script>
+</body>
+</html>

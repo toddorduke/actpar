@@ -1,0 +1,503 @@
+/* ========================================
+   RESET & BASE STYLES
+   ======================================== */
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #fde68a;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #6b7280;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+    background: #f3f4f6;
+    color: #667eea;
+}
+
+.nav-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+}
+
+
+/* ========================================
+   HEADER
+   ======================================== */
+#header {
+    background: linear-gradient(135deg, #f5576c 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.section-title h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.section-title p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+/* ========================================
+   SECTION HEADERS
+   ======================================== */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.section-header h2,
+.section-header h3 {
+    font-size: 1.5em;
+    color: #333;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    color: #667eea;
+}
+
+/* ========================================
+   GOAL PYRAMID SECTION
+   ======================================== */
+#goal-pyramid-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.pyramid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.goal-level {
+    display: flex;
+    justify-content: center;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.goal-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.goal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-color: #667eea;
+}
+
+/* Pyramid width effect */
+.goal-card.priority-1 { width: 100%; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-color: #fbbf24; }
+.goal-card.priority-2 { width: 85%; background: linear-gradient(135deg, #fde4e4 0%, #fca5a5 100%); border-color: #f87171; }
+.goal-card.priority-3 { width: 70%; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); border-color: #60a5fa; }
+.goal-card.priority-4 { width: 55%; background: linear-gradient(135deg, #e9d5ff 0%, #c084fc 100%); border-color: #a855f7; }
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.goal-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.goal-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.priority-badge {
+    background: white;
+    color: #6b7280;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+.day-count {
+    text-align: right;
+}
+
+.day-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+    line-height: 1;
+}
+
+.day-label {
+    font-size: 0.8em;
+    color: #6b7280;
+}
+
+.partners {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+    color: #6b7280;
+}
+
+.partners-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ========================================
+   PROGRESS BAR
+   ======================================== */
+.progress-container {
+    margin-top: 15px;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #6b7280;
+}
+
+.progress-info strong {
+    color: #1f2937;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 16px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: width 1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+}
+
+.progress-percentage {
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.milestone-markers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.75em;
+    color: #9ca3af;
+}
+
+/* Milestone lines on progress bar */
+.progress-bar::before,
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: rgba(0,0,0,0.1);
+}
+
+.progress-bar::before {
+    left: 33.33%;
+}
+
+.progress-bar::after {
+    left: 66.66%;
+}
+
+.achievement-badges {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #d1fae5;
+    color: #065f46;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+.badge-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* ========================================
+   MEDIA SECTION
+   ======================================== */
+#media-section {
+    margin-bottom: 30px;
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.media-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.photo-item {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover {
+    transform: scale(1.05);
+}
+
+#videos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.video-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.video-item:hover {
+    background: #f3f4f6;
+}
+
+.video-thumbnail {
+    width: 60px;
+    height: 60px;
+    background: #d1d5db;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.video-info {
+    flex: 1;
+}
+
+.video-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #1f2937;
+}
+
+.video-duration {
+    font-size: 0.85em;
+    color: #6b7280;
+}
+
+/* ========================================
+   TRIBE SECTION
+   ======================================== */
+#tribe-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.tribe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 25px;
+}
+
+.tribe-member {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.tribe-member:hover {
+    transform: translateY(-5px);
+}
+
+.tribe-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    margin: 0 auto 12px;
+    position: relative;
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+
+.status-online {
+    background: #10b981;
+}
+
+.status-offline {
+    background: #9ca3af;
+}
+
+.tribe-name {
+    font-weight: 500;
+    font-size: 0.95em;
+    color: #1f2937;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    #header {
+        padding: 30px 20px;
+    }
+
+    .section-title h1 {
+        font-size: 2em;
+    }
+
+    .goal-card {
+        padding: 20px;
+    }
+
+    .goal-card.priority-1,
+    .goal-card.priority-2,
+    .goal-card.priority-3,
+    .goal-card.priority-4 {
+        width: 100%;
+    }
+
+    .media-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tribe-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title h1 {
+        font-size: 1.5em;
+    }
+
+    .goal-title {
+        font-size: 1.1em;
+    }
+
+    .photos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

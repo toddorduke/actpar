@@ -1,0 +1,128 @@
+/* === BASE PAGE === */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-color: #2e003e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* === CONTAINER === */
+.container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* === SIGNUP BOX === */
+#SignUpBox {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  box-sizing: border-box;
+}
+
+/* === FORM ELEMENTS === */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input,
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #5e17eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #4310a3;
+}
+
+/* === QUOTE BUBBLES BACKGROUND === */
+#quote-bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* === INDIVIDUAL BUBBLE === */
+.bubble {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-style: italic;
+  color: #222;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-size: 0.9rem;
+  line-height: 1.2;
+  animation: floatRandom 14s ease-in-out infinite;
+  transition: transform 2s ease;
+  padding: 1rem;
+}
+
+/* === FLOATING MOTION === */
+@keyframes floatRandom {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(20px, -20px);
+  }
+}
+
+/* === MOBILE STYLES === */
+@media (max-width: 768px) {
+  body {
+    align-items: flex-start;
+    padding-top: 60px;
+  }
+
+  #SignUpBox {
+    width: 90%;
+    padding: 25px;
+  }
+
+  .bubble {
+    font-size: 0.75rem;
+    animation-duration: 10s;
+  }
+}

@@ -1,0 +1,19 @@
+.ap-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.ap-avatar-img {
+  display: block;
+}
+
+.ap-avatar-initials {
+  display: flex;
+}

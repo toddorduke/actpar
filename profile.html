@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Goal Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+     <!-- Navigation Tabs -->
+     <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">GoalTracker</div>
+            <div class="nav-tabs">
+                <a href="home.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="tribe-community.html" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Tribe Community
+                </a>
+                <a href="#" class="nav-tab">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    The Pact
+                </a>
+            </div>
+            <a href="profile.html" class="profile-link">
+                <div class="profile-avatar"></div>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header id="header">
+            <div class="section-title">
+                <h1 id="user-name">Loading...</h1>
+                <p id="user-tagline">Building better habits, one day at a time</p>
+            </div>
+        </header>
+
+        <!-- Goals Pyramid Section -->
+        <section id="goal-pyramid-section">
+            <div class="section-header">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2>Goal Pyramid</h2>
+            </div>
+            <div class="pyramid-container" id="pyramid-container">
+                <!-- Goals will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Media Section -->
+        <section id="media-section">
+            <div class="media-grid">
+                <!-- Photos -->
+                <div class="media-card">
+                    <div class="section-header">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <h3>Photos</h3>
+                    </div>
+                    <div class="photos-grid" id="photos-grid">
+                        <!-- Photos will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Videos -->
+                <div class="media-card">
+                    <div class="section-header">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <h3>Videos</h3>
+                    </div>
+                    <div id="videos-container">
+                        <!-- Videos will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accountability Tribe Section -->
+        <section id="tribe-section">
+            <div class="section-header">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <h2>Accountability Tribe</h2>
+            </div>
+            <div class="tribe-grid" id="tribe-grid">
+                <!-- Tribe members will be injected here -->
+            </div>
+        </section>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
