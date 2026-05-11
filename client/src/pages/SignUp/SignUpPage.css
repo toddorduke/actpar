@@ -249,3 +249,8 @@
     animation-duration: 10s;
   }
 }
+
+.input-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important; }
+.input-success { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16,185,129,0.15) !important; }
+.ego-available { color: #10b981 !important; font-weight: 600; }
+.ego-taken { color: #ef4444 !important; font-weight: 600; }

@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import './SignUpPage.css';
 
+const US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire',
+  'New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio',
+  'Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota',
+  'Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia',
+  'Wisconsin','Wyoming',
+];
+
 const INITIAL_FORM = {
-  firstName: '',
-  lastName: '',
-  gender: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  age: '',
-  alterEgoName: '',
-  city: '',
-  accountType: '',
+  firstName: '', lastName: '', gender: '', email: '', phone: '',
+  password: '', confirmPassword: '', age: '', alterEgoName: '',
+  city: '', state: '', accountType: '',
 };
 
 const BUBBLE_COUNT = 7;
@@ -27,113 +31,82 @@ const SignUpPage = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [bubbles, setBubbles] = useState([]);
 
+  // Alter ego availability
+  const [egoStatus, setEgoStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
+  const egoTimer = useRef(null);
+
   useEffect(() => {
     let cancelled = false;
-
     const safeZone = { xStart: 30, xEnd: 70, yStart: 20, yEnd: 80 };
     const bubbleSize = window.innerWidth < 768 ? 110 : 160;
     const minDistance = bubbleSize * 1.3;
     const placed = [];
 
-    const overlaps = (x, y) => {
-      for (const bubble of placed) {
-        const dx = bubble.x - x;
-        const dy = bubble.y - y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < minDistance) {
-          return true;
-        }
-      }
-      return false;
-    };
+    const overlaps = (x, y) => placed.some(b => {
+      const dx = b.x - x, dy = b.y - y;
+      return Math.sqrt(dx * dx + dy * dy) < minDistance;
+    });
 
-    const fetchQuote = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/quotes/random');
-        if (!response.ok) {
-          throw new Error('Failed to fetch quote');
-        }
-        const payload = await response.json();
-        return payload?.quote || 'Keep growing, one step at a time.';
-      } catch (error) {
-        console.error('Unable to fetch quote', error);
-        const fallbacks = [
-          'Your future self is cheering for you.',
-          'Progress, not perfection.',
-          'Small steps every day.',
-          'Stay focused on your why.',
-          'Consistency beats intensity.'
-        ];
-        const index = Math.floor(Math.random() * fallbacks.length);
-        return fallbacks[index];
-      }
-    };
+    const fallbacks = [
+      'Your future self is cheering for you.', 'Progress, not perfection.',
+      'Small steps every day.', 'Stay focused on your why.', 'Consistency beats intensity.',
+    ];
 
     const generateBubbles = async () => {
       const bubbleList = [];
-
-      for (let i = 0; i < BUBBLE_COUNT; i += 1) {
-        let top;
-        let left;
-        let attempts = 0;
-
+      for (let i = 0; i < BUBBLE_COUNT; i++) {
+        let top, left, attempts = 0;
         do {
-          top = Math.random() * 90;
-          left = Math.random() * 90;
-          attempts += 1;
-          if (attempts > 200) {
-            break;
-          }
+          top = Math.random() * 90; left = Math.random() * 90; attempts++;
+          if (attempts > 200) break;
         } while (
           (left > safeZone.xStart && left < safeZone.xEnd && top > safeZone.yStart && top < safeZone.yEnd) ||
           overlaps(left, top)
         );
-
         placed.push({ x: left, y: top });
-        const quote = await fetchQuote();
-
         bubbleList.push({
           id: i,
-          quote,
-          style: {
-            top: `${top}%`,
-            left: `${left}%`,
-            width: `${bubbleSize}px`,
-            height: `${bubbleSize}px`
-          }
+          quote: fallbacks[Math.floor(Math.random() * fallbacks.length)],
+          style: { top: `${top}%`, left: `${left}%`, width: `${bubbleSize}px`, height: `${bubbleSize}px` },
         });
       }
-
-      if (!cancelled) {
-        setBubbles(bubbleList);
-      }
+      if (!cancelled) setBubbles(bubbleList);
     };
 
     generateBubbles();
+    return () => { cancelled = true; };
+  }, []);
 
-    return () => {
-      cancelled = true;
-    };
+  const checkAlterEgo = useCallback((name) => {
+    clearTimeout(egoTimer.current);
+    if (!name.trim()) { setEgoStatus(null); return; }
+    setEgoStatus('checking');
+    egoTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('alter_ego_name', name.trim())
+        .maybeSingle();
+      setEgoStatus(data ? 'taken' : 'available');
+    }, 600);
   }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'alterEgoName') checkAlterEgo(value);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (formData.password !== formData.confirmPassword) {
-      toast('Passwords do not match.', 'error');
-      return;
+      toast('Passwords do not match.', 'error'); return;
     }
     if (!agreedToTerms) {
-      toast('Please agree to the Terms of Service and Privacy Policy.', 'error');
-      return;
+      toast('Please agree to the Terms of Service and Privacy Policy.', 'error'); return;
+    }
+    if (egoStatus === 'taken') {
+      toast('That Alter Ego Name is already taken — try a different one.', 'error'); return;
     }
 
     setSubmitting(true);
@@ -147,8 +120,10 @@ const SignUpPage = () => {
           last_name: formData.lastName,
           gender: formData.gender || null,
           age: formData.age ? Number.parseInt(formData.age, 10) : null,
-          alter_ego_name: formData.alterEgoName,
-          city: formData.city,
+          alter_ego_name: formData.alterEgoName || null,
+          city: formData.city || null,
+          state: formData.state || null,
+          phone: formData.phone || null,
           account_type: formData.accountType,
         },
       },
@@ -163,8 +138,6 @@ const SignUpPage = () => {
       return;
     }
 
-    // If Supabase auto-confirms (no email verification), user is now logged in → go to onboarding
-    // If email verification is required, they'll go through login first, then hit onboarding
     navigate('/onboarding');
   };
 
@@ -172,9 +145,7 @@ const SignUpPage = () => {
     <div className="signup-page">
       <div className="signup-bubbles">
         {bubbles.map((bubble) => (
-          <div key={bubble.id} className="bubble" style={bubble.style}>
-            {bubble.quote}
-          </div>
+          <div key={bubble.id} className="bubble" style={bubble.style}>{bubble.quote}</div>
         ))}
       </div>
 
@@ -190,164 +161,91 @@ const SignUpPage = () => {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="firstName">First Name</label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  autoComplete="given-name"
-                  required
-                />
+                <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} autoComplete="given-name" required />
               </div>
-
               <div className="form-group">
                 <label htmlFor="lastName">Last Name</label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  autoComplete="family-name"
-                  required
-                />
+                <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} autoComplete="family-name" required />
               </div>
             </div>
 
             <fieldset className="fieldset">
               <legend>Select your Gender:</legend>
               <div className="radio-group">
-                <label htmlFor="gender-male" className="radio-option">
-                  <input
-                    type="radio"
-                    id="gender-male"
-                    name="gender"
-                    value="Male"
-                    checked={formData.gender === 'Male'}
-                    onChange={handleChange}
-                  />
-                  Male
-                </label>
-                <label htmlFor="gender-female" className="radio-option">
-                  <input
-                    type="radio"
-                    id="gender-female"
-                    name="gender"
-                    value="Female"
-                    checked={formData.gender === 'Female'}
-                    onChange={handleChange}
-                  />
-                  Female
-                </label>
+                {['Male', 'Female'].map(g => (
+                  <label key={g} htmlFor={`gender-${g.toLowerCase()}`} className="radio-option">
+                    <input type="radio" id={`gender-${g.toLowerCase()}`} name="gender" value={g} checked={formData.gender === g} onChange={handleChange} />
+                    {g}
+                  </label>
+                ))}
               </div>
             </fieldset>
 
             <div className="form-group">
               <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                autoComplete="email"
-                required
-              />
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} autoComplete="email" required />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone">Phone Number <span className="signup-field-hint" style={{ fontStyle: 'normal' }}>(optional)</span></label>
+              <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} autoComplete="tel" placeholder="e.g. (404) 555-0123" />
             </div>
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                autoComplete="new-password"
-                required
-              />
+              <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} autoComplete="new-password" required />
             </div>
 
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirm Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                autoComplete="new-password"
-                required
-              />
+              <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} autoComplete="new-password" required />
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="age">Age</label>
-                <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  autoComplete="bday"
-                  min="0"
-                  max="120"
-                  required
-                />
+                <input type="number" id="age" name="age" value={formData.age} onChange={handleChange} autoComplete="bday" min="0" max="120" required />
               </div>
-
               <div className="form-group">
                 <label htmlFor="alterEgoName">Alter Ego Name</label>
                 <input
-                  type="text"
-                  id="alterEgoName"
-                  name="alterEgoName"
-                  value={formData.alterEgoName}
-                  onChange={handleChange}
-                  autoComplete="nickname"
-                  placeholder="e.g. The Iron Version"
+                  type="text" id="alterEgoName" name="alterEgoName"
+                  value={formData.alterEgoName} onChange={handleChange}
+                  autoComplete="nickname" placeholder="e.g. The Iron Version"
+                  className={egoStatus === 'taken' ? 'input-error' : egoStatus === 'available' ? 'input-success' : ''}
                 />
-                <span className="signup-field-hint">Your accountability persona — who you're becoming.</span>
+                {egoStatus === 'checking' && <span className="signup-field-hint">Checking availability…</span>}
+                {egoStatus === 'available' && <span className="signup-field-hint ego-available">✓ Available!</span>}
+                {egoStatus === 'taken' && <span className="signup-field-hint ego-taken">✗ Already taken — try another.</span>}
+                {!egoStatus && <span className="signup-field-hint">Your accountability persona — who you're becoming.</span>}
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="city">What city are you in?</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                autoComplete="address-level2"
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="city">City</label>
+                <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} autoComplete="address-level2" placeholder="e.g. Atlanta" />
+              </div>
+              <div className="form-group">
+                <label htmlFor="state">State</label>
+                <select id="state" name="state" value={formData.state} onChange={handleChange}>
+                  <option value="">Select state</option>
+                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="accountType">What kind of account are you setting up:</label>
-              <select
-                id="accountType"
-                name="accountType"
-                value={formData.accountType}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>
-                  Select account type
-                </option>
+              <select id="accountType" name="accountType" value={formData.accountType} onChange={handleChange} required>
+                <option value="" disabled>Select account type</option>
                 <option value="Personal">Personal</option>
                 <option value="Coach">Coach</option>
               </select>
             </div>
 
             <label className="signup-terms-row">
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-              />
+              <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
               <span>
                 I agree to the{' '}
                 <a href="/legal/terms-of-service.html" target="_blank" rel="noreferrer" className="signup-link">Terms of Service</a>
@@ -356,18 +254,13 @@ const SignUpPage = () => {
               </span>
             </label>
 
-            <button type="submit" disabled={submitting || !agreedToTerms}>
+            <button type="submit" disabled={submitting || !agreedToTerms || egoStatus === 'taken'}>
               {submitting ? 'Creating account...' : 'Create My Account'}
             </button>
           </form>
 
-          <p className="signup-footer">
-            Already have an account?{' '}
-            <Link to="/login" className="signup-link">Sign in</Link>
-          </p>
-          <p className="signup-footer" style={{ marginTop: '6px' }}>
-            <Link to="/about" className="signup-link">What is ActPar? →</Link>
-          </p>
+          <p className="signup-footer">Already have an account?{' '}<Link to="/login" className="signup-link">Sign in</Link></p>
+          <p className="signup-footer" style={{ marginTop: '6px' }}><Link to="/about" className="signup-link">What is ActPar? →</Link></p>
         </section>
       </div>
     </div>
