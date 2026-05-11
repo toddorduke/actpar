@@ -20,6 +20,13 @@ const GOAL_CATEGORIES = [
   'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
 ];
 
+const GROWTH_AREAS = [
+  'Beating Procrastination', 'Building Daily Discipline', 'Sharpening My Focus',
+  'Staying Consistent', 'Reigniting My Motivation', 'Mastering My Time',
+  'Silencing Self-Doubt', 'Breaking Old Habits', 'Taking More Action',
+  'Quieting Overthinking', 'Managing Stress Better', 'Showing Up for Myself',
+];
+
 const INITIAL_FORM = {
   firstName: '', lastName: '', gender: '', email: '', phone: '',
   password: '', confirmPassword: '', age: '', alterEgoName: '',
@@ -37,9 +44,13 @@ const SignUpPage = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [bubbles, setBubbles] = useState([]);
   const [lookingFor, setLookingFor] = useState([]);
+  const [workingOn, setWorkingOn] = useState([]);
 
   const toggleGoal = (cat) => setLookingFor(prev =>
     prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+  );
+  const toggleGrowth = (area) => setWorkingOn(prev =>
+    prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
   );
 
   // Alter ego availability
@@ -137,6 +148,7 @@ const SignUpPage = () => {
           phone: formData.phone || null,
           account_type: formData.accountType,
           looking_for: lookingFor,
+          working_on: workingOn,
         },
       },
     });
@@ -267,6 +279,22 @@ const SignUpPage = () => {
                     onClick={() => toggleGoal(cat)}
                   >
                     {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>What are you ready to conquer? <span className="signup-field-hint" style={{ fontStyle: 'normal' }}>(pick all that apply)</span></label>
+              <div className="signup-goal-chips">
+                {GROWTH_AREAS.map(area => (
+                  <button
+                    key={area}
+                    type="button"
+                    className={`signup-goal-chip${workingOn.includes(area) ? ' selected' : ''}`}
+                    onClick={() => toggleGrowth(area)}
+                  >
+                    {area}
                   </button>
                 ))}
               </div>
