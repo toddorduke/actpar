@@ -27,7 +27,35 @@ const MOTIVATIONS = [
   'Weight Loss', 'Strength', 'Energy', 'Gratitude', 'Career Growth',
 ];
 
-const TOTAL_STEPS = 5;
+const GROWTH_AREAS = [
+  'Beating Procrastination', 'Building Daily Discipline', 'Sharpening My Focus',
+  'Staying Consistent', 'Reigniting My Motivation', 'Mastering My Time',
+  'Silencing Self-Doubt', 'Breaking Old Habits', 'Taking More Action',
+  'Quieting Overthinking', 'Managing Stress Better', 'Showing Up for Myself',
+];
+
+const STRENGTHS = [
+  'Natural Leader', 'Great Listener', 'Creative Thinker', 'Quick Learner',
+  'Problem Solver', 'Detail-Oriented', 'Self-Starter', 'Big-Picture Thinker',
+  'Highly Empathetic', 'Resilient Under Pressure', 'Strong Communicator', 'Team Player',
+];
+
+const WEAKNESSES = [
+  "I can be too hard on myself",
+  "Patience is a muscle I'm still training",
+  "I sometimes avoid hard conversations",
+  "I struggle with saying no",
+  "I get in my own way",
+  "I shut down under pressure",
+  "I put everyone else first",
+  "I fear what others think",
+  "I take on too much at once",
+  "I have trouble asking for help",
+  "I can be overly cautious",
+  "I hold on to things too long",
+];
+
+const TOTAL_STEPS = 8;
 
 export default function OnboardingPage() {
   const { user } = useContext(AuthContext);
@@ -39,6 +67,9 @@ export default function OnboardingPage() {
   const [goalTitle, setGoalTitle] = useState('');
   const [goalCategory, setGoalCategory] = useState('');
   const [motivations, setMotivations] = useState([]);
+  const [workingOn, setWorkingOn] = useState([]);
+  const [strengths, setStrengths] = useState([]);
+  const [weaknesses, setWeaknesses] = useState([]);
   const [saving, setSaving] = useState(false);
 
   // Step 4 — suggested connections
@@ -50,7 +81,7 @@ export default function OnboardingPage() {
 
   // Load suggested profiles when entering step 4
   useEffect(() => {
-    if (step !== 4 || !user) return;
+    if (step !== 6 || !user) return;
     let cancelled = false;
     setLoadingSuggestions(true);
 
@@ -126,6 +157,18 @@ export default function OnboardingPage() {
     );
   }
 
+  function toggleWorkingOn(a) {
+    setWorkingOn((prev) => prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]);
+  }
+
+  function toggleStrength(s) {
+    setStrengths((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
+  }
+
+  function toggleWeakness(w) {
+    setWeaknesses((prev) => prev.includes(w) ? prev.filter((x) => x !== w) : [...prev, w]);
+  }
+
   async function handleGoalStep() {
     if (goalTitle.trim()) {
       await addGoal(goalTitle.trim(), goalCategory || null);
@@ -136,7 +179,7 @@ export default function OnboardingPage() {
   async function handleFinish() {
     setSaving(true);
     await Promise.all([
-      supabase.auth.updateUser({ data: { onboarding_complete: true } }),
+      supabase.auth.updateUser({ data: { onboarding_complete: true, working_on: workingOn, strengths, weaknesses } }),
       supabase.from('profiles').update({ onboarding_complete: true }).eq('id', user.id),
     ]);
     setSaving(false);
@@ -146,7 +189,7 @@ export default function OnboardingPage() {
   return (
     <div className="onboarding-page">
       {/* Progress bar — hidden on final step */}
-      {step < 5 && (
+      {step < 8 && (
         <div className="onboarding-progress">
           <div
             className="onboarding-progress-fill"
@@ -181,7 +224,7 @@ export default function OnboardingPage() {
       {step === 2 && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 1 of 3</div>
+            <div className="step-number">Step 1 of 5</div>
             <h2 className="step-title">What do you want to achieve?</h2>
             <p className="step-subtitle">Set your first goal to start tracking progress.</p>
           </div>
@@ -231,7 +274,7 @@ export default function OnboardingPage() {
       {step === 3 && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 2 of 3</div>
+            <div className="step-number">Step 2 of 5</div>
             <h2 className="step-title">What drives you?</h2>
             <p className="step-subtitle">Pick up to 3 things that motivate you most.</p>
           </div>
@@ -266,11 +309,106 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Step 4 — Find Your People */}
+      {/* Step 4 — What Are You Working to Overcome? */}
       {step === 4 && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 3 of 3</div>
+            <div className="step-number">Step 3 of 5</div>
+            <h2 className="step-title">What are you working to overcome?</h2>
+            <p className="step-subtitle">Pick everything that resonates — no judgment here.</p>
+          </div>
+          <div className="step-body">
+            <div className="motivations-grid">
+              {GROWTH_AREAS.map((a) => (
+                <button
+                  key={a}
+                  type="button"
+                  className={`motivation-chip${workingOn.includes(a) ? ' selected' : ''}`}
+                  onClick={() => toggleWorkingOn(a)}
+                >
+                  {a}
+                  {workingOn.includes(a) && <span className="chip-check">✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="step-actions">
+            <button className="onboarding-btn primary" onClick={() => setStep(5)}>
+              {workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
+            </button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(3)}>Back</button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 5 — What Are Your Superpowers? */}
+      {step === 5 && (
+        <div className="onboarding-step">
+          <div className="step-header">
+            <div className="step-number">Step 4 of 5</div>
+            <h2 className="step-title">What are your superpowers?</h2>
+            <p className="step-subtitle">Own it — what do you naturally bring to the table?</p>
+          </div>
+          <div className="step-body">
+            <div className="motivations-grid">
+              {STRENGTHS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`motivation-chip${strengths.includes(s) ? ' selected' : ''}`}
+                  onClick={() => toggleStrength(s)}
+                >
+                  {s}
+                  {strengths.includes(s) && <span className="chip-check">✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="step-actions">
+            <button className="onboarding-btn primary" onClick={() => setStep(6)}>
+              {strengths.length > 0 ? 'Continue' : 'Skip for Now'}
+            </button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(4)}>Back</button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 6 — What Are Your Weaknesses? */}
+      {step === 6 && (
+        <div className="onboarding-step">
+          <div className="step-header">
+            <div className="step-number">Step 5 of 5</div>
+            <h2 className="step-title">What are you still working on inside?</h2>
+            <p className="step-subtitle">Owning it is the first step to changing it.</p>
+          </div>
+          <div className="step-body">
+            <div className="motivations-grid">
+              {WEAKNESSES.map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  className={`motivation-chip${weaknesses.includes(w) ? ' selected' : ''}`}
+                  onClick={() => toggleWeakness(w)}
+                >
+                  {w}
+                  {weaknesses.includes(w) && <span className="chip-check">✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="step-actions">
+            <button className="onboarding-btn primary" onClick={() => setStep(7)}>
+              {weaknesses.length > 0 ? 'Continue' : 'Skip for Now'}
+            </button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(5)}>Back</button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 7 — Find Your People */}
+      {step === 7 && (
+        <div className="onboarding-step">
+          <div className="step-header">
             <h2 className="step-title">Find your people</h2>
             <p className="step-subtitle">
               {goalCategory
@@ -325,18 +463,18 @@ export default function OnboardingPage() {
           </div>
 
           <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(5)}>
+            <button className="onboarding-btn primary" onClick={() => setStep(8)}>
               {sparkedIds.size > 0 ? 'Continue' : 'Skip for Now'}
             </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(3)}>
+            <button className="onboarding-btn ghost" onClick={() => setStep(6)}>
               Back
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 5 — All Set */}
-      {step === 5 && (
+      {/* Step 8 — All Set */}
+      {step === 8 && (
         <div className="onboarding-step onboarding-finish">
           <div className="finish-checkmark">✅</div>
           <h2 className="finish-title">You're all set, {firstName}!</h2>
