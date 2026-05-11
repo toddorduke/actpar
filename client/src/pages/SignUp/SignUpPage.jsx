@@ -155,7 +155,10 @@ const SignUpPage = () => {
     });
 
     if (error) {
-      toast(`❌ ${error.message}`, 'error');
+      const msg = error.message?.toLowerCase().includes('alter_ego')
+        ? 'That Alter Ego Name is already taken — try a different one.'
+        : error.message;
+      toast(`❌ ${msg}`, 'error');
       setSubmitting(false);
       return;
     }

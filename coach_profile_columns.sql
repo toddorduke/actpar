@@ -18,3 +18,8 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS coach_values         text[]  DEFAU
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS coach_testimonials   jsonb   DEFAULT '[]';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS coach_sessions       jsonb   DEFAULT '[]';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS coach_programs       jsonb   DEFAULT '[]';
+
+-- Unique alter ego names (nulls are allowed, only filled values must be unique)
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_alter_ego_name_unique
+  ON profiles (lower(alter_ego_name))
+  WHERE alter_ego_name IS NOT NULL AND alter_ego_name <> '';
