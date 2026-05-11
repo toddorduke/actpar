@@ -254,3 +254,33 @@
 .input-success { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16,185,129,0.15) !important; }
 .ego-available { color: #10b981 !important; font-weight: 600; }
 .ego-taken { color: #ef4444 !important; font-weight: 600; }
+
+.signup-goal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.signup-goal-chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(124, 58, 237, 0.3);
+  background: transparent;
+  color: #4b5563;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.signup-goal-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.signup-goal-chip.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}

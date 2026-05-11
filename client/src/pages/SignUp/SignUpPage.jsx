@@ -15,11 +15,17 @@ const US_STATES = [
   'Wisconsin','Wyoming',
 ];
 
+const GOAL_CATEGORIES = [
+  'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
+  'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
+];
+
 const INITIAL_FORM = {
   firstName: '', lastName: '', gender: '', email: '', phone: '',
   password: '', confirmPassword: '', age: '', alterEgoName: '',
   city: '', state: '', accountType: '',
 };
+
 
 const BUBBLE_COUNT = 7;
 
@@ -30,6 +36,11 @@ const SignUpPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [bubbles, setBubbles] = useState([]);
+  const [lookingFor, setLookingFor] = useState([]);
+
+  const toggleGoal = (cat) => setLookingFor(prev =>
+    prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+  );
 
   // Alter ego availability
   const [egoStatus, setEgoStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
@@ -125,6 +136,7 @@ const SignUpPage = () => {
           state: formData.state || null,
           phone: formData.phone || null,
           account_type: formData.accountType,
+          looking_for: lookingFor,
         },
       },
     });
@@ -242,6 +254,22 @@ const SignUpPage = () => {
                 <option value="Personal">Personal</option>
                 <option value="Coach">Coach</option>
               </select>
+            </div>
+
+            <div className="form-group">
+              <label>What do you want to achieve? <span className="signup-field-hint" style={{ fontStyle: 'normal' }}>(pick all that apply)</span></label>
+              <div className="signup-goal-chips">
+                {GOAL_CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    type="button"
+                    className={`signup-goal-chip${lookingFor.includes(cat) ? ' selected' : ''}`}
+                    onClick={() => toggleGoal(cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <label className="signup-terms-row">
