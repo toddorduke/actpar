@@ -55,7 +55,7 @@ const WEAKNESSES = [
   "I hold on to things too long",
 ];
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 6;
 
 export default function OnboardingPage() {
   const { user } = useContext(AuthContext);
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
 
   // Load suggested profiles when entering step 4
   useEffect(() => {
-    if (step !== 6 || !user) return;
+    if (step !== 5 || !user) return;
     let cancelled = false;
     setLoadingSuggestions(true);
 
@@ -189,7 +189,7 @@ export default function OnboardingPage() {
   return (
     <div className="onboarding-page">
       {/* Progress bar — hidden on final step */}
-      {step < 8 && (
+      {step < 6 && (
         <div className="onboarding-progress">
           <div
             className="onboarding-progress-fill"
@@ -224,7 +224,7 @@ export default function OnboardingPage() {
       {step === 2 && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 1 of 5</div>
+            <div className="step-number">Step 1 of 3</div>
             <h2 className="step-title">What do you want to achieve?</h2>
             <p className="step-subtitle">Set your first goal to start tracking progress.</p>
           </div>
@@ -270,143 +270,117 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Step 3 — What Drives You */}
+      {/* Step 3 — What Drives You + What Are You Working to Overcome? */}
       {step === 3 && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 2 of 5</div>
-            <h2 className="step-title">What drives you?</h2>
-            <p className="step-subtitle">Pick up to 3 things that motivate you most.</p>
+            <div className="step-number">Step 2 of 3</div>
+            <h2 className="step-title">What's fueling you — and what's holding you back?</h2>
+            <p className="step-subtitle">Be honest with yourself. This is just between you and your goals.</p>
           </div>
 
           <div className="step-body">
-            <div className="motivations-grid">
-              {MOTIVATIONS.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  className={`motivation-chip${motivations.includes(m) ? ' selected' : ''}`}
-                  onClick={() => toggleMotivation(m)}
-                >
-                  {m}
-                  {motivations.includes(m) && <span className="chip-check">✓</span>}
-                </button>
-              ))}
+            <div className="form-group">
+              <label className="form-label">What drives you? <span style={{ fontWeight: 400, opacity: 0.7 }}>(pick up to 3)</span></label>
+              <div className="motivations-grid">
+                {MOTIVATIONS.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className={`motivation-chip${motivations.includes(m) ? ' selected' : ''}`}
+                    onClick={() => toggleMotivation(m)}
+                  >
+                    {m}
+                    {motivations.includes(m) && <span className="chip-check">✓</span>}
+                  </button>
+                ))}
+              </div>
+              {motivations.length === 3 && <p className="motivation-max-note">Maximum 3 selected</p>}
             </div>
-            {motivations.length === 3 && (
-              <p className="motivation-max-note">Maximum 3 selected</p>
-            )}
+
+            <div className="form-group" style={{ marginTop: '1.5rem' }}>
+              <label className="form-label">What are you working to overcome?</label>
+              <div className="motivations-grid">
+                {GROWTH_AREAS.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    className={`motivation-chip${workingOn.includes(a) ? ' selected' : ''}`}
+                    onClick={() => toggleWorkingOn(a)}
+                  >
+                    {a}
+                    {workingOn.includes(a) && <span className="chip-check">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="step-actions">
             <button className="onboarding-btn primary" onClick={() => setStep(4)}>
-              {motivations.length > 0 ? 'Continue' : 'Skip for Now'}
+              {motivations.length > 0 || workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
             </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(2)}>
-              Back
-            </button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(2)}>Back</button>
           </div>
         </div>
       )}
 
-      {/* Step 4 — What Are You Working to Overcome? */}
+      {/* Step 4 — Superpowers + Weaknesses */}
       {step === 4 && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 3 of 5</div>
-            <h2 className="step-title">What are you working to overcome?</h2>
-            <p className="step-subtitle">Pick everything that resonates — no judgment here.</p>
+            <div className="step-number">Step 3 of 3</div>
+            <h2 className="step-title">Know yourself, grow yourself.</h2>
+            <p className="step-subtitle">Own your strengths and acknowledge what you're still building.</p>
           </div>
+
           <div className="step-body">
-            <div className="motivations-grid">
-              {GROWTH_AREAS.map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  className={`motivation-chip${workingOn.includes(a) ? ' selected' : ''}`}
-                  onClick={() => toggleWorkingOn(a)}
-                >
-                  {a}
-                  {workingOn.includes(a) && <span className="chip-check">✓</span>}
-                </button>
-              ))}
+            <div className="form-group">
+              <label className="form-label">What are your superpowers?</label>
+              <div className="motivations-grid">
+                {STRENGTHS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`motivation-chip${strengths.includes(s) ? ' selected' : ''}`}
+                    onClick={() => toggleStrength(s)}
+                  >
+                    {s}
+                    {strengths.includes(s) && <span className="chip-check">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginTop: '1.5rem' }}>
+              <label className="form-label">What are you still working on inside?</label>
+              <div className="motivations-grid">
+                {WEAKNESSES.map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    className={`motivation-chip${weaknesses.includes(w) ? ' selected' : ''}`}
+                    onClick={() => toggleWeakness(w)}
+                  >
+                    {w}
+                    {weaknesses.includes(w) && <span className="chip-check">✓</span>}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+
           <div className="step-actions">
             <button className="onboarding-btn primary" onClick={() => setStep(5)}>
-              {workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
+              {strengths.length > 0 || weaknesses.length > 0 ? 'Continue' : 'Skip for Now'}
             </button>
             <button className="onboarding-btn ghost" onClick={() => setStep(3)}>Back</button>
           </div>
         </div>
       )}
 
-      {/* Step 5 — What Are Your Superpowers? */}
+      {/* Step 5 — Find Your People */}
       {step === 5 && (
-        <div className="onboarding-step">
-          <div className="step-header">
-            <div className="step-number">Step 4 of 5</div>
-            <h2 className="step-title">What are your superpowers?</h2>
-            <p className="step-subtitle">Own it — what do you naturally bring to the table?</p>
-          </div>
-          <div className="step-body">
-            <div className="motivations-grid">
-              {STRENGTHS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`motivation-chip${strengths.includes(s) ? ' selected' : ''}`}
-                  onClick={() => toggleStrength(s)}
-                >
-                  {s}
-                  {strengths.includes(s) && <span className="chip-check">✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(6)}>
-              {strengths.length > 0 ? 'Continue' : 'Skip for Now'}
-            </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(4)}>Back</button>
-          </div>
-        </div>
-      )}
-
-      {/* Step 6 — What Are Your Weaknesses? */}
-      {step === 6 && (
-        <div className="onboarding-step">
-          <div className="step-header">
-            <div className="step-number">Step 5 of 5</div>
-            <h2 className="step-title">What are you still working on inside?</h2>
-            <p className="step-subtitle">Owning it is the first step to changing it.</p>
-          </div>
-          <div className="step-body">
-            <div className="motivations-grid">
-              {WEAKNESSES.map((w) => (
-                <button
-                  key={w}
-                  type="button"
-                  className={`motivation-chip${weaknesses.includes(w) ? ' selected' : ''}`}
-                  onClick={() => toggleWeakness(w)}
-                >
-                  {w}
-                  {weaknesses.includes(w) && <span className="chip-check">✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(7)}>
-              {weaknesses.length > 0 ? 'Continue' : 'Skip for Now'}
-            </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(5)}>Back</button>
-          </div>
-        </div>
-      )}
-
-      {/* Step 7 — Find Your People */}
-      {step === 7 && (
         <div className="onboarding-step">
           <div className="step-header">
             <h2 className="step-title">Find your people</h2>
@@ -463,18 +437,18 @@ export default function OnboardingPage() {
           </div>
 
           <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(8)}>
+            <button className="onboarding-btn primary" onClick={() => setStep(6)}>
               {sparkedIds.size > 0 ? 'Continue' : 'Skip for Now'}
             </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(6)}>
+            <button className="onboarding-btn ghost" onClick={() => setStep(4)}>
               Back
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 8 — All Set */}
-      {step === 8 && (
+      {/* Step 6 — All Set */}
+      {step === 6 && (
         <div className="onboarding-step onboarding-finish">
           <div className="finish-checkmark">✅</div>
           <h2 className="finish-title">You're all set, {firstName}!</h2>
