@@ -794,6 +794,30 @@ const ProfilePage = () => {
             </button>
 
             <div className="profile-sidebar-card">
+              <div className="sidebar-about-header">
+                <h3 className="sidebar-card-title">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  About Me
+                </h3>
+                <button className="edit-questions-btn" onClick={() => setEditing((v) => !v)}>
+                  ✏️ Edit
+                </button>
+              </div>
+              {profile?.tagline ? (
+                <p className="about-me-bio">{profile.tagline}</p>
+              ) : (
+                <p className="about-me-empty">No bio yet — click Edit to add one.</p>
+              )}
+              {(profile?.city || profile?.state) && (
+                <div className="about-me-location">
+                  📍 {[profile.city, profile.state].filter(Boolean).join(', ')}
+                </div>
+              )}
+            </div>
+
+            <div className="profile-sidebar-card">
               <h3 className="sidebar-card-title">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
