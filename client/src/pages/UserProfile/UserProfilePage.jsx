@@ -51,7 +51,7 @@ export default function UserProfilePage() {
     const [{ data: prof }, { data: goalData }, { data: postData }, { data: connData }] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id, first_name, last_name, alter_ego_name, city, tagline, avatar_url, account_type, looking_for, affirmation_start_date')
+        .select('id, first_name, last_name, alter_ego_name, city, tagline, bio, avatar_url, account_type, looking_for, affirmation_start_date')
         .eq('id', userId)
         .single(),
       supabase
@@ -240,6 +240,14 @@ export default function UserProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* About Me */}
+          {profile.bio && (
+            <div className="up-about-me">
+              <div className="up-section-label">About Me</div>
+              <p className="up-bio">{profile.bio}</p>
+            </div>
+          )}
 
           {/* Looking For tags */}
           {(profile.looking_for ?? []).length > 0 && (

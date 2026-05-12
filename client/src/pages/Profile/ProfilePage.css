@@ -2355,3 +2355,12 @@
   color: #6b7280;
   margin-top: 4px;
 }
+
+/* Profile header bio */
+.profile-bio {
+  font-size: 0.88rem;
+  color: #6b7280;
+  line-height: 1.55;
+  margin: 6px 0 0;
+  max-width: 340px;
+}

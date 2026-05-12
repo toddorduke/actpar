@@ -352,6 +352,12 @@ export default function ConnectionsPage() {
                               <p className="card-tagline">"{profile.tagline}"</p>
                             </div>
                           )}
+                          {profile.bio && (
+                            <div className="card-section">
+                              <div className="card-section-label">About Me</div>
+                              <p className="card-bio">{profile.bio}</p>
+                            </div>
+                          )}
                           {profile.goals?.length > 0 && (
                             <div className="card-section">
                               <div className="card-section-label">Working On</div>

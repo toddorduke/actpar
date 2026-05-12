@@ -626,6 +626,9 @@ const ProfilePage = () => {
                   <div className="profile-header-city">📍 {profile.city}</div>
                 )}
                 <p className="profile-tagline">{profile?.tagline || 'Building better habits, one day at a time'}</p>
+                {profile?.bio && (
+                  <p className="profile-bio">{profile.bio}</p>
+                )}
               </div>
             </div>
 

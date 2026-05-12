@@ -40,7 +40,7 @@ export const useConnections = () => {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, alter_ego_name, age, city, account_type, tagline, avatar_url, looking_for, gender')
+      .select('id, first_name, last_name, alter_ego_name, age, city, account_type, tagline, bio, avatar_url, looking_for, gender')
       .not('id', 'in', `(${excludeIds.join(',')})`)
       .limit(50);
 

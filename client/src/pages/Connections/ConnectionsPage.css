@@ -956,3 +956,14 @@
 
   .mob-conn-msg-btn:hover { background: rgba(255,255,255,0.1); }
 }
+
+.card-bio {
+  font-size: 0.84rem;
+  color: #4b5563;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
