@@ -457,3 +457,27 @@
     padding: 20px;
   }
 }
+
+.settings-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 24px 0;
+}
+
+.settings-subsection-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px;
+}
+
+.settings-hint.ego-locked {
+  color: #b45309;
+  font-weight: 500;
+}
+
+.settings-input.disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}

@@ -36,9 +36,11 @@ export default function SettingsPage() {
   // Account
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [email] = useState(user?.email ?? '');
+  const [newEmail, setNewEmail] = useState('');
   const [savingAccount, setSavingAccount] = useState(false);
   const [accountSaved, setAccountSaved] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [emailMsg, setEmailMsg] = useState(null);
 
   // Profile
   const [alterEgo, setAlterEgo] = useState('');
@@ -116,10 +118,28 @@ export default function SettingsPage() {
   async function handleSaveAccount(e) {
     e.preventDefault();
     setSavingAccount(true);
-    await updateProfile({ first_name: firstName, last_name: lastName });
+    await Promise.all([
+      updateProfile({ first_name: firstName, last_name: lastName }),
+      supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName } }),
+    ]);
     setSavingAccount(false);
     setAccountSaved(true);
     setTimeout(() => setAccountSaved(false), 2500);
+  }
+
+  async function handleChangeEmail(e) {
+    e.preventDefault();
+    if (!newEmail.trim() || newEmail.trim() === user?.email) return;
+    setSavingEmail(true);
+    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+    setSavingEmail(false);
+    if (error) {
+      setEmailMsg({ type: 'error', text: error.message });
+    } else {
+      setEmailMsg({ type: 'success', text: 'Confirmation sent to your new email — click the link to complete the change.' });
+      setNewEmail('');
+    }
+    setTimeout(() => setEmailMsg(null), 6000);
   }
 
   async function handleAvatarChange(e) {
@@ -140,13 +160,44 @@ export default function SettingsPage() {
   async function handleSaveProfile(e) {
     e.preventDefault();
     setSavingProfile(true);
-    await updateProfile({
-      alter_ego_name: alterEgo.trim() || null,
-      tagline: tagline.trim() || null,
-      city: city.trim() || null,
-      gender: gender || null,
-      looking_for: lookingFor,
-    });
+
+    const trimmedEgo = alterEgo.trim() || null;
+    const egoChanged = trimmedEgo !== (profile?.alter_ego_name ?? null);
+
+    if (egoChanged && trimmedEgo) {
+      const changeCount = profile?.alter_ego_change_count ?? 0;
+      const lastChanged = profile?.alter_ego_last_changed ? new Date(profile.alter_ego_last_changed) : null;
+      const daysSinceLast = lastChanged ? (Date.now() - lastChanged) / 86400000 : Infinity;
+      const withinWindow = daysSinceLast < 30;
+      const changesLeft = withinWindow ? Math.max(0, 3 - changeCount) : 3;
+
+      if (changesLeft === 0) {
+        const daysLeft = Math.ceil(30 - daysSinceLast);
+        toast(`You've reached the alter ego name change limit. Try again in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}.`, 'error');
+        setSavingProfile(false);
+        return;
+      }
+
+      const newCount = withinWindow ? changeCount + 1 : 1;
+      await updateProfile({
+        alter_ego_name: trimmedEgo,
+        alter_ego_change_count: newCount,
+        alter_ego_last_changed: new Date().toISOString(),
+        tagline: tagline.trim() || null,
+        city: city.trim() || null,
+        gender: gender || null,
+        looking_for: lookingFor,
+      });
+    } else {
+      await updateProfile({
+        alter_ego_name: trimmedEgo,
+        tagline: tagline.trim() || null,
+        city: city.trim() || null,
+        gender: gender || null,
+        looking_for: lookingFor,
+      });
+    }
+
     setSavingProfile(false);
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 2500);
@@ -271,17 +322,40 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="settings-field">
-                  <label>Email</label>
+                  <label>Current Email</label>
                   <input
                     type="email"
-                    value={email}
+                    value={user?.email ?? ''}
                     className="settings-input disabled"
                     disabled
                   />
-                  <span className="settings-hint">Email cannot be changed here.</span>
                 </div>
                 <button type="submit" className="settings-save-btn" disabled={savingAccount}>
-                  {accountSaved ? '✓ Saved' : savingAccount ? 'Saving...' : 'Save Changes'}
+                  {accountSaved ? '✓ Saved' : savingAccount ? 'Saving...' : 'Save Name'}
+                </button>
+              </form>
+
+              <div className="settings-divider" />
+
+              <h4 className="settings-subsection-title">Change Email</h4>
+              <form onSubmit={handleChangeEmail} className="settings-form">
+                <div className="settings-field">
+                  <label>New Email Address</label>
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="settings-input"
+                    placeholder="Enter new email address"
+                    required
+                  />
+                  <span className="settings-hint">A confirmation link will be sent to your new email.</span>
+                </div>
+                {emailMsg && (
+                  <p className={`settings-msg ${emailMsg.type}`}>{emailMsg.text}</p>
+                )}
+                <button type="submit" className="settings-save-btn" disabled={savingEmail || !newEmail.trim()}>
+                  {savingEmail ? 'Sending…' : 'Send Confirmation'}
                 </button>
               </form>
             </section>
@@ -310,15 +384,39 @@ export default function SettingsPage() {
 
                 <div className="settings-field">
                   <label>Alter Ego Name</label>
-                  <input
-                    type="text"
-                    value={alterEgo}
-                    onChange={(e) => setAlterEgo(e.target.value)}
-                    className="settings-input"
-                    placeholder="Your accountability persona (e.g. IronMike, FaithFirst)"
-                    maxLength={40}
-                  />
-                  <span className="settings-hint">Shown on your connection card with a ⚡</span>
+                  {(() => {
+                    const changeCount = profile?.alter_ego_change_count ?? 0;
+                    const lastChanged = profile?.alter_ego_last_changed ? new Date(profile.alter_ego_last_changed) : null;
+                    const daysSinceLast = lastChanged ? (Date.now() - lastChanged) / 86400000 : Infinity;
+                    const withinWindow = daysSinceLast < 30;
+                    const changesLeft = withinWindow ? Math.max(0, 3 - changeCount) : 3;
+                    const locked = changesLeft === 0;
+                    const daysLeft = locked ? Math.ceil(30 - daysSinceLast) : null;
+                    return (
+                      <>
+                        <input
+                          type="text"
+                          value={alterEgo}
+                          onChange={(e) => setAlterEgo(e.target.value)}
+                          className={`settings-input${locked ? ' disabled' : ''}`}
+                          placeholder="Your accountability persona (e.g. IronMike, FaithFirst)"
+                          maxLength={40}
+                          disabled={locked}
+                        />
+                        {locked ? (
+                          <span className="settings-hint ego-locked">
+                            🔒 Name change limit reached — available again in {daysLeft} day{daysLeft !== 1 ? 's' : ''}
+                          </span>
+                        ) : withinWindow && changeCount > 0 ? (
+                          <span className="settings-hint">
+                            ⚡ Shown on your connection card &nbsp;·&nbsp; {3 - changeCount} name change{3 - changeCount !== 1 ? 's' : ''} remaining this period
+                          </span>
+                        ) : (
+                          <span className="settings-hint">⚡ Shown on your connection card &nbsp;·&nbsp; 3 changes allowed per 30 days</span>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div className="settings-field">
