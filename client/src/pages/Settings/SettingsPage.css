@@ -481,3 +481,8 @@
   color: #9ca3af;
   cursor: not-allowed;
 }
+
+.settings-input.input-error { border-color: #ef4444; }
+.settings-input.input-success { border-color: #10b981; }
+.settings-hint.ego-taken { color: #dc2626; font-weight: 500; }
+.settings-hint.ego-available { color: #059669; font-weight: 500; }

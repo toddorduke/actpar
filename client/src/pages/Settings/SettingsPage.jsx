@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useProfile } from '../../hooks/useProfile.js';
@@ -44,6 +44,8 @@ export default function SettingsPage() {
 
   // Profile
   const [alterEgo, setAlterEgo] = useState('');
+  const [egoStatus, setEgoStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
+  const egoTimer = useRef(null);
   const [tagline, setTagline] = useState('');
   const [city, setCity] = useState('');
   const [gender, setGender] = useState('');
@@ -109,6 +111,25 @@ export default function SettingsPage() {
     }
   }, [profile]);
 
+  const checkAlterEgo = useCallback((name) => {
+    clearTimeout(egoTimer.current);
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.toLowerCase() === (profile?.alter_ego_name ?? '').toLowerCase()) {
+      setEgoStatus(null);
+      return;
+    }
+    setEgoStatus('checking');
+    egoTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('alter_ego_name', trimmed)
+        .neq('id', user.id)
+        .maybeSingle();
+      setEgoStatus(data ? 'taken' : 'available');
+    }, 600);
+  }, [profile?.alter_ego_name, user?.id]);
+
   function toggleLf(cat) {
     setLookingFor((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
@@ -163,6 +184,12 @@ export default function SettingsPage() {
 
     const trimmedEgo = alterEgo.trim() || null;
     const egoChanged = trimmedEgo !== (profile?.alter_ego_name ?? null);
+
+    if (egoChanged && egoStatus === 'taken') {
+      toast('That Alter Ego Name is already taken — try a different one.', 'error');
+      setSavingProfile(false);
+      return;
+    }
 
     if (egoChanged && trimmedEgo) {
       const changeCount = profile?.alter_ego_change_count ?? 0;
@@ -369,8 +396,8 @@ export default function SettingsPage() {
                         <input
                           type="text"
                           value={alterEgo}
-                          onChange={(e) => setAlterEgo(e.target.value)}
-                          className={`settings-input${locked ? ' disabled' : ''}`}
+                          onChange={(e) => { setAlterEgo(e.target.value); checkAlterEgo(e.target.value); }}
+                          className={`settings-input${locked ? ' disabled' : egoStatus === 'taken' ? ' input-error' : egoStatus === 'available' ? ' input-success' : ''}`}
                           placeholder="Your accountability persona (e.g. IronMike, FaithFirst)"
                           maxLength={40}
                           disabled={locked}
@@ -379,12 +406,18 @@ export default function SettingsPage() {
                           <span className="settings-hint ego-locked">
                             🔒 Name change limit reached — available again in {daysLeft} day{daysLeft !== 1 ? 's' : ''}
                           </span>
+                        ) : egoStatus === 'checking' ? (
+                          <span className="settings-hint">Checking availability…</span>
+                        ) : egoStatus === 'taken' ? (
+                          <span className="settings-hint ego-taken">✗ Already taken — try another name.</span>
+                        ) : egoStatus === 'available' ? (
+                          <span className="settings-hint ego-available">✓ Available!</span>
                         ) : withinWindow && changeCount > 0 ? (
                           <span className="settings-hint">
-                            ⚡ Shown on your connection card &nbsp;·&nbsp; {3 - changeCount} name change{3 - changeCount !== 1 ? 's' : ''} remaining this period
+                            ⚡ {3 - changeCount} name change{3 - changeCount !== 1 ? 's' : ''} remaining this period
                           </span>
                         ) : (
-                          <span className="settings-hint">⚡ Shown on your connection card &nbsp;·&nbsp; 3 changes allowed per 30 days</span>
+                          <span className="settings-hint">3 changes allowed per 30 days</span>
                         )}
                       </>
                     );
@@ -449,7 +482,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <button type="submit" className="settings-save-btn" disabled={savingProfile}>
+                <button type="submit" className="settings-save-btn" disabled={savingProfile || egoStatus === 'taken'}>
                   {profileSaved ? '✓ Saved' : savingProfile ? 'Saving...' : 'Save Profile'}
                 </button>
               </form>
