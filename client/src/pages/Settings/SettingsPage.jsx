@@ -298,31 +298,30 @@ export default function SettingsPage() {
           {activeSection === 'account' && (
             <section className="settings-section">
               <h3 className="settings-section-title">Account Information</h3>
-              <form onSubmit={handleSaveAccount} className="settings-form">
+              <p className="settings-desc">Your legal name and email are set at registration and cannot be changed.</p>
+              <div className="settings-form">
                 <div className="settings-field-row">
                   <div className="settings-field">
                     <label>First Name</label>
                     <input
                       type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="settings-input"
-                      placeholder="First name"
+                      value={profile?.first_name ?? ''}
+                      className="settings-input disabled"
+                      disabled
                     />
                   </div>
                   <div className="settings-field">
                     <label>Last Name</label>
                     <input
                       type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="settings-input"
-                      placeholder="Last name"
+                      value={profile?.last_name ?? ''}
+                      className="settings-input disabled"
+                      disabled
                     />
                   </div>
                 </div>
                 <div className="settings-field">
-                  <label>Current Email</label>
+                  <label>Email</label>
                   <input
                     type="email"
                     value={user?.email ?? ''}
@@ -330,34 +329,7 @@ export default function SettingsPage() {
                     disabled
                   />
                 </div>
-                <button type="submit" className="settings-save-btn" disabled={savingAccount}>
-                  {accountSaved ? '✓ Saved' : savingAccount ? 'Saving...' : 'Save Name'}
-                </button>
-              </form>
-
-              <div className="settings-divider" />
-
-              <h4 className="settings-subsection-title">Change Email</h4>
-              <form onSubmit={handleChangeEmail} className="settings-form">
-                <div className="settings-field">
-                  <label>New Email Address</label>
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    className="settings-input"
-                    placeholder="Enter new email address"
-                    required
-                  />
-                  <span className="settings-hint">A confirmation link will be sent to your new email.</span>
-                </div>
-                {emailMsg && (
-                  <p className={`settings-msg ${emailMsg.type}`}>{emailMsg.text}</p>
-                )}
-                <button type="submit" className="settings-save-btn" disabled={savingEmail || !newEmail.trim()}>
-                  {savingEmail ? 'Sending…' : 'Send Confirmation'}
-                </button>
-              </form>
+              </div>
             </section>
           )}
 
