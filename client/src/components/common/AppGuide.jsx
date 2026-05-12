@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext.jsx';
+import { supabase } from '../../lib/supabase.js';
 import './AppGuide.css';
 
 const QUICK_SLIDES = [
@@ -69,12 +70,16 @@ export default function AppGuide() {
 
   useEffect(() => {
     if (!user) return;
+    if (user.user_metadata?.tour_dismissed) return;
     const seen = localStorage.getItem(storageKey(user.id));
     if (!seen) setPhase('choice');
   }, [user]);
 
-  function dismiss() {
-    if (user) localStorage.setItem(storageKey(user.id), '1');
+  async function dismiss() {
+    if (user) {
+      localStorage.setItem(storageKey(user.id), '1');
+      await supabase.auth.updateUser({ data: { tour_dismissed: true } });
+    }
     setPhase(null);
   }
 
