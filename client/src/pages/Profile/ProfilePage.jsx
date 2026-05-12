@@ -281,7 +281,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [animateGoals, setAnimateGoals] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ tagline: '', alter_ego_name: '', city: '' });
+  const [editForm, setEditForm] = useState({ tagline: '', bio: '', alter_ego_name: '', city: '' });
   const [saving, setSaving] = useState(false);
   const [answers, setAnswers] = useState({});
   const [publicAnswers, setPublicAnswers] = useState({});
@@ -328,6 +328,7 @@ const ProfilePage = () => {
     if (profile) {
       setEditForm({
         tagline: profile.tagline ?? '',
+        bio: profile.bio ?? '',
         alter_ego_name: profile.alter_ego_name ?? '',
         city: profile.city ?? '',
       });
@@ -665,6 +666,17 @@ const ProfilePage = () => {
                 <label>Tagline</label>
                 <input value={editForm.tagline} onChange={(e) => setEditForm((p) => ({ ...p, tagline: e.target.value }))} placeholder="Building better habits, one day at a time" />
               </div>
+              <div className="edit-field">
+                <label>About Me</label>
+                <textarea
+                  rows={3}
+                  style={{ width: '100%', resize: 'vertical', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #d1d5db', fontSize: '0.9rem', fontFamily: 'inherit' }}
+                  value={editForm.bio}
+                  onChange={(e) => setEditForm((p) => ({ ...p, bio: e.target.value }))}
+                  placeholder="Tell people about yourself…"
+                  maxLength={500}
+                />
+              </div>
               <button type="submit" className="save-profile-btn" disabled={saving}>
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -805,8 +817,8 @@ const ProfilePage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              {profile?.tagline ? (
-                <p className="about-me-bio">{profile.tagline}</p>
+              {profile?.bio ? (
+                <p className="about-me-bio">{profile.bio}</p>
               ) : (
                 <p className="about-me-empty">No bio yet — click Edit to add one.</p>
               )}

@@ -26,6 +26,7 @@ export default function ProfileSetupPage() {
   const avatarInputRef = useRef(null);
 
   const [alterEgo, setAlterEgo] = useState('');
+  const [tagline, setTagline] = useState('');
   const [bio, setBio] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -40,7 +41,8 @@ export default function ProfileSetupPage() {
   useEffect(() => {
     if (profile) {
       setAlterEgo(profile.alter_ego_name ?? user?.user_metadata?.alter_ego_name ?? '');
-      setBio(profile.tagline ?? '');
+      setTagline(profile.tagline ?? '');
+      setBio(profile.bio ?? '');
       setCity(profile.city ?? user?.user_metadata?.city ?? '');
       setState(profile.state ?? user?.user_metadata?.state ?? '');
       setAvatarUrl(profile.avatar_url ?? null);
@@ -77,7 +79,8 @@ export default function ProfileSetupPage() {
 
     await updateProfile({
       alter_ego_name: alterEgo.trim() || null,
-      tagline: bio.trim(),
+      tagline: tagline.trim() || null,
+      bio: bio.trim(),
       city: city.trim() || null,
       state: state || null,
       avatar_url: avatarUrl ?? undefined,
@@ -132,18 +135,31 @@ export default function ProfileSetupPage() {
         <div className="profile-setup-fields">
 
           <div className="profile-setup-group">
+            <label className="profile-setup-label">Tagline</label>
+            <input
+              className="profile-setup-input"
+              type="text"
+              placeholder="e.g. Building better habits, one day at a time"
+              value={tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              maxLength={100}
+            />
+            <span className="profile-setup-hint">Short line shown under your name.</span>
+          </div>
+
+          <div className="profile-setup-group">
             <label className="profile-setup-label">
-              Bio <span className="profile-setup-required">*</span>
+              About Me <span className="profile-setup-required">*</span>
             </label>
             <textarea
               className="profile-setup-textarea"
-              placeholder="Tell people a little about yourself and what you're working toward…"
+              placeholder="Tell people about yourself — your story, what you're working on, what drives you…"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              maxLength={300}
-              rows={3}
+              maxLength={500}
+              rows={4}
             />
-            <span className="profile-setup-char-count">{bio.length}/300</span>
+            <span className="profile-setup-char-count">{bio.length}/500</span>
           </div>
 
           <div className="profile-setup-group">
