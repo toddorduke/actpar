@@ -8,9 +8,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Restore existing session on mount (handles page refresh)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      // If user chose "don't remember me", sign them out when the browser is reopened
+      // (sessionStorage clears on browser close; localStorage persists)
+      const noRemember = localStorage.getItem('actpar_no_remember');
+      const sameSession = sessionStorage.getItem('actpar_session_active');
+      if (noRemember && !sameSession && session) {
+        supabase.auth.signOut();
+        setUser(null);
+      } else {
+        setUser(session?.user ?? null);
+      }
       setLoading(false);
     });
 

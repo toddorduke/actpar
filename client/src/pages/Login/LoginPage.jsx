@@ -12,6 +12,7 @@ const LoginPage = () => {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -35,7 +36,14 @@ const LoginPage = () => {
       return;
     }
 
-    // AuthContext picks up the session change automatically
+    if (rememberMe) {
+      localStorage.removeItem('actpar_no_remember');
+      sessionStorage.removeItem('actpar_session_active');
+    } else {
+      localStorage.setItem('actpar_no_remember', '1');
+      sessionStorage.setItem('actpar_session_active', '1');
+    }
+
     navigate(from, { replace: true });
   };
 
@@ -79,7 +87,17 @@ const LoginPage = () => {
 
             {error && <div className="login-error">{error}</div>}
 
-            <Link to="/forgot-password" className="login-forgot">Forgot password?</Link>
+            <div className="login-row">
+              <label className="login-remember">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="login-forgot">Forgot password?</Link>
+            </div>
 
             <button type="submit" className="login-btn" disabled={submitting}>
               {submitting ? 'Signing in...' : 'Sign In'}
