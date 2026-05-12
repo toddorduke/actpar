@@ -183,7 +183,7 @@ export default function OnboardingPage() {
       supabase.from('profiles').update({ onboarding_complete: true }).eq('id', user.id),
     ]);
     setSaving(false);
-    navigate('/', { replace: true });
+    navigate('/profile-setup', { replace: true });
   }
 
   return (

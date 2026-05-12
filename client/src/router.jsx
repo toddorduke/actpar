@@ -13,6 +13,7 @@ import CoachProfilePage from './pages/CoachProfile/CoachProfilePage.jsx';
 import CoachDiscoveryPage from './pages/CoachDiscovery/CoachDiscoveryPage.jsx';
 import SettingsPage from './pages/Settings/SettingsPage.jsx';
 import OnboardingPage from './pages/Onboarding/OnboardingPage.jsx';
+import ProfileSetupPage from './pages/ProfileSetup/ProfileSetupPage.jsx';
 import SignUpPage from './pages/SignUp/SignUpPage.jsx';
 import LoginPage from './pages/Login/LoginPage.jsx';
 import AboutPage from './pages/About/AboutPage.jsx';
@@ -34,8 +35,11 @@ export const AppRoutes = () => (
     <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
     <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-    {/* Onboarding — authenticated but skips the onboarding check (otherwise infinite loop) */}
-    <Route path="/onboarding" element={<ProtectedRoute skipOnboardingCheck><OnboardingPage /></ProtectedRoute>} />
+    {/* Onboarding — skips both gates to avoid redirect loops */}
+    <Route path="/onboarding" element={<ProtectedRoute skipOnboardingCheck skipProfileSetupCheck><OnboardingPage /></ProtectedRoute>} />
+
+    {/* Profile setup — onboarding must be done first, but skips the profile gate */}
+    <Route path="/profile-setup" element={<ProtectedRoute skipProfileSetupCheck><ProfileSetupPage /></ProtectedRoute>} />
 
     {/* Protected routes — redirect to /login if not authenticated, /onboarding if not complete */}
     <Route path="/" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
