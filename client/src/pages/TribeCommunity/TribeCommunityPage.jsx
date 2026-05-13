@@ -327,8 +327,8 @@ export default function TribeCommunityPage() {
               onClick={() => { setFeedTab('circle'); setVisibleCount(10); }}
             >
               🔥 My Circle
-              {circleActivity.length > 0 && (
-                <span className="feed-tab-count">{circleActivity.length}</span>
+              {(circleActivity.length + sparkPosts.length) > 0 && (
+                <span className="feed-tab-count">{circleActivity.length + sparkPosts.length}</span>
               )}
             </button>
             <button
@@ -349,45 +349,84 @@ export default function TribeCommunityPage() {
             </button>
           </div>
 
-          {/* My Circle activity feed */}
-          {feedTab === 'circle' && (
-            <div className="feed-container">
-              {circleLoading && <div className="feed-empty">Loading activity...</div>}
-              {!circleLoading && acceptedConnections.length === 0 && (
-                <div className="feed-empty">Connect with people on the Sparks page to see their activity here.</div>
-              )}
-              {!circleLoading && acceptedConnections.length > 0 && circleActivity.length === 0 && (
-                <div className="feed-empty">None of your connections have checked in recently — check back soon!</div>
-              )}
-              {circleActivity.map((item) => {
-                const p = item.profiles;
-                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
-                const milestone = isMilestone(item.day_count);
-                return (
-                  <div key={item.id} className={`circle-activity-card${milestone ? ' milestone' : ''}`}>
-                    <Link to={`/profile/${item.user_id}`} className="circle-avatar-link">
-                      <Avatar url={p?.avatar_url} name={name} size={44} />
-                    </Link>
-                    <div className="circle-activity-body">
-                      <div className="circle-activity-text">
-                        <Link to={`/profile/${item.user_id}`} className="circle-activity-name">{name}</Link>
-                        {milestone ? (
-                          <span> hit a <strong>{item.day_count}-day milestone</strong> on "{item.title}" 🎉</span>
-                        ) : (
-                          <span> checked in on "<strong>{item.title}</strong>" — {item.day_count} day streak</span>
-                        )}
+          {/* My Circle — unified feed of check-ins + posts */}
+          {feedTab === 'circle' && (() => {
+            const checkInItems = circleActivity.map((item) => ({
+              _type: 'checkin',
+              _ts: item.updated_at,
+              ...item,
+            }));
+            const postItems = sparkPosts.map((p) => ({
+              _type: 'post',
+              _ts: p.created_at,
+              ...p,
+            }));
+            const merged = [...checkInItems, ...postItems].sort(
+              (a, b) => new Date(b._ts) - new Date(a._ts)
+            );
+            const isLoading = circleLoading || postsLoading;
+            return (
+              <div className="feed-container">
+                {isLoading && <div className="feed-empty">Loading...</div>}
+                {!isLoading && acceptedConnections.length === 0 && (
+                  <div className="feed-empty">Connect with people on the Sparks page to see their activity here.</div>
+                )}
+                {!isLoading && acceptedConnections.length > 0 && merged.length === 0 && (
+                  <div className="feed-empty">No activity yet from your connections — check back soon!</div>
+                )}
+                {merged.map((item) => {
+                  if (item._type === 'checkin') {
+                    const p = item.profiles;
+                    const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                    const milestone = isMilestone(item.day_count);
+                    return (
+                      <div key={`ci-${item.id}`} className={`circle-activity-card${milestone ? ' milestone' : ''}`}>
+                        <Link to={`/profile/${item.user_id}`} className="circle-avatar-link">
+                          <Avatar url={p?.avatar_url} name={name} size={44} />
+                        </Link>
+                        <div className="circle-activity-body">
+                          <div className="circle-activity-text">
+                            <Link to={`/profile/${item.user_id}`} className="circle-activity-name">{name}</Link>
+                            {milestone
+                              ? <span> hit a <strong>{item.day_count}-day milestone</strong> on "{item.title}" 🎉</span>
+                              : <span> checked in on "<strong>{item.title}</strong>" — {item.day_count} day streak</span>}
+                          </div>
+                          {p?.alter_ego_name && <div className="circle-activity-ego">⚡ {p.alter_ego_name}</div>}
+                          <div className="circle-activity-time">{timeAgo(item.updated_at)}</div>
+                        </div>
+                        {milestone && <div className="circle-milestone-badge">🏆 {item.day_count} days</div>}
                       </div>
-                      {p?.alter_ego_name && (
-                        <div className="circle-activity-ego">⚡ {p.alter_ego_name}</div>
-                      )}
-                      <div className="circle-activity-time">{timeAgo(item.updated_at)}</div>
-                    </div>
-                    {milestone && <div className="circle-milestone-badge">🏆 {item.day_count} days</div>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                    );
+                  }
+                  // Post item
+                  const authorName = item.profiles
+                    ? `${item.profiles.first_name ?? ''} ${item.profiles.last_name ?? ''}`.trim() || 'Member'
+                    : 'Member';
+                  return (
+                    <PostCard
+                      key={`post-${item.id}`}
+                      post={item}
+                      onLike={handleLike}
+                      onShare={async () => {
+                        const snippet = item.content.length > 120 ? item.content.slice(0, 120).trimEnd() + '…' : item.content;
+                        if (navigator.share) {
+                          try { await navigator.share({ title: 'ActPar', text: snippet }); } catch {}
+                        } else {
+                          await navigator.clipboard.writeText(snippet);
+                          toast('Copied to clipboard!', 'success');
+                        }
+                      }}
+                      onReport={() => setReportPost({ id: item.id, user_id: item.user_id })}
+                      commentState={commentState}
+                      likedIds={likedIds}
+                      toggling={toggling}
+                      likeCount={localLikeCounts[item.id] ?? item.likes ?? 0}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })()}
 
           {/* Posts feed */}
           {feedTab !== 'circle' && (
