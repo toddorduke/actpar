@@ -28,6 +28,7 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState(null);
   const [goals, setGoals] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [media, setMedia] = useState([]);
   const [reflections, setReflections] = useState([]);
   const [affirmations, setAffirmations] = useState([]);
   const [journalEntries, setJournalEntries] = useState([]);
@@ -59,10 +60,11 @@ export default function UserProfilePage() {
       { data: reflData },
       { data: affData },
       { data: journalData },
+      { data: mediaData },
     ] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id, first_name, last_name, alter_ego_name, city, tagline, bio, avatar_url, account_type, looking_for, affirmation_start_date')
+        .select('id, first_name, last_name, alter_ego_name, city, tagline, bio, avatar_url, account_type, looking_for, affirmation_start_date, age')
         .eq('id', userId)
         .single(),
       supabase
@@ -103,11 +105,18 @@ export default function UserProfilePage() {
         .eq('user_id', userId)
         .eq('is_public', true)
         .order('created_at', { ascending: false }),
+      supabase
+        .from('media')
+        .select('id, file_url, file_type, caption, created_at')
+        .eq('user_id', userId)
+        .eq('visibility', 'everyone')
+        .order('created_at', { ascending: false }),
     ]);
 
     setProfile(prof ?? null);
     setGoals(goalData ?? []);
     setPosts(postData ?? []);
+    setMedia(mediaData ?? []);
     setReflections(reflData ?? []);
     setAffirmations(affData ?? []);
     setJournalEntries(journalData ?? []);
@@ -183,6 +192,7 @@ export default function UserProfilePage() {
 
   const tabs = [
     { id: 'overview', label: `Goals (${goals.length})` },
+    ...(media.length > 0 ? [{ id: 'media', label: `Media (${media.length})` }] : []),
     { id: 'posts', label: `Posts (${posts.length})` },
     ...(reflections.length > 0 ? [{ id: 'reflections', label: `Reflections (${reflections.length})` }] : []),
     ...(affirmations.length > 0 ? [{ id: 'affirmations', label: `Affirmations (${affirmations.length})` }] : []),
@@ -202,6 +212,19 @@ export default function UserProfilePage() {
 
         {/* Header card */}
         <div className="up-header-card">
+          {/* Banner — first media item or avatar */}
+          {(media.length > 0 || profile.avatar_url) && (
+            <div className="up-banner">
+              {media.length > 0 && media[0].file_type === 'video' ? (
+                <video src={media[0].file_url} className="up-banner-media" autoPlay muted loop playsInline />
+              ) : media.length > 0 ? (
+                <img src={media[0].file_url} alt="" className="up-banner-media" />
+              ) : (
+                <img src={profile.avatar_url} alt={fullName} className="up-banner-media" />
+              )}
+            </div>
+          )}
+
           <div className="up-header-top">
             <div className="up-avatar-wrap">
               <Avatar url={profile.avatar_url} name={fullName} size={90} />
@@ -209,6 +232,7 @@ export default function UserProfilePage() {
             <div className="up-header-info">
               <h1 className="up-name">{fullName}</h1>
               {profile.alter_ego_name && <div className="up-alter-ego">⚡ {profile.alter_ego_name}</div>}
+              {profile.age && <div className="up-age">{profile.age} yrs old</div>}
               {profile.city && <div className="up-city">📍 {profile.city}</div>}
               {profile.account_type && <span className="up-account-badge">{profile.account_type}</span>}
               {profile.tagline && <p className="up-tagline">"{profile.tagline}"</p>}
@@ -360,6 +384,22 @@ export default function UserProfilePage() {
                 </div>
                 <p className="up-post-content">{post.content}</p>
                 <div className="up-post-likes">♥ {post.likes ?? 0}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Media tab */}
+        {activeTab === 'media' && (
+          <div className="up-media-grid">
+            {media.map((item) => (
+              <div key={item.id} className="up-media-item">
+                {item.file_type === 'video' ? (
+                  <video src={item.file_url} className="up-media-file" controls playsInline />
+                ) : (
+                  <img src={item.file_url} alt={item.caption ?? ''} className="up-media-file" />
+                )}
+                {item.caption && <div className="up-media-caption">{item.caption}</div>}
               </div>
             ))}
           </div>
