@@ -1368,6 +1368,19 @@
   color: #6b7280;
 }
 
+.mn-conn-profile-btn {
+  margin-top: 4px;
+  padding: 5px 10px;
+  background: rgba(124,58,237,0.12);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7c3aed;
+  cursor: pointer;
+}
+.mn-conn-profile-btn:hover { background: rgba(124,58,237,0.22); }
+
 .mn-conn-msg-btn {
   margin-top: 4px;
   padding: 5px 10px;

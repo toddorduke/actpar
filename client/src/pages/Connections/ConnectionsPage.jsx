@@ -193,6 +193,9 @@ export default function ConnectionsPage() {
                     {c.partnerProfile?.alter_ego_name && (
                       <span className="mn-conn-ego">⚡ {c.partnerProfile.alter_ego_name}</span>
                     )}
+                    <button className="mn-conn-profile-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                      👤 Profile
+                    </button>
                     <button className="mn-conn-msg-btn" onClick={() => navigate(`/messages?with=${c.partnerId}`)}>
                       💬 Message
                     </button>
