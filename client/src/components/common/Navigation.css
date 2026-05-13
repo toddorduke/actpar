@@ -385,9 +385,9 @@
     left: 0;
     right: 0;
     z-index: 200;
-    background: var(--color-surface);
-    border-top: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+    background: #111827;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
     padding-bottom: env(safe-area-inset-bottom);
   }
 
@@ -399,9 +399,9 @@
     justify-content: center;
     gap: 3px;
     padding: 10px 4px 8px;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.5);
     text-decoration: none;
-    transition: color var(--transition-base);
+    transition: color 0.15s;
     min-height: 56px;
     position: relative;
   }
@@ -424,15 +424,15 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 25%;
-    right: 25%;
+    left: 20%;
+    right: 20%;
     height: 2px;
-    background: var(--color-primary);
-    border-radius: 0 0 2px 2px;
+    background: #a78bfa;
+    border-radius: 0 0 3px 3px;
   }
 
   .bottom-tab.active .nav-icon {
-    filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.4));
+    filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.6));
   }
 
   /* Mobile notification bell */
