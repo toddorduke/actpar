@@ -470,3 +470,107 @@
   margin: 6px 0 0;
   white-space: pre-wrap;
 }
+
+/* ── Featured media ── */
+.up-featured-media {
+  width: 100%;
+  max-height: 280px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+}
+.up-featured-img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+.up-featured-video {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+
+/* ── Age ── */
+.up-age {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* ── Reflections & Affirmations ── */
+.up-reflections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.up-reflection-card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.up-reflection-q {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.up-reflection-a {
+  font-size: 0.93rem;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0 0 8px;
+}
+
+.up-reflection-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.up-affirmation-card {
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #fde68a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.up-affirmation-icon {
+  font-size: 1.5rem;
+}
+
+.up-affirmation-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #92400e;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Journal subject ── */
+.up-journal-subject {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+/* ── Tabs scrollable on mobile ── */
+.up-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+.up-tabs::-webkit-scrollbar { display: none; }
