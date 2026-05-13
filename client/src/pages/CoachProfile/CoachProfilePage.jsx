@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
+import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { COACHES } from '../../data/coaches.js';
 import { useCoachProfile } from '../../hooks/useCoaches.js';
@@ -19,6 +21,7 @@ export default function CoachProfilePage() {
   const { coachId } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { user } = useContext(AuthContext);
 
   // Try real DB coach first (UUID), fall back to sample data (numeric id)
   const isUuid = coachId && coachId.includes('-');
@@ -69,11 +72,44 @@ export default function CoachProfilePage() {
       return;
     }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 800));
-    setSubmitting(false);
-    setShowBooking(false);
-    setForm({ name: '', email: '', phone: '', goal: '', time: 'Morning (9am – 12pm)' });
-    toast(`Booking request sent! ${coach.name} will contact you within 24 hours.`, 'success');
+
+    if (isUuid && coach?.isReal && user) {
+      const sessionLabel = selectedSession
+        ? `"${selectedSession.title}" (${selectedSession.price})`
+        : 'a coaching session';
+      const msgContent =
+        `Hi ${coach.name.split(' ')[0]}! I'd like to book ${sessionLabel}.\n\n` +
+        `My goal: ${form.goal}\n` +
+        `Preferred time: ${form.time}\n\n` +
+        `Looking forward to working with you!`;
+
+      await supabase.from('direct_messages').insert({
+        sender_id: user.id,
+        receiver_id: coach.id,
+        content: msgContent,
+      });
+
+      const myName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name]
+        .filter(Boolean).join(' ') || 'A new client';
+      await supabase.from('notifications').insert({
+        user_id: coach.id,
+        actor_id: user.id,
+        type: 'booking_request',
+        body: `${myName} requested a coaching session with you! Check your messages.`,
+      });
+
+      setSubmitting(false);
+      setShowBooking(false);
+      setForm({ name: '', email: '', phone: '', goal: '', time: 'Morning (9am – 12pm)' });
+      toast('Booking request sent! Opening your conversation...', 'success');
+      navigate(`/messages?with=${coach.id}`);
+    } else {
+      await new Promise(r => setTimeout(r, 800));
+      setSubmitting(false);
+      setShowBooking(false);
+      setForm({ name: '', email: '', phone: '', goal: '', time: 'Morning (9am – 12pm)' });
+      toast(`Booking request sent! ${coach.name} will contact you within 24 hours.`, 'success');
+    }
   }
 
   const filteredSessions = (coach.sessions ?? []).filter(s =>
@@ -123,7 +159,12 @@ export default function CoachProfilePage() {
 
             <div className="coach-hero-actions">
               <button className="coach-book-btn" onClick={() => openBooking()}>📅 Book a Session</button>
-              <button className="coach-msg-btn" onClick={() => openBooking()}>💬 Message</button>
+              <button
+                className="coach-msg-btn"
+                onClick={() => isUuid && coach?.isReal && user ? navigate(`/messages?with=${coach.id}`) : openBooking()}
+              >
+                💬 Message
+              </button>
             </div>
           </div>
         </div>

@@ -198,6 +198,36 @@ const HomePage = () => {
         <div className="home-grid">
           <div className="home-main">
 
+            {/* Getting Started — shown until user has at least one goal AND one connection */}
+            {!goalsLoading && (goals.length === 0 || acceptedConnections.length === 0) && (
+              <div className="home-card home-getting-started">
+                <h2 className="home-card-title">🚀 Getting Started</h2>
+                <p className="home-gs-sub">Complete these steps to get the most out of ActPar.</p>
+                <div className="home-gs-steps">
+                  <div className={`home-gs-step${goals.length > 0 ? ' done' : ''}`}>
+                    <span className="home-gs-check">{goals.length > 0 ? '✅' : '⭕'}</span>
+                    <div className="home-gs-step-info">
+                      <div className="home-gs-step-title">Add your first goal</div>
+                      <div className="home-gs-step-desc">Set a habit or progress goal to track your journey</div>
+                    </div>
+                    {goals.length === 0 && (
+                      <button className="home-gs-step-btn" onClick={() => navigate('/profile')}>Go →</button>
+                    )}
+                  </div>
+                  <div className={`home-gs-step${acceptedConnections.length > 0 ? ' done' : ''}`}>
+                    <span className="home-gs-check">{acceptedConnections.length > 0 ? '✅' : '⭕'}</span>
+                    <div className="home-gs-step-info">
+                      <div className="home-gs-step-title">Connect with an accountability partner</div>
+                      <div className="home-gs-step-desc">Find someone working toward similar goals and spark them</div>
+                    </div>
+                    {acceptedConnections.length === 0 && (
+                      <button className="home-gs-step-btn" onClick={() => navigate('/connections')}>Find →</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Daily Check-In Cards */}
             {!goalsLoading && habitGoals.length > 0 && (
               <div className="home-card">

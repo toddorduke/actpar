@@ -137,6 +137,8 @@ const Navigation = () => {
       navigate('/profile');
     } else if (notif.type === 'cheer') {
       navigate('/profile');
+    } else if (notif.type === 'booking_request') {
+      navigate(`/messages?with=${notif.actor_id}`);
     }
   }
 

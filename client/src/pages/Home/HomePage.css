@@ -334,6 +334,65 @@
   border-radius: 999px;
 }
 
+/* ── Getting Started card ── */
+.home-getting-started {
+  border: 2px solid #7c3aed !important;
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff) !important;
+}
+
+.home-gs-sub {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: 0 0 16px;
+}
+
+.home-gs-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-gs-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+}
+
+.home-gs-step.done { opacity: 0.55; }
+
+.home-gs-check { font-size: 1.3rem; flex-shrink: 0; }
+
+.home-gs-step-info { flex: 1; min-width: 0; }
+
+.home-gs-step-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.home-gs-step-desc {
+  font-size: 0.76rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.home-gs-step-btn {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.home-gs-step-btn:hover { opacity: 0.88; }
+
 .home-activity-cheer-btn {
   flex-shrink: 0;
   background: none;
