@@ -5,17 +5,32 @@ import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import './LeaderboardPage.css';
 
+const CATEGORY_META = {
+  faith:        { label: 'Faith',        emoji: '✝️' },
+  fitness:      { label: 'Fitness',      emoji: '💪' },
+  sobriety:     { label: 'Sobriety',     emoji: '🌱' },
+  mindfulness:  { label: 'Mindfulness',  emoji: '🧘' },
+  nutrition:    { label: 'Nutrition',    emoji: '🥗' },
+  mental_health:{ label: 'Mental Health',emoji: '🧠' },
+  finance:      { label: 'Finance',      emoji: '💰' },
+  relationships:{ label: 'Relationships',emoji: '❤️' },
+  learning:     { label: 'Learning',     emoji: '📚' },
+  career:       { label: 'Career',       emoji: '💼' },
+  other:        { label: 'Other',        emoji: '✨' },
+};
+
 export default function LeaderboardPage() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [metric, setMetric] = useState('streak');
   const [scope, setScope] = useState('local');
+  const [category, setCategory] = useState('all');
   const [leaders, setLeaders] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState('');
   const [myCity, setMyCity] = useState('');
-  const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,14 +50,18 @@ export default function LeaderboardPage() {
 
       const { data: goalData } = await supabase
         .from('goals')
-        .select('user_id, day_count, goal_type, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city)')
+        .select('user_id, day_count, goal_type, category, title, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city)')
         .eq('is_active', true);
 
-      // Aggregate per user
       const userMap = {};
+      const catSet = new Set();
+
       for (const g of goalData ?? []) {
         const p = g.profiles;
         if (!p) continue;
+        const cat = g.category ?? 'other';
+        if (cat) catSet.add(cat);
+
         if (!userMap[g.user_id]) {
           userMap[g.user_id] = {
             id: p.id,
@@ -51,26 +70,36 @@ export default function LeaderboardPage() {
             alter_ego: p.alter_ego_name,
             city: p.city ?? '',
             bestStreak: 0,
+            bestStreakCategory: null,
+            bestStreakTitle: null,
             totalGoals: 0,
-            totalProgress: 0,
+            // per-category best streaks for category filter mode
+            categoryBest: {},
           };
         }
-        userMap[g.user_id].totalGoals += 1;
+
+        const u = userMap[g.user_id];
+        u.totalGoals += 1;
+
         if (g.goal_type !== 'numeric') {
-          if ((g.day_count ?? 0) > userMap[g.user_id].bestStreak) {
-            userMap[g.user_id].bestStreak = g.day_count ?? 0;
+          const days = g.day_count ?? 0;
+          // overall best
+          if (days > u.bestStreak) {
+            u.bestStreak = days;
+            u.bestStreakCategory = cat;
+            u.bestStreakTitle = g.title ?? null;
           }
-        } else {
-          const pct = g.target_value ? ((g.progress ?? 0) / g.target_value) * 100 : 0;
-          userMap[g.user_id].totalProgress += pct;
+          // per-category best
+          if (!u.categoryBest[cat] || days > u.categoryBest[cat].days) {
+            u.categoryBest[cat] = { days, title: g.title ?? null };
+          }
         }
       }
 
       const allUsers = Object.values(userMap);
-
-      // Collect unique cities
       const citySet = [...new Set(allUsers.map(u => u.city).filter(Boolean))].sort();
       setCities(citySet);
+      setAvailableCategories([...catSet].sort());
       setLeaders(allUsers);
       setLoading(false);
     }
@@ -79,20 +108,29 @@ export default function LeaderboardPage() {
 
   function sorted(list) {
     return [...list].sort((a, b) => {
-      if (metric === 'streak') return b.bestStreak - a.bestStreak;
+      if (metric === 'streak') {
+        const aVal = category === 'all' ? a.bestStreak : (a.categoryBest[category]?.days ?? 0);
+        const bVal = category === 'all' ? b.bestStreak : (b.categoryBest[category]?.days ?? 0);
+        return bVal - aVal;
+      }
       if (metric === 'goals') return b.totalGoals - a.totalGoals;
       return 0;
     });
   }
 
-  const filtered = scope === 'local'
+  const scopeFiltered = scope === 'local'
     ? leaders.filter(u => u.city === selectedCity)
     : scope === 'city' && selectedCity
       ? leaders.filter(u => u.city === selectedCity)
       : leaders;
 
-  const ranked = sorted(filtered);
-  const myEntry = sorted(leaders).find(u => u.id === user?.id);
+  // For category mode, only show users who have a goal in that category
+  const catFiltered = category === 'all'
+    ? scopeFiltered
+    : scopeFiltered.filter(u => u.categoryBest[category]);
+
+  const ranked = sorted(catFiltered);
+  const myEntry = sorted(scopeFiltered).find(u => u.id === user?.id);
   const globalRank = sorted(leaders).findIndex(u => u.id === user?.id) + 1;
   const localRank = sorted(leaders.filter(u => u.city === myCity)).findIndex(u => u.id === user?.id) + 1;
 
@@ -103,11 +141,27 @@ export default function LeaderboardPage() {
     return null;
   };
 
-  const scoreFor = (person) => {
-    if (metric === 'streak') return { value: person.bestStreak, unit: 'day streak' };
+  function scoreFor(person) {
+    if (metric === 'streak') {
+      const val = category === 'all' ? person.bestStreak : (person.categoryBest[category]?.days ?? 0);
+      return { value: val, unit: 'day streak' };
+    }
     if (metric === 'goals') return { value: person.totalGoals, unit: 'active goals' };
     return { value: 0, unit: '' };
-  };
+  }
+
+  function categoryTagFor(person) {
+    if (metric !== 'streak') return null;
+    if (category !== 'all') {
+      const meta = CATEGORY_META[category];
+      const title = person.categoryBest[category]?.title;
+      return meta ? `${meta.emoji} ${meta.label}${title ? ` · ${title}` : ''}` : null;
+    }
+    if (!person.bestStreakCategory) return null;
+    const meta = CATEGORY_META[person.bestStreakCategory];
+    const title = person.bestStreakTitle;
+    return meta ? `${meta.emoji} ${meta.label}${title ? ` · ${title}` : ''}` : null;
+  }
 
   return (
     <div className="lb-page">
@@ -172,9 +226,34 @@ export default function LeaderboardPage() {
 
           {/* Metric */}
           <div className="lb-control-group">
-            <button className={`lb-ctrl-btn${metric === 'streak' ? ' active' : ''}`} onClick={() => setMetric('streak')}>🔥 Streak</button>
-            <button className={`lb-ctrl-btn${metric === 'goals' ? ' active' : ''}`} onClick={() => setMetric('goals')}>🎯 Goals</button>
+            <button className={`lb-ctrl-btn${metric === 'streak' ? ' active' : ''}`} onClick={() => { setMetric('streak'); }}>🔥 Streak</button>
+            <button className={`lb-ctrl-btn${metric === 'goals' ? ' active' : ''}`} onClick={() => { setMetric('goals'); setCategory('all'); }}>🎯 Goals</button>
           </div>
+
+          {/* Category filter — only meaningful for streak */}
+          {metric === 'streak' && availableCategories.length > 0 && (
+            <div className="lb-category-chips">
+              <button
+                className={`lb-cat-chip${category === 'all' ? ' active' : ''}`}
+                onClick={() => setCategory('all')}
+              >
+                All Categories
+              </button>
+              {availableCategories.map((cat) => {
+                const meta = CATEGORY_META[cat];
+                if (!meta) return null;
+                return (
+                  <button
+                    key={cat}
+                    className={`lb-cat-chip${category === cat ? ' active' : ''}`}
+                    onClick={() => setCategory(cat)}
+                  >
+                    {meta.emoji} {meta.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Board */}
@@ -197,6 +276,7 @@ export default function LeaderboardPage() {
                   <div className="lb-podium-medal">🥈</div>
                   <div className="lb-podium-name">{ranked[1].name.split(' ')[0]}</div>
                   <div className="lb-podium-score">{scoreFor(ranked[1]).value} <span>{scoreFor(ranked[1]).unit}</span></div>
+                  {categoryTagFor(ranked[1]) && <div className="lb-podium-cat">{categoryTagFor(ranked[1])}</div>}
                   <div className="lb-podium-bar lb-podium-bar-2" />
                 </div>
                 {/* 1st */}
@@ -206,6 +286,7 @@ export default function LeaderboardPage() {
                   <div className="lb-podium-medal">🥇</div>
                   <div className="lb-podium-name">{ranked[0].name.split(' ')[0]}</div>
                   <div className="lb-podium-score">{scoreFor(ranked[0]).value} <span>{scoreFor(ranked[0]).unit}</span></div>
+                  {categoryTagFor(ranked[0]) && <div className="lb-podium-cat">{categoryTagFor(ranked[0])}</div>}
                   <div className="lb-podium-bar lb-podium-bar-1" />
                 </div>
                 {/* 3rd */}
@@ -214,6 +295,7 @@ export default function LeaderboardPage() {
                   <div className="lb-podium-medal">🥉</div>
                   <div className="lb-podium-name">{ranked[2].name.split(' ')[0]}</div>
                   <div className="lb-podium-score">{scoreFor(ranked[2]).value} <span>{scoreFor(ranked[2]).unit}</span></div>
+                  {categoryTagFor(ranked[2]) && <div className="lb-podium-cat">{categoryTagFor(ranked[2])}</div>}
                   <div className="lb-podium-bar lb-podium-bar-3" />
                 </div>
               </div>
@@ -239,6 +321,9 @@ export default function LeaderboardPage() {
                       <div className="lb-row-name">{person.name} {isMe && <span className="lb-row-you">You</span>}</div>
                       {person.alter_ego && <div className="lb-row-ego">⚡ {person.alter_ego}</div>}
                       {person.city && scope !== 'local' && <div className="lb-row-city">📍 {person.city}</div>}
+                      {categoryTagFor(person) && (
+                        <div className="lb-row-cat-tag">{categoryTagFor(person)}</div>
+                      )}
                     </div>
                     <div className="lb-row-score">
                       <span className="lb-row-score-num">{score.value}</span>

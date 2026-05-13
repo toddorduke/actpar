@@ -131,6 +131,34 @@
 
 .lb-city-select:focus { border-color: #7c3aed; }
 
+/* ── Category chips ── */
+.lb-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.lb-cat-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.lb-cat-chip:hover { border-color: #7c3aed; color: #7c3aed; }
+.lb-cat-chip.active {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  border-color: transparent;
+  color: white;
+}
+
 /* ── Loading / Empty ── */
 .lb-loading, .lb-empty {
   text-align: center;
@@ -191,6 +219,15 @@
   font-weight: 400;
   color: #9ca3af;
   font-size: 0.68rem;
+}
+
+.lb-podium-cat {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #7c3aed;
+  text-align: center;
+  margin-top: 2px;
+  opacity: 0.85;
 }
 
 .lb-podium-bar {
@@ -286,6 +323,13 @@
 .lb-row-city {
   font-size: 0.72rem;
   color: #9ca3af;
+}
+
+.lb-row-cat-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7c3aed;
+  margin-top: 2px;
 }
 
 .lb-row-score {
