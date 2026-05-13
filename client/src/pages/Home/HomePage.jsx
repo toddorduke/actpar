@@ -161,37 +161,36 @@ const HomePage = () => {
     <>
     <div className="home-page">
       <div className="home-container">
-        <section className="welcome-section">
-          <div className="welcome-row">
-            <div>
-              <h1 className="welcome-title">
-                Welcome back, <span className="welcome-name">{firstName}</span>! 👋
-              </h1>
-              <p className="welcome-subtitle">Stay motivated and crush your goals today</p>
-            </div>
-            {shouldShowRecap() && (
-              <button
-                className="recap-trigger-btn"
-                onClick={() => {
-                  setRecap(computeRecap(goals, acceptedConnections, activity));
-                  setShowRecap(true);
-                }}
-              >
-                📊 Weekly Recap
-              </button>
-            )}
+        {/* Welcome Banner */}
+        <div className="home-welcome">
+          <div>
+            <h1 className="home-welcome-title">
+              Welcome back, <span className="home-welcome-name">{firstName}</span> 👋
+            </h1>
+            <p className="home-welcome-sub">Stay consistent. Every check-in counts.</p>
           </div>
-        </section>
+          {shouldShowRecap() && (
+            <button
+              className="recap-trigger-btn"
+              onClick={() => {
+                setRecap(computeRecap(goals, acceptedConnections, activity));
+                setShowRecap(true);
+              }}
+            >
+              📊 Weekly Recap
+            </button>
+          )}
+        </div>
 
-        <div className="feed-grid">
-          <div className="main-feed">
+        <div className="home-grid">
+          <div className="home-main">
 
             {/* Daily Check-In Cards */}
             {!goalsLoading && habitGoals.length > 0 && (
-              <div className="feed-card checkin-feed-card">
-                <div className="card-header">
-                  <h2 className="card-title">
-                    <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="home-card">
+                <div className="home-card-header">
+                  <h2 className="home-card-title">
+                    <svg className="home-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Today's Check-Ins
@@ -243,249 +242,117 @@ const HomePage = () => {
               </div>
             )}
 
-            {/* Daily Reflection */}
-            <div className="feed-card">
-              <div className="card-header">
-                <h2 className="card-title">
-                  <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Daily Reflection — single question */}
+            <div className="home-card">
+              <div className="home-card-header">
+                <h2 className="home-card-title">
+                  <svg className="home-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Daily Reflection
                 </h2>
-                <button type="button" className="view-all" onClick={() => navigate('/profile')}>My Profile</button>
+                <button type="button" className="home-card-link" onClick={() => navigate('/profile')}>My Profile</button>
               </div>
-              <div className="questions-container">
-                {QUESTIONS.map((question) => (
-                  <div key={question.id} className="question-card">
-                    <div className="question-text">{question.text}</div>
-                    <textarea
-                      className="answer-input"
-                      placeholder="Share your thoughts..."
-                      value={answers[question.id] ?? ''}
-                      onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="submit-answer"
-                      onClick={() => handleSubmitAnswer(question)}
-                      disabled={submitting[question.id]}
-                    >
-                      {submitting[question.id] ? 'Saving...' : 'Submit Answer'}
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <div className="home-reflection-q">{QUESTIONS[0].text}</div>
+              <textarea
+                className="home-reflection-input"
+                placeholder="Share your thoughts..."
+                value={answers[QUESTIONS[0].id] ?? ''}
+                onChange={(e) => handleAnswerChange(QUESTIONS[0].id, e.target.value)}
+              />
+              <button
+                type="button"
+                className="home-reflection-submit"
+                onClick={() => handleSubmitAnswer(QUESTIONS[0])}
+                disabled={submitting[QUESTIONS[0].id]}
+              >
+                {submitting[QUESTIONS[0].id] ? 'Saving...' : 'Save Reflection'}
+              </button>
             </div>
 
-            {/* Active Goals */}
-            <div className="feed-card">
-              <div className="card-header">
-                <h2 className="card-title">
-                  <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Your Active Goals
-                </h2>
-                <button type="button" className="view-all" onClick={() => setShowAddForm((v) => !v)}>
-                  {showAddForm ? 'Cancel' : '+ Add Goal'}
-                </button>
-              </div>
-
-              {showAddForm && (
-                <form className="add-goal-form" onSubmit={handleAddGoal}>
-                  <input
-                    type="text"
-                    className="add-goal-input"
-                    placeholder="e.g. Morning Meditation"
-                    value={newGoalTitle}
-                    onChange={(e) => setNewGoalTitle(e.target.value)}
-                    autoFocus
-                    required
-                  />
-                  <button type="submit" className="add-goal-btn" disabled={addingGoal}>
-                    {addingGoal ? 'Saving...' : 'Save'}
-                  </button>
-                </form>
-              )}
-
-              <div className="goals-feed">
-                {goalsLoading && <p className="goals-empty">Loading goals...</p>}
-                {!goalsLoading && goals.length === 0 && (
-                  <p className="goals-empty">No goals yet — add one above to get started!</p>
-                )}
-                {goals.map((goal) => (
-                  <div key={goal.id} className="goal-item">
-                    <div className="goal-item-header">
-                      <span className="goal-name">{goal.title}</span>
-                      <div className="goal-item-actions">
-                        <span className="goal-day">Day {goal.day_count}</span>
-                        <button
-                          type="button"
-                          className="goal-delete-btn"
-                          onClick={() => deleteGoal(goal.id)}
-                          aria-label="Remove goal"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                    <div className="goal-progress">
-                      <div className="goal-progress-fill" style={{ width: `${goal.progress}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Connection Activity Feed */}
-            <div className="feed-card">
-              <div className="card-header">
-                <h2 className="card-title">
-                  <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Connection Activity */}
+            <div className="home-card">
+              <div className="home-card-header">
+                <h2 className="home-card-title">
+                  <svg className="home-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   Connection Activity
                 </h2>
-                <button type="button" className="view-all" onClick={() => navigate('/connections')}>
-                  See connections
-                </button>
+                <button type="button" className="home-card-link" onClick={() => navigate('/tribe-community')}>See in Tribe</button>
               </div>
-
-              {activityLoading && <p className="goals-empty">Loading activity...</p>}
-
+              {activityLoading && <p className="home-empty">Loading...</p>}
               {!activityLoading && acceptedConnections.length === 0 && (
-                <p className="goals-empty">
-                  Connect with people on the Connections page to see their activity here.
-                </p>
+                <p className="home-empty">Connect with people on the Connections page to see their activity here.</p>
               )}
-
               {!activityLoading && acceptedConnections.length > 0 && activity.length === 0 && (
-                <p className="goals-empty">No activity in the last 3 days — check back soon!</p>
+                <p className="home-empty">No activity in the last 3 days — check back soon!</p>
               )}
-
               {activity.length > 0 && (
-                <div className="activity-list">
-                  {activity.map((item) => {
+                <div className="home-activity-list">
+                  {activity.slice(0, 5).map((item) => {
                     const name = item.profiles
                       ? `${item.profiles.first_name ?? ''} ${item.profiles.last_name ?? ''}`.trim() || 'Someone'
                       : 'Someone';
                     const milestone = isMilestone(item.day_count);
-                    const today = new Date().toISOString().split('T')[0];
-                    const isToday = item.last_checked_in === today;
-                    const timeLabel = isToday ? 'Today' : 'Recently';
+                    const isToday = item.last_checked_in === new Date().toISOString().split('T')[0];
                     return (
                       <div
                         key={item.id}
-                        className={`activity-item${milestone ? ' activity-item--milestone' : ''}`}
+                        className={`home-activity-item${milestone ? ' home-activity-item--milestone' : ''}`}
                         onClick={() => navigate(`/profile/${item.profiles?.id}`)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={(e) => e.key === 'Enter' && navigate(`/profile/${item.profiles?.id}`)}
                       >
                         <Avatar url={item.profiles?.avatar_url} name={name} size={36} />
-                        <div className="activity-body">
-                          <div className="activity-text">
-                            <span className="activity-name">{name}</span>
-                            {milestone ? (
-                              <> hit a <strong>{item.day_count}-day streak</strong> on "{item.title}" 🔥</>
-                            ) : (
-                              <> checked in on "{item.title}"</>
-                            )}
+                        <div className="home-activity-body">
+                          <div className="home-activity-text">
+                            <span className="home-activity-name">{name}</span>
+                            {milestone
+                              ? <> hit a <strong>{item.day_count}-day milestone</strong> on "{item.title}" 🎉</>
+                              : <> checked in on "{item.title}"</>}
                           </div>
-                          <div className="activity-meta">
-                            {item.profiles?.alter_ego_name && (
-                              <span className="activity-alter-ego">⚡ {item.profiles.alter_ego_name} · </span>
-                            )}
-                            {timeLabel} · Day {item.day_count}
+                          <div className="home-activity-meta">
+                            {item.profiles?.alter_ego_name && `⚡ ${item.profiles.alter_ego_name} · `}
+                            {isToday ? 'Today' : 'Recently'} · Day {item.day_count}
                           </div>
                         </div>
-                        {milestone && <div className="activity-milestone-badge">{item.day_count}d</div>}
+                        {milestone && <div className="home-activity-milestone-badge">{item.day_count}d</div>}
                       </div>
                     );
                   })}
                 </div>
               )}
             </div>
-
-            {/* Quick links */}
-            <div className="feed-card">
-              <div className="card-header">
-                <h2 className="card-title">
-                  <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Quick Access
-                </h2>
-              </div>
-              <div className="quick-links">
-                <button className="quick-link-btn" onClick={() => navigate('/connections')}>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Find Connections
-                </button>
-                <button className="quick-link-btn" onClick={() => navigate('/tribe-community')}>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  Tribe Community
-                </button>
-                <button className="quick-link-btn" onClick={() => navigate('/pact')}>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  The Pact
-                </button>
-                <button className="quick-link-btn" onClick={() => navigate('/messages')}>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  Messages
-                </button>
-                <button className="quick-link-btn" onClick={() => navigate('/coaches')}>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                  Find a Coach
-                </button>
-              </div>
-            </div>
           </div>
 
-          <aside className="sidebar">
-            {/* Suggested Connections (real data) */}
-            <div className="sidebar-card">
-              <div className="card-header">
-                <h3 className="sidebar-title">
-                  <svg className="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                  </svg>
-                  Suggested Connections
-                </h3>
-                <button type="button" className="view-all" onClick={() => navigate('/connections')}>
-                  See all
-                </button>
+          {/* Sidebar */}
+          <aside className="home-sidebar">
+            {/* Suggested Connections */}
+            <div className="home-sidebar-card">
+              <div className="home-card-header">
+                <h3 className="home-sidebar-title">People You May Know</h3>
+                <button type="button" className="home-card-link" onClick={() => navigate('/connections')}>See all</button>
               </div>
-              <div className="suggested-people">
+              <div className="home-suggested-list">
                 {suggested.length === 0 && (
-                  <p className="goals-empty" style={{ fontSize: '0.85rem', padding: '8px 0' }}>
-                    No new suggestions right now.
-                  </p>
+                  <p className="home-empty">No new suggestions right now.</p>
                 )}
                 {suggested.map((person) => {
                   const name = `${person.first_name ?? ''} ${person.last_name ?? ''}`.trim() || 'User';
                   return (
-                    <div key={person.id} className="suggested-person">
+                    <div key={person.id} className="home-suggested-item">
                       <Avatar url={person.avatar_url} name={name} size={40} />
-                      <div className="suggested-info">
-                        <div className="suggested-name">{name}</div>
-                        <div className="suggested-meta">
+                      <div className="home-suggested-info">
+                        <div className="home-suggested-name">{name}</div>
+                        <div className="home-suggested-meta">
                           {person.alter_ego_name ? `⚡ ${person.alter_ego_name}` : person.city || 'Member'}
                         </div>
                       </div>
                       <button
                         type="button"
-                        className="connect-btn"
+                        className="home-spark-btn"
                         onClick={() => handleSendSpark(person.id)}
                         disabled={sendingTo === person.id}
                       >
@@ -498,51 +365,39 @@ const HomePage = () => {
             </div>
 
             {/* My Stats */}
-            <div className="sidebar-card">
-              <div className="card-header">
-                <h3 className="sidebar-title">
-                  <svg className="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  My Stats
-                </h3>
-              </div>
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <div className="stat-value">{goals.length}</div>
-                  <div className="stat-label">Active Goals</div>
+            <div className="home-sidebar-card">
+              <h3 className="home-sidebar-title">My Stats</h3>
+              <div className="home-stats-grid">
+                <div className="home-stat">
+                  <div className="home-stat-value">{goals.length}</div>
+                  <div className="home-stat-label">Active Goals</div>
                 </div>
-                <div className="stat-item">
-                  <div className="stat-value">{goals.filter(g => g.progress >= 100).length}</div>
-                  <div className="stat-label">Completed</div>
+                <div className="home-stat">
+                  <div className="home-stat-value">{goals.length > 0 ? Math.max(...goals.map(g => g.day_count || 0)) : 0}</div>
+                  <div className="home-stat-label">Best Streak</div>
                 </div>
-                <div className="stat-item">
-                  <div className="stat-value">{goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + (g.progress || 0), 0) / goals.length) : 0}%</div>
-                  <div className="stat-label">Avg Progress</div>
+                <div className="home-stat">
+                  <div className="home-stat-value">{acceptedConnections.length}</div>
+                  <div className="home-stat-label">Connections</div>
                 </div>
-                <div className="stat-item">
-                  <div className="stat-value">{goals.length > 0 ? Math.max(...goals.map(g => g.day_count || 0)) : 0}</div>
-                  <div className="stat-label">Best Streak</div>
+                <div className="home-stat">
+                  <div className="home-stat-value">{habitGoals.filter(g => g.last_checked_in === todayStr).length}</div>
+                  <div className="home-stat-label">Done Today</div>
                 </div>
               </div>
             </div>
 
-            {/* Navigate to Profile */}
-            <div className="sidebar-card">
-              <div className="card-header">
-                <h3 className="sidebar-title">
-                  <svg className="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  Your Profile
-                </h3>
+            {/* Quick Links */}
+            <div className="home-sidebar-card">
+              <h3 className="home-sidebar-title">Quick Access</h3>
+              <div className="home-quick-links">
+                <button className="home-quick-btn" onClick={() => navigate('/connections')}>⚡ Sparks</button>
+                <button className="home-quick-btn" onClick={() => navigate('/tribe-community')}>🌍 Tribe</button>
+                <button className="home-quick-btn" onClick={() => navigate('/pact')}>🔐 Pact</button>
+                <button className="home-quick-btn" onClick={() => navigate('/messages')}>💬 Messages</button>
+                <button className="home-quick-btn" onClick={() => navigate('/coaches')}>🏋️ Coaches</button>
+                <button className="home-quick-btn" onClick={() => navigate('/profile')}>👤 Profile</button>
               </div>
-              <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', marginBottom: '12px' }}>
-                Update your goals, affirmations, and what you're looking for in an accountability partner.
-              </p>
-              <button className="connect-btn" style={{ width: '100%' }} onClick={() => navigate('/profile')}>
-                View Profile →
-              </button>
             </div>
           </aside>
         </div>
