@@ -154,7 +154,7 @@ export default function TribeCommunityPage() {
       .map(([tag, count]) => ({ tag, posts: count }));
   }, [posts]);
 
-  const [feedTab, setFeedTab] = useState('sparks');
+  const [feedTab, setFeedTab] = useState('circle');
   const [filter, setFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(10);
   const [showModal, setShowModal] = useState(false);
@@ -338,6 +338,12 @@ export default function TribeCommunityPage() {
               🌍 Community
               <span className="feed-tab-count">{posts.length}</span>
             </button>
+            <button
+              className={`feed-tab${feedTab === 'profile' ? ' active' : ''}`}
+              onClick={() => { setFeedTab('profile'); }}
+            >
+              👤 My Profile
+            </button>
           </div>
 
           {/* My Circle — unified feed of check-ins + posts */}
@@ -419,8 +425,14 @@ export default function TribeCommunityPage() {
             );
           })()}
 
+          {/* Profile tab — redirect */}
+          {feedTab === 'profile' && (() => {
+            navigate('/profile');
+            return null;
+          })()}
+
           {/* Posts feed */}
-          {feedTab !== 'circle' && (
+          {feedTab !== 'circle' && feedTab !== 'profile' && (
           <div className="feed-container">
             {postsLoading && <div className="feed-empty">Loading posts...</div>}
             {!postsLoading && allDisplayedPosts.length === 0 && (
