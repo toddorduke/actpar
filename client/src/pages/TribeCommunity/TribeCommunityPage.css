@@ -612,57 +612,65 @@
   justify-content: space-between;
   align-items: center;
   padding: 25px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-title { font-size: 1.5em; color: var(--color-text); }
+.modal-title { font-size: 1.5em; color: #ffffff; font-weight: 700; }
 
 .close-modal {
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 5px;
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.close-modal:hover { color: var(--color-text); }
+.close-modal:hover { color: #ffffff; }
 .modal-body { padding: 25px; }
 
 .form-group { margin-bottom: 20px; }
-.form-group label { display: block; font-weight: 600; color: #374151; margin-bottom: 8px; }
+.form-group label { display: block; font-weight: 600; color: #e5e7eb; margin-bottom: 8px; }
 
 .post-type-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
 .type-btn {
   padding: 11px;
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   font-weight: 500;
+  color: #d1d5db;
   cursor: pointer;
   transition: all var(--transition-base);
 }
 
 .type-btn.active {
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(124, 58, 237, 0.25);
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: #c4b5fd;
 }
 
 .post-textarea, .input-field {
   width: 100%;
   box-sizing: border-box;
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   font-family: inherit;
   font-size: 1em;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f9fafb;
   resize: vertical;
+}
+
+.post-textarea::placeholder, .input-field::placeholder {
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .post-textarea:focus, .input-field:focus {
   outline: none;
   border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
