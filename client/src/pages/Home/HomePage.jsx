@@ -86,7 +86,64 @@ const HomePage = () => {
   const [suggested, setSuggested] = useState([]);
   const [sendingTo, setSendingTo] = useState(null);
 
+  // Leaderboard
+  const [leaders, setLeaders] = useState([]);
+  const [leaderCity, setLeaderCity] = useState('');
+  const [leaderTab, setLeaderTab] = useState('streak');
+
   const firstName = user?.user_metadata?.first_name ?? 'there';
+
+  useEffect(() => {
+    async function loadLeaderboard() {
+      if (!user) return;
+
+      // Get current user's city
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('city')
+        .eq('id', user.id)
+        .single();
+
+      const city = myProfile?.city ?? '';
+      setLeaderCity(city);
+
+      // Fetch active goals with profile info, filtered by city if available
+      let query = supabase
+        .from('goals')
+        .select('user_id, day_count, goal_type, is_active, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city)')
+        .eq('is_active', true)
+        .neq('user_id', user.id);
+
+      if (city) query = query.eq('profiles.city', city);
+
+      const { data: goalData } = await query;
+
+      // Aggregate per user
+      const userMap = {};
+      for (const g of goalData ?? []) {
+        const p = g.profiles;
+        if (!p) continue;
+        if (!userMap[g.user_id]) {
+          userMap[g.user_id] = {
+            id: p.id,
+            name: `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim(),
+            avatar_url: p.avatar_url,
+            alter_ego: p.alter_ego_name,
+            city: p.city,
+            bestStreak: 0,
+            totalGoals: 0,
+          };
+        }
+        userMap[g.user_id].totalGoals += 1;
+        if (g.goal_type !== 'numeric' && (g.day_count ?? 0) > userMap[g.user_id].bestStreak) {
+          userMap[g.user_id].bestStreak = g.day_count ?? 0;
+        }
+      }
+
+      setLeaders(Object.values(userMap));
+    }
+    loadLeaderboard();
+  }, [user]);
 
   useEffect(() => {
     async function loadSuggested() {
@@ -436,6 +493,52 @@ const HomePage = () => {
                 <button className="home-quick-btn" onClick={() => navigate('/profile')}>👤 Profile</button>
               </div>
             </div>
+
+            {/* Local Leaderboard */}
+            <div className="home-sidebar-card">
+              <h3 className="home-sidebar-title">
+                🏆 {leaderCity ? `${leaderCity} Leaders` : 'Global Leaders'}
+              </h3>
+              {/* Metric tabs */}
+              <div className="lb-tabs">
+                <button className={`lb-tab${leaderTab === 'streak' ? ' active' : ''}`} onClick={() => setLeaderTab('streak')}>🔥 Streak</button>
+                <button className={`lb-tab${leaderTab === 'goals' ? ' active' : ''}`} onClick={() => setLeaderTab('goals')}>🎯 Goals</button>
+              </div>
+              <div className="lb-list">
+                {leaders.length === 0 && (
+                  <p className="home-empty">No local leaders yet — be the first!</p>
+                )}
+                {[...leaders]
+                  .sort((a, b) => leaderTab === 'streak'
+                    ? b.bestStreak - a.bestStreak
+                    : b.totalGoals - a.totalGoals)
+                  .slice(0, 8)
+                  .map((person, i) => (
+                    <div
+                      key={person.id}
+                      className="lb-row"
+                      onClick={() => navigate(`/profile/${person.id}`)}
+                    >
+                      <div className={`lb-rank lb-rank-${i + 1}`}>
+                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                      </div>
+                      <Avatar url={person.avatar_url} name={person.name} size={34} />
+                      <div className="lb-info">
+                        <div className="lb-name">{person.name}</div>
+                        {person.alter_ego && <div className="lb-ego">⚡ {person.alter_ego}</div>}
+                      </div>
+                      <div className="lb-score">
+                        {leaderTab === 'streak'
+                          ? <><span className="lb-score-num">{person.bestStreak}</span><span className="lb-score-label"> days</span></>
+                          : <><span className="lb-score-num">{person.totalGoals}</span><span className="lb-score-label"> goals</span></>
+                        }
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+
           </aside>
         </div>
       </div>
