@@ -78,6 +78,18 @@ const HomePage = () => {
 
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState({});
+  const [cheerSent, setCheerSent] = useState(new Set());
+
+  async function sendCheer(item) {
+    const myName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name].filter(Boolean).join(' ') || 'Your connection';
+    await supabase.from('notifications').insert({
+      user_id: item.profiles.id,
+      actor_id: user.id,
+      type: 'cheer',
+      body: `${myName} cheered your check-in on "${item.title}"! 🔥`,
+    });
+    setCheerSent((prev) => new Set([...prev, item.id]));
+  }
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [addingGoal, setAddingGoal] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -357,6 +369,14 @@ const HomePage = () => {
                           </div>
                         </div>
                         {milestone && <div className="home-activity-milestone-badge">{item.day_count}d</div>}
+                        <button
+                          className={`home-activity-cheer-btn${cheerSent.has(item.id) ? ' sent' : ''}`}
+                          onClick={(e) => { e.stopPropagation(); if (!cheerSent.has(item.id)) sendCheer(item); }}
+                          disabled={cheerSent.has(item.id)}
+                          title="Send a cheer"
+                        >
+                          {cheerSent.has(item.id) ? '🔥' : '👏'}
+                        </button>
                       </div>
                     );
                   })}

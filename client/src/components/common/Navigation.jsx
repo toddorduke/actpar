@@ -135,6 +135,8 @@ const Navigation = () => {
       navigate('/tribe');
     } else if (notif.type === 'streak_milestone' || notif.type === 'progress_complete') {
       navigate('/profile');
+    } else if (notif.type === 'cheer') {
+      navigate('/profile');
     }
   }
 

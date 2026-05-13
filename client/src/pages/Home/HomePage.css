@@ -334,6 +334,27 @@
   border-radius: 999px;
 }
 
+.home-activity-cheer-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.home-activity-cheer-btn:hover:not(:disabled) {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+.home-activity-cheer-btn.sent {
+  border-color: #f59e0b;
+  background: #fef3c7;
+  cursor: default;
+}
+
 .home-empty {
   font-size: 0.88rem;
   color: #9ca3af;

@@ -1394,6 +1394,43 @@
 }
 .mn-conn-msg-btn:hover { background: #e5e7eb; }
 
+.mn-conn-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin: 4px 0 2px;
+  width: 100%;
+}
+
+.mn-conn-stat {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.mn-conn-stat--streak { color: #f59e0b; font-weight: 700; }
+.mn-conn-stat--today { color: #10b981; font-weight: 600; }
+
+.mn-conn-cheer-btn {
+  margin-top: 4px;
+  padding: 5px 10px;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.mn-conn-cheer-btn:hover:not(:disabled) { opacity: 0.85; }
+.mn-conn-cheer-btn.sent {
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: default;
+}
+
 @media (max-width: 600px) {
   .mn-connections-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 }

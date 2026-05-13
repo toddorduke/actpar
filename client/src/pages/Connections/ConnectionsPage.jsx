@@ -1,8 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useBlock } from '../../hooks/useBlock.js';
+import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
 import './ConnectionsPage.css';
@@ -37,6 +38,52 @@ export default function ConnectionsPage() {
 
   const [mainTab, setMainTab] = useState('connections');
   const { blockedIds } = useBlock();
+  const [partnerStats, setPartnerStats] = useState({});
+  const [cheerSent, setCheerSent] = useState(new Set());
+
+  useEffect(() => {
+    if (mainTab !== 'my-network' || acceptedConnections.length === 0) return;
+    const partnerIds = acceptedConnections.map((c) => c.partnerId).filter(Boolean);
+    if (partnerIds.length === 0) return;
+    supabase
+      .from('goals')
+      .select('user_id, day_count, last_checked_in')
+      .in('user_id', partnerIds)
+      .eq('is_active', true)
+      .then(({ data }) => {
+        const stats = {};
+        for (const g of data ?? []) {
+          if (!stats[g.user_id]) stats[g.user_id] = { bestStreak: 0, activeGoals: 0, lastCheckin: null };
+          stats[g.user_id].activeGoals++;
+          if ((g.day_count ?? 0) > stats[g.user_id].bestStreak) stats[g.user_id].bestStreak = g.day_count ?? 0;
+          if (g.last_checked_in && (!stats[g.user_id].lastCheckin || g.last_checked_in > stats[g.user_id].lastCheckin)) {
+            stats[g.user_id].lastCheckin = g.last_checked_in;
+          }
+        }
+        setPartnerStats(stats);
+      });
+  }, [mainTab, acceptedConnections.length]);
+
+  function lastActiveLabel(lastCheckin) {
+    if (!lastCheckin) return null;
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    if (lastCheckin === today) return 'Active today ✓';
+    if (lastCheckin === yesterday) return 'Active yesterday';
+    const days = Math.floor((Date.now() - new Date(lastCheckin)) / 86400000);
+    return `Active ${days}d ago`;
+  }
+
+  async function sendCheer(partnerId, partnerName) {
+    const myName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name].filter(Boolean).join(' ') || 'Your connection';
+    await supabase.from('notifications').insert({
+      user_id: partnerId,
+      actor_id: user.id,
+      type: 'cheer',
+      body: `${myName} sent you a cheer! Keep it up! 🔥`,
+    });
+    setCheerSent((prev) => new Set([...prev, partnerId]));
+  }
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
   const [lfFilter, setLfFilter] = useState('');
@@ -193,6 +240,26 @@ export default function ConnectionsPage() {
                     {c.partnerProfile?.alter_ego_name && (
                       <span className="mn-conn-ego">⚡ {c.partnerProfile.alter_ego_name}</span>
                     )}
+                    {partnerStats[c.partnerId] && (
+                      <div className="mn-conn-stats">
+                        {partnerStats[c.partnerId].bestStreak > 0 && (
+                          <span className="mn-conn-stat mn-conn-stat--streak">🔥 {partnerStats[c.partnerId].bestStreak}d</span>
+                        )}
+                        <span className="mn-conn-stat">📋 {partnerStats[c.partnerId].activeGoals} goals</span>
+                        {lastActiveLabel(partnerStats[c.partnerId].lastCheckin) && (
+                          <span className={`mn-conn-stat${partnerStats[c.partnerId].lastCheckin === new Date().toISOString().split('T')[0] ? ' mn-conn-stat--today' : ''}`}>
+                            {lastActiveLabel(partnerStats[c.partnerId].lastCheckin)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <button
+                      className={`mn-conn-cheer-btn${cheerSent.has(c.partnerId) ? ' sent' : ''}`}
+                      onClick={() => !cheerSent.has(c.partnerId) && sendCheer(c.partnerId, name)}
+                      disabled={cheerSent.has(c.partnerId)}
+                    >
+                      {cheerSent.has(c.partnerId) ? '🔥 Cheered!' : '🔥 Cheer'}
+                    </button>
                     <button className="mn-conn-profile-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
                       👤 Profile
                     </button>
