@@ -5,6 +5,7 @@ import { useConnections } from '../../hooks/useConnections.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
+import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import ReportModal from '../../components/common/ReportModal.jsx';
@@ -176,6 +177,8 @@ export default function TribeCommunityPage() {
     return new Set([user.id, ...ids]);
   }, [acceptedConnections, user]);
 
+  const { activity: circleActivity, loading: circleLoading } = useConnectionActivity(acceptedConnections);
+
   const applyTypeFilter = (list) => {
     if (filter === 'all') return list;
     return list.filter((p) => {
@@ -320,6 +323,15 @@ export default function TribeCommunityPage() {
         <main className="main-feed">
           <div className="feed-tabs">
             <button
+              className={`feed-tab${feedTab === 'circle' ? ' active' : ''}`}
+              onClick={() => { setFeedTab('circle'); setVisibleCount(10); }}
+            >
+              🔥 My Circle
+              {circleActivity.length > 0 && (
+                <span className="feed-tab-count">{circleActivity.length}</span>
+              )}
+            </button>
+            <button
               className={`feed-tab${feedTab === 'sparks' ? ' active' : ''}`}
               onClick={() => { setFeedTab('sparks'); setVisibleCount(10); }}
             >
@@ -337,6 +349,48 @@ export default function TribeCommunityPage() {
             </button>
           </div>
 
+          {/* My Circle activity feed */}
+          {feedTab === 'circle' && (
+            <div className="feed-container">
+              {circleLoading && <div className="feed-empty">Loading activity...</div>}
+              {!circleLoading && acceptedConnections.length === 0 && (
+                <div className="feed-empty">Connect with people on the Sparks page to see their activity here.</div>
+              )}
+              {!circleLoading && acceptedConnections.length > 0 && circleActivity.length === 0 && (
+                <div className="feed-empty">None of your connections have checked in recently — check back soon!</div>
+              )}
+              {circleActivity.map((item) => {
+                const p = item.profiles;
+                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                const milestone = isMilestone(item.day_count);
+                return (
+                  <div key={item.id} className={`circle-activity-card${milestone ? ' milestone' : ''}`}>
+                    <Link to={`/profile/${item.user_id}`} className="circle-avatar-link">
+                      <Avatar url={p?.avatar_url} name={name} size={44} />
+                    </Link>
+                    <div className="circle-activity-body">
+                      <div className="circle-activity-text">
+                        <Link to={`/profile/${item.user_id}`} className="circle-activity-name">{name}</Link>
+                        {milestone ? (
+                          <span> hit a <strong>{item.day_count}-day milestone</strong> on "{item.title}" 🎉</span>
+                        ) : (
+                          <span> checked in on "<strong>{item.title}</strong>" — {item.day_count} day streak</span>
+                        )}
+                      </div>
+                      {p?.alter_ego_name && (
+                        <div className="circle-activity-ego">⚡ {p.alter_ego_name}</div>
+                      )}
+                      <div className="circle-activity-time">{timeAgo(item.updated_at)}</div>
+                    </div>
+                    {milestone && <div className="circle-milestone-badge">🏆 {item.day_count} days</div>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Posts feed */}
+          {feedTab !== 'circle' && (
           <div className="feed-container">
             {postsLoading && <div className="feed-empty">Loading posts...</div>}
             {!postsLoading && allDisplayedPosts.length === 0 && (
@@ -369,6 +423,7 @@ export default function TribeCommunityPage() {
               </button>
             )}
           </div>
+          )}
         </main>
 
         {/* Right Sidebar */}

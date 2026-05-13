@@ -860,3 +860,76 @@
 
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* ── My Circle Activity Feed ── */
+.circle-activity-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  transition: box-shadow 0.15s;
+}
+
+.circle-activity-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+
+.circle-activity-card.milestone {
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+.circle-avatar-link {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.circle-activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.circle-activity-text {
+  font-size: 0.92rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.circle-activity-name {
+  font-weight: 700;
+  color: #111827;
+  text-decoration: none;
+}
+
+.circle-activity-name:hover {
+  color: #7c3aed;
+  text-decoration: underline;
+}
+
+.circle-activity-ego {
+  font-size: 0.78rem;
+  color: #d97706;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.circle-activity-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.circle-milestone-badge {
+  flex-shrink: 0;
+  background: #fbbf24;
+  color: #78350f;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
