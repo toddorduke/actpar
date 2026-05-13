@@ -332,15 +332,6 @@ export default function TribeCommunityPage() {
               )}
             </button>
             <button
-              className={`feed-tab${feedTab === 'sparks' ? ' active' : ''}`}
-              onClick={() => { setFeedTab('sparks'); setVisibleCount(10); }}
-            >
-              ⚡ My Sparks
-              {connectedUserIds.size > 1 && (
-                <span className="feed-tab-count">{connectedUserIds.size - 1}</span>
-              )}
-            </button>
-            <button
               className={`feed-tab${feedTab === 'community' ? ' active' : ''}`}
               onClick={() => { setFeedTab('community'); setVisibleCount(10); }}
             >
