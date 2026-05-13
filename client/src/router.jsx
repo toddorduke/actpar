@@ -12,6 +12,7 @@ import HomePage from './pages/Home/HomePage.jsx';
 import ProfilePage from './pages/Profile/ProfilePage.jsx';
 import CoachProfilePage from './pages/CoachProfile/CoachProfilePage.jsx';
 import CoachDiscoveryPage from './pages/CoachDiscovery/CoachDiscoveryPage.jsx';
+import LeaderboardPage from './pages/Leaderboard/LeaderboardPage.jsx';
 import SettingsPage from './pages/Settings/SettingsPage.jsx';
 import OnboardingPage from './pages/Onboarding/OnboardingPage.jsx';
 import ProfileSetupPage from './pages/ProfileSetup/ProfileSetupPage.jsx';
@@ -54,5 +55,6 @@ export const AppRoutes = () => (
     <Route path="/coaches" element={<ProtectedRoute><CoachDiscoveryPage /></ProtectedRoute>} />
     <Route path="/coach/:coachId" element={<ProtectedRoute><CoachProfilePage /></ProtectedRoute>} />
     <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+    <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
   </Routes>
 );
