@@ -389,8 +389,15 @@
   border-radius: 8px;
 }
 
-.comm-like-btn {
-  align-self: flex-start;
+.comm-post-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.comm-like-btn,
+.comm-comment-btn {
   background: none;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
@@ -403,6 +410,9 @@
 }
 
 .comm-like-btn:hover { border-color: #f87171; color: #ef4444; }
+
+.comm-comment-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.comm-comment-btn.active { border-color: var(--color-primary); color: var(--color-primary); background: rgba(124, 58, 237, 0.06); }
 
 .load-more-btn {
   padding: 12px;

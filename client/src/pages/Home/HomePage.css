@@ -17,6 +17,31 @@
   color: #1f2937;
 }
 
+.welcome-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.recap-trigger-btn {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+  margin-top: 4px;
+}
+
+.recap-trigger-btn:hover { opacity: 0.88; }
+
 .welcome-title {
   font-size: 2.5rem;
   font-weight: 700;
@@ -553,4 +578,217 @@
   .sidebar-card {
     padding: 24px;
   }
+}
+
+/* ── Connection Activity Feed ─────────────────────────── */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.activity-item:hover { background: rgba(0, 0, 0, 0.04); }
+
+.activity-item--milestone {
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.activity-item--milestone:hover {
+  background: rgba(124, 58, 237, 0.09);
+}
+
+.activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-text {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.activity-name {
+  font-weight: 700;
+}
+
+.activity-meta {
+  font-size: 0.775rem;
+  color: var(--color-muted);
+  margin-top: 2px;
+}
+
+.activity-alter-ego {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.activity-milestone-badge {
+  flex-shrink: 0;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* ── Daily Check-In Cards ─────────────────────────────── */
+.checkin-feed-card {
+  border: 2px solid rgba(124, 58, 237, 0.15);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.03), rgba(168, 85, 247, 0.02));
+}
+
+.checkin-all-done-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.checkin-all-done {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 4px 4px;
+}
+
+.checkin-done-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+
+.checkin-done-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 3px;
+}
+
+.checkin-done-sub {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.checkin-card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.checkin-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.checkin-card:not(.checkin-card--done):hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+.checkin-card--done {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.checkin-card-streak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  border-radius: 10px;
+  padding: 6px 4px;
+  flex-shrink: 0;
+}
+
+.checkin-card--done .checkin-card-streak {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.checkin-card-day {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+}
+
+.checkin-card-day-label {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.checkin-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkin-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkin-card-milestone {
+  font-size: 0.75rem;
+  color: var(--color-primary, #7c3aed);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.checkin-card-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.checkin-card-btn:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: scale(1.03);
+}
+
+.checkin-card-btn.done {
+  background: #10b981;
+  font-size: 1rem;
+  padding: 7px 14px;
+  cursor: default;
+}
+
+.checkin-card-btn:disabled:not(.done) {
+  opacity: 0.5;
+  cursor: default;
 }

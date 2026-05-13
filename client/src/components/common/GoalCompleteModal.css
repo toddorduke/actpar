@@ -1,0 +1,195 @@
+.gc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: gc-overlay-in 0.25s ease;
+}
+
+@keyframes gc-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Confetti ─────────────────────────────────────────── */
+.gc-confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.gc-piece {
+  position: absolute;
+  top: -20px;
+  animation: gc-fall linear forwards;
+}
+
+@keyframes gc-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  75%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(900deg); opacity: 0; }
+}
+
+/* ── Card ─────────────────────────────────────────────── */
+.gc-card {
+  background: white;
+  border-radius: 28px;
+  padding: 44px 36px 36px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  animation: gc-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes gc-pop {
+  from { transform: scale(0.55) translateY(40px); opacity: 0; }
+  to   { transform: scale(1) translateY(0);       opacity: 1; }
+}
+
+.gc-trophy {
+  font-size: 5rem;
+  line-height: 1;
+  margin-bottom: 12px;
+  animation: gc-trophy-bounce 1s ease-in-out infinite alternate;
+  display: block;
+}
+
+@keyframes gc-trophy-bounce {
+  from { transform: scale(1) rotate(-3deg); }
+  to   { transform: scale(1.1) rotate(3deg); }
+}
+
+/* ── Badges ───────────────────────────────────────────── */
+.gc-badge-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.gc-badge {
+  display: inline-block;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.gc-badge--gold {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+/* ── Text ─────────────────────────────────────────────── */
+.gc-headline {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--color-text, #111827);
+  margin: 0 0 8px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.gc-goal-name {
+  font-size: 1rem;
+  color: var(--color-primary, #7c3aed);
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+
+.gc-sub {
+  font-size: 0.925rem;
+  color: var(--color-muted, #6b7280);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.gc-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 24px 0 20px;
+}
+
+.gc-prompt {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-muted, #6b7280);
+  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Actions ──────────────────────────────────────────── */
+.gc-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gc-complete-btn {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.15s;
+}
+
+.gc-complete-btn:hover { opacity: 0.88; }
+
+.gc-complete-icon {
+  font-size: 1.4rem;
+}
+
+.gc-complete-btn > span:first-child + span {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.gc-complete-sub {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+.gc-keep-btn {
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  color: var(--color-muted, #6b7280);
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.gc-keep-btn:hover {
+  border-color: #d1d5db;
+  color: var(--color-text, #111827);
+}
+
+@media (max-width: 480px) {
+  .gc-card { padding: 36px 24px 28px; }
+  .gc-headline { font-size: 2rem; }
+  .gc-trophy { font-size: 4rem; }
+}

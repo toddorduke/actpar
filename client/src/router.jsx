@@ -8,6 +8,7 @@ import UserProfilePage from './pages/UserProfile/UserProfilePage.jsx';
 import TribeCommunityPage from './pages/TribeCommunity/TribeCommunityPage.jsx';
 import CommunityPage from './pages/Community/CommunityPage.jsx';
 import PactPage from './pages/Pact/PactPage.jsx';
+import HomePage from './pages/Home/HomePage.jsx';
 import ProfilePage from './pages/Profile/ProfilePage.jsx';
 import CoachProfilePage from './pages/CoachProfile/CoachProfilePage.jsx';
 import CoachDiscoveryPage from './pages/CoachDiscovery/CoachDiscoveryPage.jsx';
@@ -42,7 +43,8 @@ export const AppRoutes = () => (
     <Route path="/profile-setup" element={<ProtectedRoute skipProfileSetupCheck><ProfileSetupPage /></ProtectedRoute>} />
 
     {/* Protected routes — redirect to /login if not authenticated, /onboarding if not complete */}
-    <Route path="/" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+    <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
     <Route path="/connections" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
     <Route path="/tribe-community" element={<ProtectedRoute><TribeCommunityPage /></ProtectedRoute>} />
     <Route path="/community/:id" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />

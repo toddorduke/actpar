@@ -8,6 +8,7 @@ import { useCommunityChat } from '../../hooks/useCommunityChat.js';
 import { useCommunityChallenges } from '../../hooks/useCommunityChallenges.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
+import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './CommunityPage.css';
 
@@ -33,6 +34,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   const { user } = useContext(AuthContext);
   const { posts, loading, createPost, likePost } = useTribePosts(communityId);
   const toast = useToast();
+  const commentState = useCommentState();
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState('general');
   const [milestone, setMilestone] = useState('');
@@ -84,7 +86,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {pinned && (
         <div className="comm-post-card pinned-post">
           <div className="pinned-label">📌 Pinned</div>
-          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned />
+          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned commentState={commentState} />
         </div>
       )}
 
@@ -92,7 +94,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
 
       {feed.map((p) => p.id !== pinnedPostId && (
-        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} />
+        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} commentState={commentState} />
       ))}
 
       {visibleCount < posts.length && (
@@ -102,12 +104,15 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   );
 }
 
-function PostCard({ post, onLike, isAdmin, onPin, isPinned }) {
+function PostCard({ post, onLike, isAdmin, onPin, isPinned, commentState }) {
   const [expanded, setExpanded] = useState(false);
   const truncated = post.content.length > POST_TRUNCATE && !expanded;
   const authorName = post.profiles
     ? `${post.profiles.first_name ?? ''} ${post.profiles.last_name ?? ''}`.trim() || 'Member'
     : 'Member';
+  const { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount } = commentState;
+  const isOpen = !!openPanels[post.id];
+  const count = commentCount(post.id);
 
   return (
     <div className="comm-post-card">
@@ -132,9 +137,24 @@ function PostCard({ post, onLike, isAdmin, onPin, isPinned }) {
         )}
       </p>
       {post.milestone && <div className="comm-post-milestone">🏆 {post.milestone}</div>}
-      <button className="comm-like-btn" onClick={() => onLike(post.id, post.likes)}>
-        ❤️ {post.likes ?? 0}
-      </button>
+      <div className="comm-post-actions">
+        <button className="comm-like-btn" onClick={() => onLike(post.id, post.likes)}>
+          ❤️ {post.likes ?? 0}
+        </button>
+        <button className={`comm-comment-btn${isOpen ? ' active' : ''}`} onClick={() => togglePanel(post.id)}>
+          💬 {count > 0 ? count : ''} Comment{count !== 1 ? 's' : ''}
+        </button>
+      </div>
+      {isOpen && (
+        <CommentPanel
+          postId={post.id}
+          postType="tribe"
+          comments={commentsByPost[post.id] ?? []}
+          loading={!!loadingPost[post.id]}
+          onAdd={addComment}
+          onDelete={deleteComment}
+        />
+      )}
     </div>
   );
 }

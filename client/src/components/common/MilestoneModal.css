@@ -1,0 +1,141 @@
+.milestone-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: overlay-in 0.2s ease;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Confetti ─────────────────────────────────────────── */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  animation: confetti-fall linear forwards;
+  opacity: 0.9;
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Card ─────────────────────────────────────────────── */
+.milestone-card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  animation: card-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes card-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.milestone-flame {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 8px;
+  animation: flame-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes flame-pulse {
+  from { transform: scale(1)    rotate(-4deg); }
+  to   { transform: scale(1.12) rotate(4deg); }
+}
+
+.milestone-days {
+  display: inline-block;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 4px 20px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.milestone-headline {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.milestone-goal-name {
+  font-size: 0.95rem;
+  color: var(--color-primary, #7c3aed);
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.milestone-sub {
+  font-size: 0.95rem;
+  color: var(--color-muted, #6b7280);
+  line-height: 1.5;
+  margin: 0 0 28px;
+}
+
+/* ── Actions ──────────────────────────────────────────── */
+.milestone-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.milestone-close-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.milestone-close-btn:hover { opacity: 0.88; }
+
+.milestone-share-btn {
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  color: var(--color-primary, #7c3aed);
+  border: 2px solid var(--color-primary, #7c3aed);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.milestone-share-btn:hover {
+  background: rgba(124, 58, 237, 0.07);
+}

@@ -39,7 +39,7 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (!userId || userId === user?.id) {
-      navigate('/');
+      navigate('/profile');
       return;
     }
     loadProfile();
