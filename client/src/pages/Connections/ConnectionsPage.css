@@ -233,14 +233,14 @@
 .search-input {
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.25);
   border-radius: var(--radius-small);
   font-size: 1em;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.12);
   color: #f9fafb;
 }
 
-.search-input::placeholder { color: #6b7280; }
+.search-input::placeholder { color: #9ca3af; }
 
 .search-input:focus {
   outline: none;
@@ -567,9 +567,9 @@
 .lf-filter-chip {
   padding: 5px 11px;
   border-radius: 20px;
-  border: 1.5px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.7);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.12);
+  color: #f9fafb;
   font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
@@ -577,7 +577,8 @@
 }
 
 .lf-filter-chip:hover {
-  border-color: rgba(124, 58, 237, 0.5);
+  border-color: #a78bfa;
+  background: rgba(124, 58, 237, 0.25);
   color: white;
 }
 
