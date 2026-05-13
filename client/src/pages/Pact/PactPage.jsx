@@ -198,7 +198,7 @@ function NoPactScreen({ openPacts, onCreate, onJoinOpen, onJoinCode }) {
       <div className="no-pact-icon">🔐</div>
       <h1 className="no-pact-title">The Pact</h1>
       <p className="no-pact-subtitle">
-        A private accountability circle. Set your own rules, hold each other to them.
+        Your inner circle. Invite-only, rule-driven, and built on one foundation: you check on each other — no exceptions.
       </p>
       <div className="no-pact-actions">
         <button className="create-pact-btn" onClick={onCreate}>
@@ -249,7 +249,7 @@ export default function PactPage() {
     myPacts, pact, members, rules, posts, myRole, openPacts, loading,
     switchPact, createPact, joinPactOpen, joinPactByCode, toggleOpen,
     addRule, updateRule, deleteRule, createPost,
-    removeMember, updateMemberRole, deletePact,
+    removeMember, updateMemberRole, leavePact, deletePact,
   } = usePact(activePactId);
 
   const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
@@ -280,7 +280,11 @@ export default function PactPage() {
   const [pactName, setPactName] = useState('');
   const [pactDesc, setPactDesc] = useState('');
   const [pactIsOpen, setPactIsOpen] = useState(true);
-  const [draftRules, setDraftRules] = useState(['', '', '']);
+  const [draftRules, setDraftRules] = useState([
+    'Check in on each other — no one goes quiet without someone reaching out.',
+    '',
+    '',
+  ]);
   const [creating, setCreating] = useState(false);
 
   const [inviteCode, setInviteCode] = useState('');
@@ -358,6 +362,12 @@ export default function PactPage() {
     else toast(newRole === 'co-lead' ? 'Promoted to Co-Lead ⭐' : 'Demoted to Member', 'success');
   }
 
+  async function handleLeavePact() {
+    const { error } = await leavePact();
+    if (error) toast(`Error: ${error.message}`, 'error');
+    else toast('You left the pact.', 'success');
+  }
+
   async function handleDeletePact() {
     const { error } = await deletePact();
     if (error) toast(`Error: ${error.message}`, 'error');
@@ -419,8 +429,17 @@ export default function PactPage() {
                   {draftRules.map((rule, i) => (
                     <div key={i} className="draft-rule-row">
                       <span className="draft-rule-num">{i + 1}.</span>
-                      <input type="text" className="input-field draft-rule-input" placeholder={`Rule ${i + 1}...`} value={rule} onChange={(e) => { const u = [...draftRules]; u[i] = e.target.value; setDraftRules(u); }} />
-                      {draftRules.length > 1 && <button type="button" className="remove-rule-btn" onClick={() => setDraftRules(draftRules.filter((_, idx) => idx !== i))}>×</button>}
+                      <input
+                        type="text"
+                        className={`input-field draft-rule-input${i === 0 ? ' foundation-rule' : ''}`}
+                        placeholder={i === 0 ? 'Foundation rule — how will you check on each other?' : `Rule ${i + 1}...`}
+                        value={rule}
+                        onChange={(e) => { const u = [...draftRules]; u[i] = e.target.value; setDraftRules(u); }}
+                      />
+                      {i === 0
+                        ? <span className="foundation-rule-pin" title="Every pact starts with this rule">📌</span>
+                        : <button type="button" className="remove-rule-btn" onClick={() => setDraftRules(draftRules.filter((_, idx) => idx !== i))}>×</button>
+                      }
                     </div>
                   ))}
                   <button type="button" className="add-draft-rule-btn" onClick={() => setDraftRules([...draftRules, ''])}>+ Add another rule</button>
@@ -568,9 +587,12 @@ export default function PactPage() {
                 const canManage = isFounder && !isMe;
                 return (
                   <div key={m.id} className="member-item">
-                    <div className="member-avatar">{badge && <span className="member-badge">{badge}</span>}</div>
+                    <button className="member-avatar-btn" onClick={() => navigate(`/profile/${m.profiles?.id ?? m.user_id}`)}>
+                      <Avatar url={m.profiles?.avatar_url} name={name} size={38} />
+                      {badge && <span className="member-badge">{badge}</span>}
+                    </button>
                     <div className="member-info">
-                      <div className="member-name">{name}</div>
+                      <button className="member-name-btn" onClick={() => navigate(`/profile/${m.profiles?.id ?? m.user_id}`)}>{name}</button>
                       <div className="member-role">{m.role.charAt(0).toUpperCase() + m.role.slice(1)}</div>
                     </div>
                     {canManage && (
@@ -596,9 +618,13 @@ export default function PactPage() {
               })}
             </div>
 
-            {isFounder && (
+            {isFounder ? (
               <button className="dissolve-pact-btn" onClick={() => setConfirmDelete(true)}>
                 Dissolve Pact
+              </button>
+            ) : (
+              <button className="leave-pact-btn" onClick={handleLeavePact}>
+                Leave Pact
               </button>
             )}
           </div>
@@ -678,7 +704,7 @@ export default function PactPage() {
                     const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() || 'Member' : 'Member';
                     return (
                       <div key={m.id} className="contributor-item">
-                        <div className="contributor-avatar" />
+                        <Avatar url={m.profiles?.avatar_url} name={name} size={32} />
                         <div>
                           <div className="contributor-name">{name}</div>
                           <div className="contributor-posts">{count} post{count !== 1 ? 's' : ''}</div>

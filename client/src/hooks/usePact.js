@@ -32,9 +32,9 @@ export const usePact = (activePactId = null) => {
     const [{ data: pactData }, { data: membersData }, { data: rulesData }, { data: postsData }] =
       await Promise.all([
         supabase.from('pacts').select('*').eq('id', pactId).single(),
-        supabase.from('pact_members').select('*, profiles(first_name, last_name, alter_ego_name)').eq('pact_id', pactId),
+        supabase.from('pact_members').select('*, profiles(id, first_name, last_name, avatar_url, alter_ego_name)').eq('pact_id', pactId),
         supabase.from('pact_rules').select('*').eq('pact_id', pactId).order('position'),
-        supabase.from('pact_posts').select('*, profiles(first_name, last_name)').eq('pact_id', pactId).order('created_at', { ascending: false }).limit(50),
+        supabase.from('pact_posts').select('*, profiles(id, first_name, last_name, avatar_url)').eq('pact_id', pactId).order('created_at', { ascending: false }).limit(50),
       ]);
     return { pactData, membersData, rulesData, postsData };
   }, []);
@@ -252,6 +252,21 @@ export const usePact = (activePactId = null) => {
     return { error };
   }, [pact]);
 
+  const leavePact = useCallback(async () => {
+    if (!pact || !user) return { error: new Error('No pact selected') };
+    const { error } = await supabase
+      .from('pact_members')
+      .delete()
+      .eq('pact_id', pact.id)
+      .eq('user_id', user.id);
+    if (!error) {
+      setMyPacts((prev) => prev.filter((p) => p.id !== pact.id));
+      setPact(null);
+      setMembers([]); setRules([]); setPosts([]);
+    }
+    return { error };
+  }, [pact, user]);
+
   const deletePact = useCallback(async () => {
     if (!pact) return { error: new Error('No pact selected') };
     const { error } = await supabase.from('pacts').delete().eq('id', pact.id);
@@ -267,7 +282,7 @@ export const usePact = (activePactId = null) => {
     myPacts, pact, members, rules, posts, myRole, openPacts, loading,
     switchPact, createPact, joinPactOpen, joinPactByCode, toggleOpen,
     addRule, updateRule, deleteRule, createPost, likePost,
-    removeMember, updateMemberRole, deletePact,
+    removeMember, updateMemberRole, leavePact, deletePact,
     refetch: fetchAll,
   };
 };

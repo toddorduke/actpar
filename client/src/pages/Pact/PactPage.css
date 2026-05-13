@@ -225,23 +225,41 @@
 
 .member-item:hover { background: rgba(245, 158, 11, 0.1); }
 
-.member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-  flex-shrink: 0;
+.member-avatar-btn {
   position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
 }
 
 .member-badge {
   position: absolute;
   bottom: -2px; right: -2px;
   font-size: 0.75em;
+  line-height: 1;
 }
 
 .member-info { flex: 1; min-width: 0; }
-.member-name { font-weight: 600; color: #e0e0e0; font-size: 0.9em; }
+
+.member-name-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 600;
+  color: #e0e0e0;
+  font-size: 0.9em;
+  cursor: pointer;
+  text-align: left;
+  display: block;
+}
+
+.member-name-btn:hover { color: #fbbf24; text-decoration: underline; }
+
 .member-role { font-size: 0.8em; color: var(--color-muted); }
 
 .member-admin-btns {
@@ -295,6 +313,26 @@
   background: rgba(239,68,68,0.18);
   border-color: rgba(239,68,68,0.5);
   color: #ef4444;
+}
+
+.leave-pact-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(156,163,175,0.25);
+  background: rgba(255,255,255,0.04);
+  color: rgba(156,163,175,0.8);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.leave-pact-btn:hover {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.35);
+  color: #f87171;
 }
 
 /* Rules */
@@ -917,6 +955,18 @@
 .draft-rule-num { color: #f59e0b; font-weight: 700; flex-shrink: 0; }
 
 .draft-rule-input { margin-bottom: 0 !important; }
+
+.draft-rule-input.foundation-rule {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.foundation-rule-pin {
+  flex-shrink: 0;
+  font-size: 1rem;
+  opacity: 0.7;
+  cursor: default;
+}
 
 .remove-rule-btn {
   background: none;
