@@ -563,7 +563,7 @@
 /* ── Looking For filter (left sidebar) ── */
 .lf-filter-hint {
   font-size: 0.8rem;
-  color: var(--color-muted, #9ca3af);
+  color: #6b7280;
   margin: 0 0 10px;
   line-height: 1.4;
 }
@@ -572,15 +572,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .lf-filter-chip {
-  padding: 5px 11px;
+  padding: 5px 12px;
   border-radius: 20px;
   border: 1.5px solid #d1d5db;
-  background: white;
-  color: #111827;
+  background: #f3f4f6;
+  color: #374151;
   font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
@@ -590,6 +590,7 @@
 .lf-filter-chip:hover {
   border-color: #7c3aed;
   color: #7c3aed;
+  background: rgba(124, 58, 237, 0.06);
 }
 
 .lf-filter-chip.active {
@@ -602,17 +603,19 @@
   margin-top: 4px;
   padding: 5px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid #e5e7eb;
   background: transparent;
-  color: rgba(255,255,255,0.55);
+  color: #6b7280;
   font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .lf-clear-btn:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
 }
 
 .empty-state {
