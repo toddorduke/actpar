@@ -3,6 +3,7 @@ import Layout from './components/common/Layout.jsx';
 import { AppRoutes } from './router.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ConnectionsProvider } from './context/ConnectionsContext.jsx';
+import { NavSlotsProvider } from './context/NavSlotsContext.jsx';
 import { ToastProvider } from './components/common/Toast.jsx';
 import { useConnectionMonitor } from './hooks/useConnectionMonitor.js';
 
@@ -18,9 +19,11 @@ function AppInner() {
 const App = () => (
   <AuthProvider>
     <ToastProvider>
-      <ConnectionsProvider>
-        <AppInner />
-      </ConnectionsProvider>
+      <NavSlotsProvider>
+        <ConnectionsProvider>
+          <AppInner />
+        </ConnectionsProvider>
+      </NavSlotsProvider>
     </ToastProvider>
   </AuthProvider>
 );
