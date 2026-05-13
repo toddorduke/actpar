@@ -62,7 +62,7 @@ export default function UserProfilePage() {
     ] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id, first_name, last_name, alter_ego_name, city, tagline, bio, avatar_url, featured_video_url, account_type, looking_for, affirmation_start_date, age')
+        .select('id, first_name, last_name, alter_ego_name, city, tagline, bio, avatar_url, account_type, looking_for, affirmation_start_date')
         .eq('id', userId)
         .single(),
       supabase
@@ -157,6 +157,7 @@ export default function UserProfilePage() {
   async function handleAcceptSpark() {
     setActing(true);
     const { error } = await supabase
+      .from('connections')
       .update({ status: 'accepted' })
       .eq('requester_id', userId)
       .eq('receiver_id', user.id);
@@ -201,17 +202,6 @@ export default function UserProfilePage() {
 
         {/* Header card */}
         <div className="up-header-card">
-          {/* Featured media */}
-          {(profile.avatar_url || profile.featured_video_url) && (
-            <div className="up-featured-media">
-              {profile.featured_video_url ? (
-                <video src={profile.featured_video_url} className="up-featured-video" autoPlay muted loop playsInline />
-              ) : (
-                <img src={profile.avatar_url} alt={fullName} className="up-featured-img" />
-              )}
-            </div>
-          )}
-
           <div className="up-header-top">
             <div className="up-avatar-wrap">
               <Avatar url={profile.avatar_url} name={fullName} size={90} />
@@ -219,7 +209,6 @@ export default function UserProfilePage() {
             <div className="up-header-info">
               <h1 className="up-name">{fullName}</h1>
               {profile.alter_ego_name && <div className="up-alter-ego">⚡ {profile.alter_ego_name}</div>}
-              {profile.age && <div className="up-age">{profile.age} years old</div>}
               {profile.city && <div className="up-city">📍 {profile.city}</div>}
               {profile.account_type && <span className="up-account-badge">{profile.account_type}</span>}
               {profile.tagline && <p className="up-tagline">"{profile.tagline}"</p>}
