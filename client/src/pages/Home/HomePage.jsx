@@ -242,6 +242,43 @@ const HomePage = () => {
               </div>
             )}
 
+            {/* Active Goals */}
+            <div className="home-card">
+              <div className="home-card-header">
+                <h2 className="home-card-title">
+                  <svg className="home-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Active Goals
+                </h2>
+                <button type="button" className="home-card-link" onClick={() => navigate('/profile')}>Manage →</button>
+              </div>
+              {goalsLoading && <p className="home-empty">Loading goals...</p>}
+              {!goalsLoading && goals.length === 0 && (
+                <p className="home-empty">No goals yet — go to your profile to add one.</p>
+              )}
+              <div className="home-goals-list">
+                {goals.map((goal) => {
+                  const pct = goal.goal_type === 'numeric'
+                    ? Math.min(((goal.progress ?? 0) / (goal.target_value || 1)) * 100, 100)
+                    : Math.min(((goal.day_count ?? 0) / 90) * 100, 100);
+                  return (
+                    <div key={goal.id} className="home-goal-item">
+                      <div className="home-goal-top">
+                        <span className="home-goal-title">{goal.title}</span>
+                        <span className="home-goal-day">
+                          {goal.goal_type === 'numeric' ? `${Math.round(pct)}%` : `Day ${goal.day_count ?? 0}`}
+                        </span>
+                      </div>
+                      <div className="home-goal-bar">
+                        <div className="home-goal-fill" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Daily Reflection — single question */}
             <div className="home-card">
               <div className="home-card-header">
