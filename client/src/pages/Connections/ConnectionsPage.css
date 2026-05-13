@@ -197,12 +197,12 @@
 }
 
 .sidebar-card {
-  background: #1f2937;
+  background: white;
   border-radius: var(--radius-medium);
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   margin-bottom: 25px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid #e5e7eb;
 }
 
 .sidebar-title {
@@ -210,12 +210,12 @@
   align-items: center;
   gap: 10px;
   font-size: 1.1em;
-  font-weight: 600;
-  color: #f9fafb;
+  font-weight: 700;
+  color: #111827;
   margin-bottom: 20px;
 }
 
-.title-icon { width: 20px; height: 20px; color: #9ca3af; }
+.title-icon { width: 20px; height: 20px; color: #6b7280; }
 
 .search-container {
   display: flex;
@@ -698,7 +698,7 @@
   transition: background var(--transition-base);
 }
 
-.connection-item:hover { background: rgba(255,255,255,0.05); }
+.connection-item:hover { background: #f9fafb; }
 
 .connection-avatar {
   width: 40px;
@@ -718,27 +718,27 @@
 }
 
 .connection-info { flex: 1; }
-.connection-name { font-weight: 600; color: #f9fafb; font-size: 0.9em; }
+.connection-name { font-weight: 600; color: #111827; font-size: 0.9em; }
 .connection-name-btn {
   background: none;
   border: none;
   font-weight: 600;
-  color: #f9fafb;
+  color: #111827;
   font-size: 0.9em;
   cursor: pointer;
   padding: 0;
   text-align: left;
 }
-.connection-name-btn:hover { text-decoration: underline; }
-.connection-goal { font-size: 0.8em; color: #9ca3af; }
+.connection-name-btn:hover { text-decoration: underline; color: #7c3aed; }
+.connection-goal { font-size: 0.8em; color: #6b7280; }
 
 .connection-msg-btn {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(124,58,237,0.15);
-  color: rgba(255,255,255,0.7);
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #7c3aed;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -747,26 +747,27 @@
   transition: all 0.15s;
 }
 .connection-msg-btn:hover {
-  background: rgba(124,58,237,0.35);
+  background: #7c3aed;
   color: white;
+  border-color: #7c3aed;
 }
 
 .pacts-list { display: flex; flex-direction: column; gap: 10px; }
 
 .pact-item {
   padding: 12px;
-  background: rgba(255,255,255,0.05);
+  background: #f9fafb;
   border-left: 3px solid #f59e0b;
   border-radius: 8px;
   cursor: pointer;
 }
 
-.pact-item-title { font-weight: 600; color: #f9fafb; font-size: 0.9em; }
-.pact-item-members { font-size: 0.8em; color: #9ca3af; }
+.pact-item-title { font-weight: 600; color: #111827; font-size: 0.9em; }
+.pact-item-members { font-size: 0.8em; color: #6b7280; }
 
-.tips-card { background: #1f2937; }
+.tips-card { background: white; }
 .tips-list { display: flex; flex-direction: column; gap: 10px; }
-.tip-item { padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.9em; color: #d1d5db; }
+.tip-item { padding: 10px; background: #f9fafb; border-radius: 8px; font-size: 0.9em; color: #374151; }
 
 /* Spark paywall */
 .sparks-locked {
