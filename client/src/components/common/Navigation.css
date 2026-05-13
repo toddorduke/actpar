@@ -336,6 +336,30 @@
 
 .notif-item-dismiss:hover { opacity: 1; }
 
+.notif-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.notif-type-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  line-height: 1;
+}
+
+.notif-type-badge.spark { background: #f59e0b; }
+.notif-type-badge.connect { background: #10b981; color: white; font-size: 0.65rem; }
+.notif-type-badge.milestone { background: #f97316; }
+
 /* ── Mobile bottom tab bar ── */
 .bottom-nav {
   display: none;

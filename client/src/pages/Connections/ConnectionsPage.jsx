@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useBlock } from '../../hooks/useBlock.js';
 import Avatar from '../../components/common/Avatar.jsx';
+import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
 import './ConnectionsPage.css';
 
 const SUGGESTED_PACTS = [
@@ -22,11 +23,15 @@ export default function ConnectionsPage() {
   const {
     browseProfiles,
     incomingSparks,
+    incomingConnects,
+    sentSparks,
+    sentConnects,
     acceptedConnections,
     loading,
     sendSpark,
     acceptSpark,
     declineSpark,
+    cancelRequest,
     skipProfile,
   } = useConnections();
 
@@ -37,6 +42,8 @@ export default function ConnectionsPage() {
   const [lfFilter, setLfFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('all');
   const [mobileConnOpen, setMobileConnOpen] = useState(false);
+  const [sparkModalOpen, setSparkModalOpen] = useState(false);
+  const sparksRemaining = Math.max(0, 5 - getSparksUsedToday());
 
   function toggleLfFilter(cat) {
     setLfFilter((prev) => (prev === cat ? '' : cat));
@@ -64,12 +71,12 @@ export default function ConnectionsPage() {
 
   async function handleConnect() {
     if (!currentProfile) return;
-    await sendSpark(currentProfile.id);
+    await sendSpark(currentProfile.id); // no message = regular connect
   }
 
-  async function handleSendSpark() {
+  function handleOpenSparkModal() {
     if (!currentProfile) return;
-    await sendSpark(currentProfile.id);
+    setSparkModalOpen(true);
   }
 
   function handleSkip() {
@@ -78,6 +85,14 @@ export default function ConnectionsPage() {
   }
 
   return (
+    <>
+    {sparkModalOpen && currentProfile && (
+      <SparkModal
+        profile={currentProfile}
+        onSend={(msg) => sendSpark(currentProfile.id, msg)}
+        onClose={() => setSparkModalOpen(false)}
+      />
+    )}
     <div className="connections-page">
       <section className="page-header">
         <h1 className="page-title">Sparks</h1>
@@ -90,7 +105,16 @@ export default function ConnectionsPage() {
           className={`connections-main-tab${mainTab === 'connections' ? ' active' : ''}`}
           onClick={() => setMainTab('connections')}
         >
-          ⚡ Connections
+          ⚡ Discover
+        </button>
+        <button
+          className={`connections-main-tab${mainTab === 'my-network' ? ' active' : ''}`}
+          onClick={() => setMainTab('my-network')}
+        >
+          👥 My Network
+          {(incomingSparks.length + incomingConnects.length) > 0 && (
+            <span className="connections-main-tab-badge">{incomingSparks.length + incomingConnects.length}</span>
+          )}
         </button>
         <button
           className={`connections-main-tab${mainTab === 'coaches' ? ' active' : ''}`}
@@ -99,6 +123,143 @@ export default function ConnectionsPage() {
           🏅 Find a Coach
         </button>
       </div>
+
+      {/* My Network tab */}
+      {mainTab === 'my-network' && (
+        <div className="my-network-page">
+
+          {/* Incoming requests */}
+          {(incomingConnects.length > 0 || incomingSparks.length > 0) && (
+            <div className="mn-section">
+              <h3 className="mn-section-title">Pending — Incoming</h3>
+              {incomingConnects.map((req) => {
+                const p = req.profiles;
+                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                return (
+                  <div key={req.requester_id} className="mn-row">
+                    <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                      <Avatar url={p?.avatar_url} name={name} size={44} />
+                    </button>
+                    <div className="mn-info">
+                      <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                        {name}
+                      </button>
+                      <span className="mn-badge connect-badge">✓ Connection Request</span>
+                    </div>
+                    <div className="mn-actions">
+                      <button className="mn-accept-btn" onClick={() => acceptSpark(req.requester_id)}>Accept</button>
+                      <button className="mn-decline-btn" onClick={() => declineSpark(req.requester_id)}>Decline</button>
+                    </div>
+                  </div>
+                );
+              })}
+              {incomingSparks.map((req) => {
+                const p = req.profiles;
+                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                return (
+                  <div key={req.requester_id} className="mn-row mn-row-spark">
+                    <div className="mn-avatar-locked"><span>⚡</span></div>
+                    <div className="mn-info">
+                      <span className="mn-name-locked">Hidden — upgrade to reveal</span>
+                      <span className="mn-badge spark-badge">⚡ Spark with message</span>
+                      <span className="mn-spark-msg-blur">"{req.spark_message?.slice(0, 40)}…"</span>
+                    </div>
+                    <button className="mn-premium-btn">Go Premium</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Accepted connections */}
+          <div className="mn-section">
+            <h3 className="mn-section-title">Your Connections ({acceptedConnections.length})</h3>
+            {acceptedConnections.length === 0 && (
+              <p className="mn-empty">No connections yet — start sparking!</p>
+            )}
+            <div className="mn-connections-grid">
+              {acceptedConnections.map((c) => {
+                const name = c.partnerProfile
+                  ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
+                  : 'Connected User';
+                return (
+                  <div key={c.id} className="mn-conn-card">
+                    <button className="mn-conn-avatar-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                      <Avatar url={c.partnerProfile?.avatar_url} name={name} size={52} />
+                    </button>
+                    <button className="mn-conn-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                      {name}
+                    </button>
+                    {c.partnerProfile?.alter_ego_name && (
+                      <span className="mn-conn-ego">⚡ {c.partnerProfile.alter_ego_name}</span>
+                    )}
+                    <button className="mn-conn-msg-btn" onClick={() => navigate(`/messages?with=${c.partnerId}`)}>
+                      💬 Message
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sent pending sparks */}
+          {sentSparks.length > 0 && (
+            <div className="mn-section">
+              <h3 className="mn-section-title">Sparks Sent — Waiting ({sentSparks.length})</h3>
+              {sentSparks.map((req) => {
+                const p = req.profiles;
+                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                return (
+                  <div key={req.receiver_id} className="mn-row">
+                    <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                      <Avatar url={p?.avatar_url} name={name} size={44} />
+                    </button>
+                    <div className="mn-info">
+                      <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                        {name}
+                      </button>
+                      <span className="mn-badge spark-badge">⚡ Spark sent</span>
+                      {req.spark_message && (
+                        <span className="mn-sent-msg">"{req.spark_message}"</span>
+                      )}
+                    </div>
+                    <button className="mn-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel spark">
+                      ✗
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Sent pending regular connects */}
+          {sentConnects.length > 0 && (
+            <div className="mn-section">
+              <h3 className="mn-section-title">Requests Sent — Waiting ({sentConnects.length})</h3>
+              {sentConnects.map((req) => {
+                const p = req.profiles;
+                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                return (
+                  <div key={req.receiver_id} className="mn-row">
+                    <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                      <Avatar url={p?.avatar_url} name={name} size={44} />
+                    </button>
+                    <div className="mn-info">
+                      <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                        {name}
+                      </button>
+                      <span className="mn-badge connect-badge">✓ Request pending</span>
+                    </div>
+                    <button className="mn-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel request">
+                      ✗
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Find a Coach tab — redirect to coach discovery page */}
       {mainTab === 'coaches' && (
@@ -140,38 +301,75 @@ export default function ConnectionsPage() {
             </div>
           </div>
 
+          {/* Connection Requests (no message) — visible to all */}
+          {incomingConnects.length > 0 && (
+            <div className="sidebar-card">
+              <h3 className="sidebar-title">
+                <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Connection Requests
+                <span className="spark-count">{incomingConnects.length}</span>
+              </h3>
+              <p className="spark-description">These people want to connect with you.</p>
+              <div className="incoming-requests-list">
+                {incomingConnects.map((req) => {
+                  const name = req.profiles
+                    ? `${req.profiles.first_name ?? ''} ${req.profiles.last_name ?? ''}`.trim()
+                    : 'Someone';
+                  return (
+                    <div key={req.requester_id} className="incoming-req-item">
+                      <button className="incoming-req-avatar-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                        <Avatar url={req.profiles?.avatar_url} name={name} size={36} />
+                      </button>
+                      <button className="incoming-req-info incoming-req-name-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                        <div className="incoming-req-name">{name}</div>
+                        {req.profiles?.alter_ego_name && (
+                          <div className="incoming-req-ego">⚡ {req.profiles.alter_ego_name}</div>
+                        )}
+                      </button>
+                      <div className="incoming-req-actions">
+                        <button className="req-accept-btn" onClick={() => acceptSpark(req.requester_id)} title="Accept">✓</button>
+                        <button className="req-decline-btn" onClick={() => declineSpark(req.requester_id)} title="Decline">✗</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Sparks (with personal message) — behind paywall */}
           <div className="sidebar-card spark-card">
             <h3 className="sidebar-title">
               <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Sparks Received
+              Sparks ⚡
               <span className="spark-count">{incomingSparks.length}</span>
             </h3>
+            <p className="spark-description" style={{ marginBottom: 6 }}>
+              Sparks include a personal message from the sender — they put extra effort in.
+            </p>
             {incomingSparks.length === 0 ? (
-              <p className="spark-description">No pending sparks yet</p>
+              <p className="spark-description" style={{ color: '#9ca3af' }}>No sparks yet</p>
             ) : (
-              <>
-                <p className="spark-description">
-                  {incomingSparks.length === 1 ? '1 person wants' : `${incomingSparks.length} people want`} to connect with you!
-                </p>
-                <div className="sparks-locked">
-                  {incomingSparks.slice(0, 3).map((spark) => (
-                    <div key={spark.requester_id} className="spark-item spark-item-locked">
-                      <div className="spark-avatar-blur" />
-                      <div className="spark-info">
-                        <div className="spark-name-blur" />
-                        <div className="spark-alter-blur" />
-                      </div>
+              <div className="sparks-locked">
+                {incomingSparks.slice(0, 3).map((spark) => (
+                  <div key={spark.requester_id} className="spark-item spark-item-locked">
+                    <div className="spark-avatar-blur" />
+                    <div className="spark-info">
+                      <div className="spark-name-blur" />
+                      <div className="spark-alter-blur" />
                     </div>
-                  ))}
-                  <div className="spark-paywall">
-                    <span>🔒</span>
-                    <span>Upgrade to see who sparked you</span>
-                    <button className="spark-upgrade-btn">Go Premium</button>
                   </div>
+                ))}
+                <div className="spark-paywall">
+                  <span>🔒</span>
+                  <span>Upgrade to see who sparked you &amp; read their message</span>
+                  <button className="spark-upgrade-btn">Go Premium</button>
                 </div>
-              </>
+              </div>
             )}
           </div>
 
@@ -184,8 +382,8 @@ export default function ConnectionsPage() {
             </h3>
             <div className="stats-grid">
               <div className="stat-item"><div className="stat-number">{acceptedConnections.length}</div><div className="stat-label">Connections</div></div>
-              <div className="stat-item"><div className="stat-number">{incomingSparks.length}</div><div className="stat-label">Sparks</div></div>
-              <div className="stat-item"><div className="stat-number">{browseProfiles.length}</div><div className="stat-label">To Discover</div></div>
+              <div className="stat-item"><div className="stat-number">{incomingSparks.length}</div><div className="stat-label">⚡ Sparks</div></div>
+              <div className="stat-item"><div className="stat-number">{incomingConnects.length}</div><div className="stat-label">✓ Requests</div></div>
             </div>
           </div>
 
@@ -298,11 +496,12 @@ export default function ConnectionsPage() {
                 visibleProfiles.slice(0, 3).map((profile, i) => (
                   <div
                     key={profile.id}
-                    className="profile-card"
+                    className={`profile-card${i === 0 ? ' profile-card-top' : ''}`}
                     style={{
                       transform: `scale(${1 - i * 0.04}) translateY(${i * 10}px)`,
                       zIndex: 10 - i,
                     }}
+                    onClick={i === 0 ? () => navigate(`/profile/${profile.id}`) : undefined}
                   >
                     {i === 0 && (
                       <>
@@ -378,6 +577,9 @@ export default function ConnectionsPage() {
                               </div>
                             </div>
                           )}
+                          <div className="card-view-profile-hint">
+                            Tap card or click below to view full profile →
+                          </div>
                         </div>
                       </>
                     )}
@@ -389,34 +591,36 @@ export default function ConnectionsPage() {
 
           {!loading && visibleProfiles.length > 0 && (
             <>
-              <div className="action-buttons">
-                <button className="action-btn skip-btn" onClick={handleSkip} title="Skip">
+              <div className="action-buttons" onClick={(e) => e.stopPropagation()}>
+                <button className="action-btn skip-btn" onClick={handleSkip} title="Skip — not for me">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
                 <button
-                  className="action-btn view-profile-btn"
-                  onClick={() => navigate(`/profile/${visibleProfiles[0]?.id}`)}
-                  title="View full profile"
+                  className="action-btn spark-send-btn"
+                  onClick={handleOpenSparkModal}
+                  title={sparksRemaining > 0 ? `Send a Spark with a message (${sparksRemaining} left today)` : 'No sparks left today'}
+                  disabled={sparksRemaining === 0}
                 >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </button>
-                <button className="action-btn spark-send-btn" onClick={handleSendSpark} title="Send Spark">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </button>
-                <button className="action-btn connect-btn" onClick={handleConnect} title="Connect">
+                <button className="action-btn connect-btn" onClick={handleConnect} title="Connect — send a request">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </button>
               </div>
               <div className="swipe-instructions">
-                ✓ Connect • ✗ Skip • ⚡ Send spark • 👤 View profile
+                <span title="Send a connection request">✓ Connect</span>
+                {' • '}
+                <span title="Not interested">✗ Skip</span>
+                {' • '}
+                <span title={`Send a personal message with your request (${sparksRemaining}/5 left today)`}>⚡ Spark with message</span>
+                {' • '}
+                <span title="Tap the card to view their full profile">👆 Tap card to view</span>
               </div>
             </>
           )}
@@ -439,21 +643,20 @@ export default function ConnectionsPage() {
                   <p className="mob-conn-empty">No connections yet — start sparking!</p>
                 ) : (
                   acceptedConnections.slice(0, 8).map((c) => {
-                    const partnerId = c.requester_id === user?.id ? c.receiver_id : c.requester_id;
-                    const name = c.profiles
-                      ? `${c.profiles.first_name ?? ''} ${c.profiles.last_name ?? ''}`.trim()
+                    const name = c.partnerProfile
+                      ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
                       : 'Connected User';
                     return (
                       <div key={c.id} className="mob-conn-item">
-                        <button className="mob-conn-avatar-btn" onClick={() => navigate(`/profile/${partnerId}`)}>
-                          <Avatar url={c.profiles?.avatar_url} name={name} size={36} />
+                        <button className="mob-conn-avatar-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                          <Avatar url={c.partnerProfile?.avatar_url} name={name} size={36} />
                         </button>
-                        <button className="mob-conn-name-btn" onClick={() => navigate(`/profile/${partnerId}`)}>
+                        <button className="mob-conn-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
                           {name}
                         </button>
                         <button
                           className="mob-conn-msg-btn"
-                          onClick={() => navigate(`/messages?with=${partnerId}`)}
+                          onClick={() => navigate(`/messages?with=${c.partnerId}`)}
                           title="Message"
                         >
                           💬
@@ -481,23 +684,22 @@ export default function ConnectionsPage() {
                 <p style={{ color: '#6b7280', fontSize: '0.9em', marginTop: 0 }}>No connections yet</p>
               )}
               {acceptedConnections.slice(0, 5).map((c) => {
-                const partnerId = c.requester_id === user?.id ? c.receiver_id : c.requester_id;
-                const name = c.profiles
-                  ? `${c.profiles.first_name ?? ''} ${c.profiles.last_name ?? ''}`.trim()
+                const name = c.partnerProfile
+                  ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
                   : 'Connected User';
                 return (
                   <div key={c.id} className="connection-item">
-                    <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${partnerId}`)}>
-                      <Avatar url={c.profiles?.avatar_url} name={name} size={38} />
+                    <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                      <Avatar url={c.partnerProfile?.avatar_url} name={name} size={38} />
                     </button>
                     <div className="connection-info">
-                      <button className="connection-name-btn" onClick={() => navigate(`/profile/${partnerId}`)}>
+                      <button className="connection-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
                         {name}
                       </button>
                     </div>
                     <button
                       className="connection-msg-btn"
-                      onClick={() => navigate(`/messages?with=${partnerId}`)}
+                      onClick={() => navigate(`/messages?with=${c.partnerId}`)}
                       title="Send message"
                     >
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
@@ -507,6 +709,11 @@ export default function ConnectionsPage() {
                   </div>
                 );
               })}
+              {acceptedConnections.length > 5 && (
+                <button className="connections-see-all-btn" onClick={() => setMainTab('my-network')}>
+                  See all {acceptedConnections.length} connections →
+                </button>
+              )}
             </div>
           </div>
 
@@ -541,8 +748,53 @@ export default function ConnectionsPage() {
               <div className="tip-item">💬 Start conversations meaningfully</div>
             </div>
           </div>
+
+          {(sentSparks.length > 0 || sentConnects.length > 0) && (
+            <div className="sidebar-card">
+              <h3 className="sidebar-title">Sent — Waiting</h3>
+              <div className="sent-pending-list">
+                {sentSparks.map((req) => {
+                  const p = req.profiles;
+                  const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                  return (
+                    <div key={req.receiver_id} className="sent-pending-item">
+                      <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                        <Avatar url={p?.avatar_url} name={name} size={34} />
+                      </button>
+                      <div className="sent-pending-info">
+                        <button className="connection-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                          {name}
+                        </button>
+                        <span className="sent-pending-badge spark">⚡ Spark</span>
+                      </div>
+                      <button className="sent-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel">✗</button>
+                    </div>
+                  );
+                })}
+                {sentConnects.map((req) => {
+                  const p = req.profiles;
+                  const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                  return (
+                    <div key={req.receiver_id} className="sent-pending-item">
+                      <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                        <Avatar url={p?.avatar_url} name={name} size={34} />
+                      </button>
+                      <div className="sent-pending-info">
+                        <button className="connection-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
+                          {name}
+                        </button>
+                        <span className="sent-pending-badge connect">✓ Request</span>
+                      </div>
+                      <button className="sent-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel">✗</button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </aside>
       </div>}
     </div>
+    </>
   );
 }

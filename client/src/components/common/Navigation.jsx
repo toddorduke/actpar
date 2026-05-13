@@ -8,14 +8,24 @@ import './Navigation.css';
 const buildClassName = ({ isActive }) => `nav-tab${isActive ? ' active' : ''}`;
 const buildBottomClassName = ({ isActive }) => `bottom-tab${isActive ? ' active' : ''}`;
 
+function notifTypeBadge(notif) {
+  if (notif.type === 'connection_request') {
+    const isSpark = notif.body?.includes('sparked');
+    return <span className={`notif-type-badge${isSpark ? ' spark' : ' connect'}`}>{isSpark ? '⚡' : '✓'}</span>;
+  }
+  if (notif.type === 'connection_accepted') return <span className="notif-type-badge connect">✓</span>;
+  if (notif.type === 'streak_milestone') return <span className="notif-type-badge milestone">🔥</span>;
+  return null;
+}
+
 const NAV_ITEMS = [
   {
     to: '/',
     end: true,
-    label: 'Profile',
+    label: 'Home',
     icon: (
       <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
       </svg>
     ),
   },
@@ -156,7 +166,10 @@ const Navigation = () => {
                           className={`notif-item${notif.read ? '' : ' unread'}`}
                           onClick={() => handleNotifClick(notif)}
                         >
-                          <Avatar url={notif.actor?.avatar_url} name={actorName} size={36} />
+                          <div className="notif-avatar-wrap">
+                            <Avatar url={notif.actor?.avatar_url} name={actorName} size={36} />
+                            {notifTypeBadge(notif)}
+                          </div>
                           <div className="notif-item-body">
                             <p className="notif-item-text">{notif.body}</p>
                             <span className="notif-item-time">{timeAgoShort(notif.created_at)}</span>
@@ -257,6 +270,16 @@ const Navigation = () => {
 
                   {dropdownOpen && (
                     <div className="avatar-dropdown">
+                      <NavLink
+                        to="/profile"
+                        className="avatar-dropdown-item"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        My Profile
+                      </NavLink>
                       <NavLink
                         to="/settings"
                         className="avatar-dropdown-item"

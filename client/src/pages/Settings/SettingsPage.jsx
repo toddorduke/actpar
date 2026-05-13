@@ -62,6 +62,8 @@ export default function SettingsPage() {
 
   // Notifications
   const [notifDailyReminder, setNotifDailyReminder] = useState(true);
+  const [notifReminderHour, setNotifReminderHour] = useState(8);
+  const [notifAutoCheckin, setNotifAutoCheckin] = useState(false);
   const [notifSparks, setNotifSparks] = useState(true);
   const [notifPact, setNotifPact] = useState(true);
   const [notifTribe, setNotifTribe] = useState(false);
@@ -96,6 +98,8 @@ export default function SettingsPage() {
       setLookingFor(profile.looking_for ?? []);
       const prefs = profile.notification_prefs ?? {};
       setNotifDailyReminder(prefs.daily_reminder ?? true);
+      setNotifReminderHour(prefs.reminder_hour ?? 8);
+      setNotifAutoCheckin(prefs.auto_checkin ?? false);
       setNotifSparks(prefs.sparks ?? true);
       setNotifPact(prefs.pact ?? true);
       setNotifTribe(prefs.tribe ?? false);
@@ -255,9 +259,14 @@ export default function SettingsPage() {
 
   async function handleSaveNotifs() {
     setSavingNotifs(true);
+    const utcOffset = new Date().getTimezoneOffset(); // minutes behind UTC (positive = west)
+    const reminderUtcHour = ((notifReminderHour + Math.round(utcOffset / 60)) + 24) % 24;
     await updateProfile({
       notification_prefs: {
         daily_reminder: notifDailyReminder,
+        reminder_hour: notifReminderHour,
+        reminder_utc_hour: reminderUtcHour,
+        auto_checkin: notifAutoCheckin,
         sparks: notifSparks,
         pact: notifPact,
         tribe: notifTribe,
@@ -612,15 +621,48 @@ export default function SettingsPage() {
 
               <div className="settings-toggles">
                 {[
-                  [notifDailyReminder, setNotifDailyReminder, 'Daily Check-In Reminder', 'Remind you to check in on your goals each day'],
+                  [notifDailyReminder, setNotifDailyReminder, 'Daily Check-In Reminder', 'Remind you to check in on your goals each day',
+                    notifDailyReminder && (
+                      <div className="settings-reminder-extras">
+                        <div className="settings-reminder-time">
+                          <label className="settings-reminder-label">Remind me at</label>
+                          <select
+                            className="settings-reminder-select"
+                            value={notifReminderHour}
+                            onChange={(e) => setNotifReminderHour(Number(e.target.value))}
+                          >
+                            {Array.from({ length: 24 }, (_, h) => {
+                              const label = h === 0 ? '12:00 AM' : h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h - 12}:00 PM`;
+                              return <option key={h} value={h}>{label}</option>;
+                            })}
+                          </select>
+                          <span className="settings-reminder-tz">(your local time)</span>
+                        </div>
+                        <div className="settings-auto-checkin-row">
+                          <div className="settings-auto-checkin-info">
+                            <div className="settings-toggle-title" style={{ fontSize: '0.82rem' }}>Tapping reminder logs me automatically</div>
+                            <div className="settings-toggle-desc">When you tap the daily notification, all unchecked goals are logged for you instantly.</div>
+                          </div>
+                          <button
+                            type="button"
+                            className={`toggle-switch${notifAutoCheckin ? ' on' : ''}`}
+                            onClick={() => setNotifAutoCheckin(!notifAutoCheckin)}
+                          >
+                            <span className="toggle-knob" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  ],
                   [notifSparks, setNotifSparks, 'Spark Requests', 'When someone sends you a spark connection'],
                   [notifPact, setNotifPact, 'Pact Activity', 'New posts and updates in your pacts'],
                   [notifTribe, setNotifTribe, 'Tribe Community', 'New posts in the community feed'],
-                ].map(([val, setter, title, desc]) => (
+                ].map(([val, setter, title, desc, extra]) => (
                   <div key={title} className="settings-toggle-row">
                     <div className="settings-toggle-info">
                       <div className="settings-toggle-title">{title}</div>
                       <div className="settings-toggle-desc">{desc}</div>
+                      {extra}
                     </div>
                     <button
                       type="button"

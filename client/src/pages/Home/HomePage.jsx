@@ -1,8 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useGoals } from '../../hooks/useGoals.js';
 import { useReflections } from '../../hooks/useReflections.js';
+import { useConnections } from '../../hooks/useConnections.js';
+import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
+import { shouldShowRecap, dismissRecap, computeRecap } from '../../hooks/useWeeklyRecap.js';
+import WeeklyRecapModal from '../../components/common/WeeklyRecapModal.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
@@ -17,9 +21,60 @@ const QUESTIONS = [
 const HomePage = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { goals, loading: goalsLoading, addGoal, deleteGoal } = useGoals();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { goals, loading: goalsLoading, addGoal, deleteGoal, checkIn } = useGoals();
   const { saveAnswer } = useReflections();
+  const { acceptedConnections } = useConnections();
+  const { activity, loading: activityLoading } = useConnectionActivity(acceptedConnections);
   const toast = useToast();
+
+  const [showRecap, setShowRecap] = useState(() => false);
+  const [recap, setRecap] = useState(null);
+
+  // Show recap once goals have loaded so we have real data
+  useEffect(() => {
+    if (goalsLoading) return;
+    if (!shouldShowRecap()) return;
+    const computed = computeRecap(goals, acceptedConnections, activity);
+    setRecap(computed);
+    setShowRecap(true);
+  }, [goalsLoading]);
+
+  const [checkingIn, setCheckingIn] = useState({});
+  const todayStr = new Date().toISOString().split('T')[0];
+  const habitGoals = goals.filter((g) => g.goal_type !== 'numeric');
+  const allCheckedIn = habitGoals.length > 0 && habitGoals.every((g) => g.last_checked_in === todayStr);
+  const autoCheckinRan = useRef(false);
+
+  // Auto-check-in when user taps the daily reminder notification
+  useEffect(() => {
+    if (goalsLoading) return;
+    if (!searchParams.get('auto-checkin')) return;
+    if (autoCheckinRan.current) return;
+    autoCheckinRan.current = true;
+
+    const unchecked = habitGoals.filter((g) => g.last_checked_in !== todayStr);
+    if (unchecked.length === 0) {
+      toast("You've already logged everything today ✓", 'success');
+    } else {
+      Promise.all(unchecked.map((g) => checkIn(g.id, 'auto'))).then(() => {
+        toast(`✓ ${unchecked.length} goal${unchecked.length !== 1 ? 's' : ''} logged automatically`, 'success', 4000);
+      });
+    }
+    // Clean the URL param without a page reload
+    setSearchParams((p) => { p.delete('auto-checkin'); return p; }, { replace: true });
+  }, [goalsLoading]);
+
+  async function handleQuickCheckIn(goalId) {
+    if (checkingIn[goalId]) return;
+    setCheckingIn((p) => ({ ...p, [goalId]: true }));
+    const result = await checkIn(goalId);
+    setCheckingIn((p) => ({ ...p, [goalId]: false }));
+    if (result?.alreadyDone) return;
+    if (result?.milestone) {
+      toast(`🔥 ${result.milestone}-day streak on "${result.goalTitle}"!`, 'success', 4000);
+    }
+  }
 
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState({});
@@ -103,17 +158,91 @@ const HomePage = () => {
   };
 
   return (
+    <>
     <div className="home-page">
       <div className="home-container">
         <section className="welcome-section">
-          <h1 className="welcome-title">
-            Welcome back, <span className="welcome-name">{firstName}</span>! 👋
-          </h1>
-          <p className="welcome-subtitle">Stay motivated and crush your goals today</p>
+          <div className="welcome-row">
+            <div>
+              <h1 className="welcome-title">
+                Welcome back, <span className="welcome-name">{firstName}</span>! 👋
+              </h1>
+              <p className="welcome-subtitle">Stay motivated and crush your goals today</p>
+            </div>
+            {shouldShowRecap() && (
+              <button
+                className="recap-trigger-btn"
+                onClick={() => {
+                  setRecap(computeRecap(goals, acceptedConnections, activity));
+                  setShowRecap(true);
+                }}
+              >
+                📊 Weekly Recap
+              </button>
+            )}
+          </div>
         </section>
 
         <div className="feed-grid">
           <div className="main-feed">
+
+            {/* Daily Check-In Cards */}
+            {!goalsLoading && habitGoals.length > 0 && (
+              <div className="feed-card checkin-feed-card">
+                <div className="card-header">
+                  <h2 className="card-title">
+                    <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Today's Check-Ins
+                  </h2>
+                  {allCheckedIn && <span className="checkin-all-done-badge">All done 🔥</span>}
+                </div>
+
+                {allCheckedIn ? (
+                  <div className="checkin-all-done">
+                    <div className="checkin-done-icon">🔥</div>
+                    <div>
+                      <div className="checkin-done-title">You're locked in for today.</div>
+                      <div className="checkin-done-sub">Every goal checked. Come back tomorrow to keep the streak alive.</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="checkin-card-grid">
+                    {habitGoals.map((goal) => {
+                      const done = goal.last_checked_in === todayStr;
+                      const loading = !!checkingIn[goal.id];
+                      const nextMilestone = [7, 30, 60, 90].find((m) => m > (goal.day_count ?? 0));
+                      const daysLeft = nextMilestone ? nextMilestone - (goal.day_count ?? 0) : null;
+                      return (
+                        <div key={goal.id} className={`checkin-card${done ? ' checkin-card--done' : ''}`}>
+                          <div className="checkin-card-streak">
+                            <span className="checkin-card-day">{goal.day_count ?? 0}</span>
+                            <span className="checkin-card-day-label">days</span>
+                          </div>
+                          <div className="checkin-card-info">
+                            <div className="checkin-card-title">{goal.title}</div>
+                            {daysLeft !== null && !done && (
+                              <div className="checkin-card-milestone">
+                                {daysLeft === 1 ? `1 day to ${nextMilestone}-day milestone!` : `${daysLeft} days to ${nextMilestone}-day milestone`}
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            className={`checkin-card-btn${done ? ' done' : ''}`}
+                            onClick={() => handleQuickCheckIn(goal.id)}
+                            disabled={done || loading}
+                          >
+                            {done ? '✓' : loading ? '...' : 'Check In'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Daily Reflection */}
             <div className="feed-card">
               <div className="card-header">
@@ -123,7 +252,7 @@ const HomePage = () => {
                   </svg>
                   Daily Reflection
                 </h2>
-                <button type="button" className="view-all" onClick={() => navigate('/')}>My Profile</button>
+                <button type="button" className="view-all" onClick={() => navigate('/profile')}>My Profile</button>
               </div>
               <div className="questions-container">
                 {QUESTIONS.map((question) => (
@@ -206,6 +335,76 @@ const HomePage = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Connection Activity Feed */}
+            <div className="feed-card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  <svg className="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Connection Activity
+                </h2>
+                <button type="button" className="view-all" onClick={() => navigate('/connections')}>
+                  See connections
+                </button>
+              </div>
+
+              {activityLoading && <p className="goals-empty">Loading activity...</p>}
+
+              {!activityLoading && acceptedConnections.length === 0 && (
+                <p className="goals-empty">
+                  Connect with people on the Connections page to see their activity here.
+                </p>
+              )}
+
+              {!activityLoading && acceptedConnections.length > 0 && activity.length === 0 && (
+                <p className="goals-empty">No activity in the last 3 days — check back soon!</p>
+              )}
+
+              {activity.length > 0 && (
+                <div className="activity-list">
+                  {activity.map((item) => {
+                    const name = item.profiles
+                      ? `${item.profiles.first_name ?? ''} ${item.profiles.last_name ?? ''}`.trim() || 'Someone'
+                      : 'Someone';
+                    const milestone = isMilestone(item.day_count);
+                    const today = new Date().toISOString().split('T')[0];
+                    const isToday = item.last_checked_in === today;
+                    const timeLabel = isToday ? 'Today' : 'Recently';
+                    return (
+                      <div
+                        key={item.id}
+                        className={`activity-item${milestone ? ' activity-item--milestone' : ''}`}
+                        onClick={() => navigate(`/profile/${item.profiles?.id}`)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && navigate(`/profile/${item.profiles?.id}`)}
+                      >
+                        <Avatar url={item.profiles?.avatar_url} name={name} size={36} />
+                        <div className="activity-body">
+                          <div className="activity-text">
+                            <span className="activity-name">{name}</span>
+                            {milestone ? (
+                              <> hit a <strong>{item.day_count}-day streak</strong> on "{item.title}" 🔥</>
+                            ) : (
+                              <> checked in on "{item.title}"</>
+                            )}
+                          </div>
+                          <div className="activity-meta">
+                            {item.profiles?.alter_ego_name && (
+                              <span className="activity-alter-ego">⚡ {item.profiles.alter_ego_name} · </span>
+                            )}
+                            {timeLabel} · Day {item.day_count}
+                          </div>
+                        </div>
+                        {milestone && <div className="activity-milestone-badge">{item.day_count}d</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Quick links */}
@@ -341,7 +540,7 @@ const HomePage = () => {
               <p style={{ fontSize: '0.875rem', color: 'var(--color-muted)', marginBottom: '12px' }}>
                 Update your goals, affirmations, and what you're looking for in an accountability partner.
               </p>
-              <button className="connect-btn" style={{ width: '100%' }} onClick={() => navigate('/')}>
+              <button className="connect-btn" style={{ width: '100%' }} onClick={() => navigate('/profile')}>
                 View Profile →
               </button>
             </div>
@@ -349,6 +548,14 @@ const HomePage = () => {
         </div>
       </div>
     </div>
+
+    {showRecap && recap && (
+      <WeeklyRecapModal
+        recap={recap}
+        onClose={() => { dismissRecap(); setShowRecap(false); }}
+      />
+    )}
+    </>
   );
 };
 

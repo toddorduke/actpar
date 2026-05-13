@@ -181,7 +181,7 @@
 
 .settings-toggle-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   padding: 16px 0;
@@ -361,8 +361,8 @@
 
 .settings-radio-option.selected {
   border-color: #d97706;
-  background: #fffbeb;
-  color: #d97706;
+  background: #d97706;
+  color: white;
 }
 
 /* Looking-for chips */
@@ -391,8 +391,8 @@
 
 .settings-lf-chip.selected {
   border-color: #d97706;
-  background: #fffbeb;
-  color: #d97706;
+  background: #d97706;
+  color: white;
 }
 
 /* About section */
@@ -486,3 +486,57 @@
 .settings-input.input-success { border-color: #10b981; }
 .settings-hint.ego-taken { color: #dc2626; font-weight: 500; }
 .settings-hint.ego-available { color: #059669; font-weight: 500; }
+
+.settings-reminder-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-reminder-label {
+  font-size: 0.8rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.settings-reminder-select {
+  padding: 5px 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #1f2937;
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.settings-reminder-select:focus {
+  border-color: #7c3aed;
+}
+
+.settings-reminder-tz {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.settings-reminder-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.settings-auto-checkin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(124, 58, 237, 0.04);
+  border: 1.5px solid rgba(124, 58, 237, 0.12);
+  border-radius: 10px;
+}
+
+.settings-auto-checkin-info { flex: 1; }

@@ -11,6 +11,8 @@ import { useGoalProgress } from '../../hooks/useGoalProgress.js';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
+import MilestoneModal from '../../components/common/MilestoneModal.jsx';
+import GoalCompleteModal from '../../components/common/GoalCompleteModal.jsx';
 import './ProfilePage.css';
 
 const TIER_LABELS = { 1: 'Top Priority', 2: 'Important', 3: 'Foundation' };
@@ -74,13 +76,21 @@ function formatDate(iso) {
 
 const todayStr = () => new Date().toISOString().split('T')[0];
 
-const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress }) => {
+const GoalCard = ({ goal, animate, onTierChange, onCheckIn, onBackdatedCheckIn, progressData, onLogProgress, onShare, onComplete }) => {
   const isNumeric = goal.goal_type === 'numeric';
 
   // Habit state
   const habitPct = useMemo(() => Math.min((goal.day_count / 90) * 100, 100), [goal.day_count]);
   const checkedInToday = goal.last_checked_in === todayStr();
+  const isComplete90 = !isNumeric && goal.day_count >= 90;
   const [checking, setChecking] = useState(false);
+  const [milestone, setMilestone] = useState(null);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showBackdateModal, setShowBackdateModal] = useState(false);
+  const [backdateDate, setBackdateDate] = useState('');
+  const [backdateNote, setBackdateNote] = useState('');
+  const [backdating, setBackdating] = useState(false);
+  const [backdateDone, setBackdateDone] = useState(false);
 
   // Numeric state
   const [logValue, setLogValue] = useState('');
@@ -103,9 +113,34 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
   async function handleCheckIn() {
     if (checkedInToday || checking) return;
     setChecking(true);
-    await onCheckIn(goal.id);
+    const result = await onCheckIn(goal.id);
     setChecking(false);
+    if (result?.milestone === 90) {
+      setShowCompleteModal(true);
+    } else if (result?.milestone) {
+      setMilestone(result.milestone);
+    }
   }
+
+  async function handleBackdate() {
+    if (!backdateDate || backdating) return;
+    setBackdating(true);
+    const result = await onBackdatedCheckIn(goal.id, backdateDate, backdateNote);
+    setBackdating(false);
+    if (result?.alreadyLogged) {
+      setBackdateDone('already');
+    } else if (!result?.error) {
+      setBackdateDone('ok');
+      setTimeout(() => { setShowBackdateModal(false); setBackdateDone(false); setBackdateDate(''); setBackdateNote(''); }, 1500);
+    }
+  }
+
+  // Build list of past 7 days (excluding today) for the date picker
+  const pastDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (i + 1));
+    return d.toISOString().split('T')[0];
+  });
 
   async function handleLog() {
     if (!logValue || logging) return;
@@ -214,13 +249,62 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
           )}
         </div>
       ) : (
-        <button
-          className={`checkin-btn${checkedInToday ? ' done' : ''}`}
-          onClick={handleCheckIn}
-          disabled={checkedInToday || checking}
-        >
-          {checkedInToday ? '✓ Done for today' : checking ? 'Saving...' : '✓ Check in for today'}
-        </button>
+        <>
+        <div className="checkin-area">
+          <button
+            className={`checkin-btn${checkedInToday ? ' done' : ''}`}
+            onClick={handleCheckIn}
+            disabled={checkedInToday || checking}
+          >
+            {checkedInToday ? '✓ Done for today' : checking ? 'Saving...' : '✓ Check in for today'}
+          </button>
+          <button className="backdate-btn" onClick={() => setShowBackdateModal(true)} title="Log a past day">
+            + Log past day
+          </button>
+          {isComplete90 && (
+            <button className="complete-goal-btn" onClick={() => setShowCompleteModal(true)}>
+              🏆 Mark as Complete
+            </button>
+          )}
+        </div>
+
+        {showBackdateModal && (
+          <div className="backdate-modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowBackdateModal(false)}>
+            <div className="backdate-modal">
+              <button className="backdate-modal-close" onClick={() => setShowBackdateModal(false)}>×</button>
+              <h4 className="backdate-modal-title">Log a Past Day</h4>
+              <p className="backdate-modal-sub">Missed logging? Add it now — your streak stays as-is, but the history is saved.</p>
+              <label className="backdate-label">Which day?</label>
+              <select className="backdate-select" value={backdateDate} onChange={(e) => setBackdateDate(e.target.value)}>
+                <option value="">Select a day…</option>
+                {pastDays.map((d) => (
+                  <option key={d} value={d}>
+                    {new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                  </option>
+                ))}
+              </select>
+              <label className="backdate-label">Note (optional)</label>
+              <input
+                className="backdate-note"
+                type="text"
+                placeholder="e.g. Hit the gym but forgot to log"
+                value={backdateNote}
+                onChange={(e) => setBackdateNote(e.target.value)}
+                maxLength={120}
+              />
+              {backdateDone === 'already' && <p className="backdate-msg warn">Already logged for that day.</p>}
+              {backdateDone === 'ok' && <p className="backdate-msg ok">✓ Logged!</p>}
+              <button
+                className="backdate-submit-btn"
+                onClick={handleBackdate}
+                disabled={!backdateDate || backdating || backdateDone === 'ok'}
+              >
+                {backdating ? 'Saving…' : 'Save Log'}
+              </button>
+            </div>
+          </div>
+        )}
+        </>
       )}
 
       {badges.length > 0 && (
@@ -236,6 +320,24 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
           ))}
         </div>
       )}
+
+      {milestone && (
+        <MilestoneModal
+          days={milestone}
+          goalTitle={goal.title}
+          onClose={() => setMilestone(null)}
+          onShare={onShare ? () => { onShare(milestone, goal.title); setMilestone(null); } : null}
+        />
+      )}
+
+      {showCompleteModal && (
+        <GoalCompleteModal
+          goalTitle={goal.title}
+          dayCount={goal.day_count}
+          onComplete={() => { setShowCompleteModal(false); onComplete?.(goal.id); }}
+          onKeepGoing={() => setShowCompleteModal(false)}
+        />
+      )}
     </div>
   );
 };
@@ -244,13 +346,20 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { profile, loading: profileLoading, updateProfile } = useProfile();
   const { reflections, affirmations, saveAnswer, saveAffirmation } = useReflections();
-  const { goals, loading: goalsLoading, updateTier, addGoal, checkIn } = useGoals();
+  const { goals, completedGoals, loading: goalsLoading, updateTier, addGoal, checkIn, backdatedCheckIn, completeGoal } = useGoals();
   const { progressMap, logProgress } = useGoalProgress(goals);
   const { entries, loading: journalLoading, createEntry, deleteEntry } = useJournal();
   const { posts, loading: postsLoading, createPost } = useTribePosts();
   const { photos, videos, uploadFile, deleteMedia } = useMedia();
   const { acceptedConnections } = useConnections();
   const toast = useToast();
+
+  const handleMilestoneShare = useCallback(async (days, goalTitle) => {
+    const content = `🔥 Just hit a ${days}-day streak on my goal: "${goalTitle}"! Consistency is the key. #ActPar #Streak${days}Days`;
+    const { error } = await createPost({ content, post_type: 'achievement', milestone: `${days}-Day Streak` });
+    if (!error) toast('Shared to Tribe! 🎉', 'success');
+    else toast('Could not share right now', 'error');
+  }, [createPost, toast]);
 
   const [connectionProfiles, setConnectionProfiles] = useState([]);
   useEffect(() => {
@@ -732,8 +841,11 @@ const ProfilePage = () => {
                               animate={animateGoals}
                               onTierChange={updateTier}
                               onCheckIn={checkIn}
+                              onBackdatedCheckIn={backdatedCheckIn}
                               progressData={progressMap[goal.id]}
                               onLogProgress={logProgress}
+                              onShare={handleMilestoneShare}
+                              onComplete={completeGoal}
                             />
                           ))}
                         </div>
@@ -743,6 +855,33 @@ const ProfilePage = () => {
                 </div>
               )}
             </section>
+
+            {/* Trophy Case */}
+            {completedGoals.length > 0 && (
+              <section className="profile-section">
+                <div className="section-header">
+                  <span className="section-icon" style={{ fontSize: '1.3rem' }}>🏆</span>
+                  <h2>Trophy Case</h2>
+                </div>
+                <div className="trophy-case">
+                  {completedGoals.map((goal) => {
+                    const completedDate = new Date(goal.completed_at).toLocaleDateString('en-US', {
+                      month: 'short', day: 'numeric', year: 'numeric',
+                    });
+                    return (
+                      <div key={goal.id} className="trophy-item">
+                        <div className="trophy-icon">🏆</div>
+                        <div className="trophy-info">
+                          <div className="trophy-title">{goal.title}</div>
+                          <div className="trophy-meta">{goal.day_count} days · Completed {completedDate}</div>
+                        </div>
+                        <div className="trophy-days">{goal.day_count}d</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             <section className="profile-section">
               <div className="media-grid">
