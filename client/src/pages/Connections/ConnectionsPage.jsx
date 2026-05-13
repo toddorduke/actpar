@@ -752,43 +752,22 @@ export default function ConnectionsPage() {
           {(sentSparks.length > 0 || sentConnects.length > 0) && (
             <div className="sidebar-card">
               <h3 className="sidebar-title">Sent — Waiting</h3>
-              <div className="sent-pending-list">
-                {sentSparks.map((req) => {
-                  const p = req.profiles;
-                  const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
-                  return (
-                    <div key={req.receiver_id} className="sent-pending-item">
-                      <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
-                        <Avatar url={p?.avatar_url} name={name} size={34} />
-                      </button>
-                      <div className="sent-pending-info">
-                        <button className="connection-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
-                          {name}
-                        </button>
-                        <span className="sent-pending-badge spark">⚡ Spark</span>
-                      </div>
-                      <button className="sent-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel">✗</button>
-                    </div>
-                  );
-                })}
-                {sentConnects.map((req) => {
-                  const p = req.profiles;
-                  const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
-                  return (
-                    <div key={req.receiver_id} className="sent-pending-item">
-                      <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
-                        <Avatar url={p?.avatar_url} name={name} size={34} />
-                      </button>
-                      <div className="sent-pending-info">
-                        <button className="connection-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
-                          {name}
-                        </button>
-                        <span className="sent-pending-badge connect">✓ Request</span>
-                      </div>
-                      <button className="sent-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel">✗</button>
-                    </div>
-                  );
-                })}
+              <div className="sent-counts">
+                {sentSparks.length > 0 && (
+                  <div className="sent-count-row">
+                    <span className="sent-count-label">⚡ Sparks</span>
+                    <span className="sent-count-num spark">{sentSparks.length}</span>
+                  </div>
+                )}
+                {sentConnects.length > 0 && (
+                  <div className="sent-count-row">
+                    <span className="sent-count-label">✓ Requests</span>
+                    <span className="sent-count-num connect">{sentConnects.length}</span>
+                  </div>
+                )}
+                <button className="sent-view-all-btn" onClick={() => setMainTab('my-network')}>
+                  View all →
+                </button>
               </div>
             </div>
           )}

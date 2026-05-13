@@ -67,60 +67,53 @@
 .connections-see-all-btn:hover { text-decoration: underline; }
 
 /* ── Sent pending sidebar ── */
-.sent-pending-list {
+.sent-counts {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.sent-pending-item {
+.sent-count-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
 }
 
-.sent-pending-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+.sent-count-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #374151;
 }
 
-.sent-pending-badge {
-  font-size: 0.73rem;
-  font-weight: 700;
-  padding: 2px 7px;
+.sent-count-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 2px 12px;
   border-radius: 999px;
-  width: fit-content;
 }
 
-.sent-pending-badge.spark {
+.sent-count-num.spark {
   background: #fef3c7;
   color: #d97706;
 }
 
-.sent-pending-badge.connect {
+.sent-count-num.connect {
   background: #d1fae5;
   color: #065f46;
 }
 
-.sent-cancel-btn {
+.sent-view-all-btn {
   background: none;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
-  color: #9ca3af;
-  font-size: 0.8rem;
+  border: none;
+  color: #7c3aed;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 3px 8px;
-  flex-shrink: 0;
-  transition: all 0.15s;
+  padding: 4px 0 0;
+  text-align: left;
 }
 
-.sent-cancel-btn:hover {
-  border-color: #ef4444;
-  color: #ef4444;
-}
+.sent-view-all-btn:hover { text-decoration: underline; }
 
 /* ── Find a Coach promo tab ── */
 .find-coach-tab {
