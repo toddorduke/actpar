@@ -66,20 +66,61 @@ export const ConnectionsProvider = ({ children }) => {
 
     const profileList = profiles ?? [];
     let goalsMap = {};
-    if (profileList.length > 0) {
-      const profileIds = profileList.map((p) => p.id);
-      const { data: goalsData } = await supabase
-        .from('goals')
-        .select('user_id, title, tier')
-        .in('user_id', profileIds)
-        .eq('is_active', true);
-      for (const g of goalsData ?? []) {
-        if (!goalsMap[g.user_id]) goalsMap[g.user_id] = [];
-        goalsMap[g.user_id].push({ title: g.title, tier: g.tier });
-      }
+
+    // Fetch their goals + current user's profile/goals in parallel
+    const [goalsResult, myProfResult, myGoalsResult] = await Promise.all([
+      profileList.length > 0
+        ? supabase.from('goals').select('user_id, title, tier').in('user_id', profileList.map((p) => p.id)).eq('is_active', true)
+        : Promise.resolve({ data: [] }),
+      supabase.from('profiles').select('looking_for, city').eq('id', user.id).single(),
+      supabase.from('goals').select('title').eq('user_id', user.id).eq('is_active', true),
+    ]);
+
+    for (const g of goalsResult.data ?? []) {
+      if (!goalsMap[g.user_id]) goalsMap[g.user_id] = [];
+      goalsMap[g.user_id].push({ title: g.title, tier: g.tier });
     }
 
-    setBrowseProfiles(profileList.map((p) => ({ ...p, goals: goalsMap[p.id] ?? [] })));
+    const myLf = myProfResult.data?.looking_for ?? [];
+    const myCity = (myProfResult.data?.city ?? '').toLowerCase().trim();
+    const myGoalWords = new Set(
+      (myGoalsResult.data ?? [])
+        .flatMap((g) => g.title.toLowerCase().split(/\W+/))
+        .filter((w) => w.length > 3)
+    );
+
+    function calcScore(p, pGoals) {
+      let score = 0;
+      const sharedLf = (p.looking_for ?? []).filter((t) =>
+        myLf.some((m) => m.toLowerCase() === t.toLowerCase())
+      );
+      score += sharedLf.length * 3;
+      if (myCity && (p.city ?? '').toLowerCase().trim() === myCity) score += 2;
+      const theirWords = pGoals.flatMap((g) => g.title.toLowerCase().split(/\W+/)).filter((w) => w.length > 3);
+      if (theirWords.some((w) => myGoalWords.has(w))) score += 1;
+      return score;
+    }
+
+    function calcReason(p, pGoals) {
+      const sharedLf = (p.looking_for ?? []).filter((t) =>
+        myLf.some((m) => m.toLowerCase() === t.toLowerCase())
+      );
+      if (sharedLf.length === 1) return `Both looking for ${sharedLf[0]} support`;
+      if (sharedLf.length > 1) return `Share ${sharedLf.length} interests: ${sharedLf.slice(0, 2).join(', ')}`;
+      if (myCity && (p.city ?? '').toLowerCase().trim() === myCity) return `Local to you in ${p.city}`;
+      const theirWords = pGoals.flatMap((g) => g.title.toLowerCase().split(/\W+/)).filter((w) => w.length > 3);
+      if (theirWords.some((w) => myGoalWords.has(w))) return 'Working on similar goals';
+      return null;
+    }
+
+    const scored = profileList
+      .map((p) => {
+        const pGoals = goalsMap[p.id] ?? [];
+        return { ...p, goals: pGoals, matchScore: calcScore(p, pGoals), matchReason: calcReason(p, pGoals) };
+      })
+      .sort((a, b) => b.matchScore - a.matchScore);
+
+    setBrowseProfiles(scored);
     setLoading(false);
   }, [user]);
 

@@ -612,6 +612,11 @@ export default function ConnectionsPage() {
                               <span className="card-age">{profile.age} yrs</span>
                             )}
                           </div>
+                          {profile.matchReason && (
+                            <div className="card-match-reason">
+                              ✨ {profile.matchReason}
+                            </div>
+                          )}
                           {profile.city && (
                             <div className="profile-city">📍 {profile.city}</div>
                           )}
