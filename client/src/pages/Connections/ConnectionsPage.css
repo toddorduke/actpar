@@ -189,6 +189,9 @@
   color: rgba(255,255,255,0.7);
 }
 
+.connections-page .page-title { color: #ffffff; }
+.connections-page .page-subtitle { color: rgba(255,255,255,0.7); }
+
 .connections-grid {
   display: grid;
   grid-template-columns: 320px 1fr 320px;
