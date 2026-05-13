@@ -224,48 +224,58 @@ export default function ConnectionsPage() {
             {acceptedConnections.length === 0 && (
               <p className="mn-empty">No connections yet — start sparking!</p>
             )}
-            <div className="mn-connections-grid">
+            <div className="mn-connections-list">
               {acceptedConnections.map((c) => {
                 const name = c.partnerProfile
                   ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
                   : 'Connected User';
+                const stats = partnerStats[c.partnerId];
+                const isToday = stats?.lastCheckin === new Date().toISOString().split('T')[0];
                 return (
-                  <div key={c.id} className="mn-conn-card">
+                  <div key={c.id} className="mn-conn-row">
                     <button className="mn-conn-avatar-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
-                      <Avatar url={c.partnerProfile?.avatar_url} name={name} size={52} />
+                      <Avatar url={c.partnerProfile?.avatar_url} name={name} size={46} />
                     </button>
-                    <button className="mn-conn-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
-                      {name}
-                    </button>
-                    {c.partnerProfile?.alter_ego_name && (
-                      <span className="mn-conn-ego">⚡ {c.partnerProfile.alter_ego_name}</span>
-                    )}
-                    {partnerStats[c.partnerId] && (
-                      <div className="mn-conn-stats">
-                        {partnerStats[c.partnerId].bestStreak > 0 && (
-                          <span className="mn-conn-stat mn-conn-stat--streak">🔥 {partnerStats[c.partnerId].bestStreak}d</span>
+
+                    <div className="mn-conn-body">
+                      <button className="mn-conn-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                        {name}
+                      </button>
+                      <div className="mn-conn-meta">
+                        {c.partnerProfile?.alter_ego_name && (
+                          <span className="mn-conn-ego">⚡ {c.partnerProfile.alter_ego_name}</span>
                         )}
-                        <span className="mn-conn-stat">📋 {partnerStats[c.partnerId].activeGoals} goals</span>
-                        {lastActiveLabel(partnerStats[c.partnerId].lastCheckin) && (
-                          <span className={`mn-conn-stat${partnerStats[c.partnerId].lastCheckin === new Date().toISOString().split('T')[0] ? ' mn-conn-stat--today' : ''}`}>
-                            {lastActiveLabel(partnerStats[c.partnerId].lastCheckin)}
-                          </span>
+                        {stats && (
+                          <>
+                            {stats.bestStreak > 0 && (
+                              <span className="mn-conn-pill mn-conn-pill--streak">🔥 {stats.bestStreak}d</span>
+                            )}
+                            <span className="mn-conn-pill">🎯 {stats.activeGoals} goal{stats.activeGoals !== 1 ? 's' : ''}</span>
+                            {lastActiveLabel(stats.lastCheckin) && (
+                              <span className={`mn-conn-pill${isToday ? ' mn-conn-pill--today' : ''}`}>
+                                {lastActiveLabel(stats.lastCheckin)}
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
-                    <button
-                      className={`mn-conn-cheer-btn${cheerSent.has(c.partnerId) ? ' sent' : ''}`}
-                      onClick={() => !cheerSent.has(c.partnerId) && sendCheer(c.partnerId, name)}
-                      disabled={cheerSent.has(c.partnerId)}
-                    >
-                      {cheerSent.has(c.partnerId) ? '🔥 Cheered!' : '🔥 Cheer'}
-                    </button>
-                    <button className="mn-conn-profile-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
-                      👤 Profile
-                    </button>
-                    <button className="mn-conn-msg-btn" onClick={() => navigate(`/messages?with=${c.partnerId}`)}>
-                      💬 Message
-                    </button>
+                    </div>
+
+                    <div className="mn-conn-actions">
+                      <button
+                        className={`mn-conn-cheer-btn${cheerSent.has(c.partnerId) ? ' sent' : ''}`}
+                        onClick={() => !cheerSent.has(c.partnerId) && sendCheer(c.partnerId, name)}
+                        disabled={cheerSent.has(c.partnerId)}
+                      >
+                        {cheerSent.has(c.partnerId) ? '🔥 Cheered!' : '🔥 Cheer'}
+                      </button>
+                      <button className="mn-conn-icon-btn" title="View profile" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                      </button>
+                      <button className="mn-conn-icon-btn mn-conn-icon-btn--msg" title="Message" onClick={() => navigate(`/messages?with=${c.partnerId}`)}>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                      </button>
+                    </div>
                   </div>
                 );
               })}

@@ -1339,22 +1339,27 @@
 }
 
 /* Connections grid */
-.mn-connections-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.mn-conn-card {
-  background: white;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 16px 12px;
+/* ── Connection rows ── */
+.mn-connections-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.mn-conn-row {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  text-align: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: white;
+  border: 1.5px solid #f0f0f5;
+  border-radius: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mn-conn-row:hover {
+  border-color: #c4b5fd;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.08);
 }
 
 .mn-conn-avatar-btn {
@@ -1363,88 +1368,104 @@
   padding: 0;
   cursor: pointer;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Middle section */
+.mn-conn-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .mn-conn-name-btn {
   background: none;
   border: none;
   padding: 0;
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: #111827;
   cursor: pointer;
-  line-height: 1.3;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.mn-conn-name-btn:hover { color: #7c3aed; text-decoration: underline; }
+.mn-conn-name-btn:hover { color: #7c3aed; }
+
+.mn-conn-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
 
 .mn-conn-ego {
   font-size: 0.72rem;
-  color: #6b7280;
-}
-
-.mn-conn-profile-btn {
-  margin-top: 4px;
-  padding: 5px 10px;
-  background: rgba(124,58,237,0.12);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.78rem;
   font-weight: 600;
-  color: #7c3aed;
-  cursor: pointer;
-}
-.mn-conn-profile-btn:hover { background: rgba(124,58,237,0.22); }
-
-.mn-conn-msg-btn {
-  margin-top: 4px;
-  padding: 5px 10px;
-  background: #f3f4f6;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #374151;
-  cursor: pointer;
-}
-.mn-conn-msg-btn:hover { background: #e5e7eb; }
-
-.mn-conn-stats {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  margin: 4px 0 2px;
-  width: 100%;
+  color: #d97706;
 }
 
-.mn-conn-stat {
+.mn-conn-pill {
   font-size: 0.7rem;
+  font-weight: 600;
   color: #6b7280;
-  font-weight: 500;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
-.mn-conn-stat--streak { color: #f59e0b; font-weight: 700; }
-.mn-conn-stat--today { color: #10b981; font-weight: 600; }
+.mn-conn-pill--streak { background: #fef3c7; color: #b45309; }
+.mn-conn-pill--today  { background: #d1fae5; color: #065f46; }
+
+/* Right actions */
+.mn-conn-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 
 .mn-conn-cheer-btn {
-  margin-top: 4px;
-  padding: 5px 10px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, #f59e0b, #f97316);
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
   font-size: 0.78rem;
   font-weight: 700;
   color: white;
   cursor: pointer;
+  white-space: nowrap;
   transition: opacity 0.15s;
 }
 .mn-conn-cheer-btn:hover:not(:disabled) { opacity: 0.85; }
 .mn-conn-cheer-btn.sent {
-  background: #e5e7eb;
-  color: #6b7280;
+  background: #f3f4f6;
+  color: #9ca3af;
   cursor: default;
 }
 
+.mn-conn-icon-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.mn-conn-icon-btn:hover { border-color: #7c3aed; color: #7c3aed; background: rgba(124,58,237,0.06); }
+.mn-conn-icon-btn--msg:hover { border-color: #3b82f6; color: #3b82f6; background: rgba(59,130,246,0.06); }
+
 @media (max-width: 600px) {
-  .mn-connections-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .mn-conn-row { padding: 10px 10px; }
+  .mn-conn-cheer-btn { padding: 5px 8px; font-size: 0.72rem; }
+  .mn-conn-icon-btn { width: 30px; height: 30px; }
 }
