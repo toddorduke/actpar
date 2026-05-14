@@ -1,0 +1,137 @@
+.admin-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.admin-header {
+  margin-bottom: 28px;
+}
+
+.admin-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-tab {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1.5px solid #e2e8f0;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.admin-tab.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #fff;
+}
+
+.admin-tab-count {
+  background: rgba(255,255,255,0.2);
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+.admin-tab:not(.active) .admin-tab-count {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admin-loading,
+.admin-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 48px 0;
+  font-size: 1rem;
+}
+
+.admin-reports {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-report-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-reason {
+  font-weight: 700;
+  color: #dc2626;
+  font-size: 0.95rem;
+}
+
+.report-date {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.report-details {
+  font-size: 0.88rem;
+  color: #475569;
+  font-style: italic;
+  margin: 0;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid #e2e8f0;
+}
+
+.report-parties {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.report-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.report-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.report-btn {
+  padding: 7px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.report-btn:hover { opacity: 0.85; }
+.report-btn.reviewed { background: #10b981; color: #fff; }
+.report-btn.dismiss  { background: #e2e8f0; color: #475569; }
+.report-btn.ban      { background: #dc2626; color: #fff; }

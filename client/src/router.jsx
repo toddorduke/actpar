@@ -22,6 +22,8 @@ import LoginPage from './pages/Login/LoginPage.jsx';
 import AboutPage from './pages/About/AboutPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPassword/ForgotPasswordPage.jsx';
 import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage.jsx';
+import CheckEmailPage from './pages/CheckEmail/CheckEmailPage.jsx';
+import AdminPage from './pages/Admin/AdminPage.jsx';
 
 // Redirects already-logged-in users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
@@ -37,6 +39,7 @@ export const AppRoutes = () => (
     <Route path="/signup" element={<PublicOnlyRoute><SignUpPage /></PublicOnlyRoute>} />
     <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
     <Route path="/reset-password" element={<ResetPasswordPage />} />
+    <Route path="/check-email" element={<CheckEmailPage />} />
 
     {/* Onboarding — skips both gates to avoid redirect loops */}
     <Route path="/onboarding" element={<ProtectedRoute skipOnboardingCheck skipProfileSetupCheck><OnboardingPage /></ProtectedRoute>} />
@@ -58,5 +61,6 @@ export const AppRoutes = () => (
     <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
     <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
     <Route path="/you" element={<ProtectedRoute><YouPage /></ProtectedRoute>} />
+    <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
   </Routes>
 );

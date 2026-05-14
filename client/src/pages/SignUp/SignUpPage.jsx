@@ -45,6 +45,7 @@ const SignUpPage = () => {
   const [bubbles, setBubbles] = useState([]);
   const [lookingFor, setLookingFor] = useState([]);
   const [workingOn, setWorkingOn] = useState([]);
+  const [customGoal, setCustomGoal] = useState('');
 
   const toggleGoal = (cat) => setLookingFor(prev =>
     prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
@@ -52,6 +53,13 @@ const SignUpPage = () => {
   const toggleGrowth = (area) => setWorkingOn(prev =>
     prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
   );
+
+  function addCustomGoal() {
+    const tag = customGoal.trim();
+    if (!tag || lookingFor.includes(tag)) { setCustomGoal(''); return; }
+    setLookingFor(prev => [...prev, tag]);
+    setCustomGoal('');
+  }
 
   // Alter ego availability
   const [egoStatus, setEgoStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
@@ -133,10 +141,13 @@ const SignUpPage = () => {
 
     setSubmitting(true);
 
-    const { error } = await supabase.auth.signUp({
+    const appUrl = import.meta.env.VITE_APP_URL ?? window.location.origin;
+
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
       options: {
+        emailRedirectTo: `${appUrl}/onboarding`,
         data: {
           first_name: formData.firstName,
           last_name: formData.lastName,
@@ -159,6 +170,13 @@ const SignUpPage = () => {
         : error.message;
       toast(`❌ ${msg}`, 'error');
       setSubmitting(false);
+      return;
+    }
+
+    // If session is null, Supabase requires email confirmation first
+    if (!signUpData.session) {
+      setSubmitting(false);
+      navigate('/check-email', { state: { email: formData.email } });
       return;
     }
 
@@ -281,6 +299,27 @@ const SignUpPage = () => {
                     {cat}
                   </button>
                 ))}
+                {lookingFor.filter(t => !GOAL_CATEGORIES.includes(t)).map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className="signup-goal-chip selected"
+                    onClick={() => setLookingFor(prev => prev.filter(t => t !== tag))}
+                  >
+                    {tag} ×
+                  </button>
+                ))}
+              </div>
+              <div className="signup-custom-row">
+                <input
+                  type="text"
+                  className="signup-custom-input"
+                  placeholder="Something else? Add your own…"
+                  value={customGoal}
+                  onChange={(e) => setCustomGoal(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomGoal(); } }}
+                />
+                <button type="button" className="signup-custom-add" onClick={addCustomGoal}>+</button>
               </div>
             </div>
 

@@ -340,6 +340,22 @@
   background: linear-gradient(135deg, #faf5ff, #f3e8ff) !important;
 }
 
+.home-gs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.home-gs-progress {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #7c3aed;
+  background: rgba(124,58,237,0.1);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
 .home-gs-sub {
   font-size: 0.88rem;
   color: #6b7280;

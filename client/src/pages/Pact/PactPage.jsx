@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext.jsx';
 import { usePact } from '../../hooks/usePact.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
+import ReportModal from '../../components/common/ReportModal.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './PactPage.css';
 
@@ -16,7 +18,7 @@ function timeAgo(isoString) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function PostCard({ post, onLike, onViewProfile, commentState, likedIds, toggling, likeCount }) {
+function PostCard({ post, onLike, onViewProfile, onReport, currentUserId, commentState, likedIds, toggling, likeCount }) {
   const { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount } = commentState;
   const liked = likedIds?.has(post.id) ?? false;
   const isToggling = toggling?.has(post.id) ?? false;
@@ -45,6 +47,9 @@ function PostCard({ post, onLike, onViewProfile, commentState, likedIds, togglin
           <div className="post-timestamp">{timeAgo(post.created_at)}</div>
         </div>
         <span className={`post-badge ${cls}`}>{label}</span>
+        {post.user_id !== currentUserId && (
+          <button className="post-report-btn" onClick={() => onReport(post.id, post.user_id)} title="Report post">⋯</button>
+        )}
       </div>
       <p className="post-text">{post.content}</p>
       <div className="post-actions">
@@ -244,6 +249,7 @@ export default function PactPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const commentState = useCommentState();
+  const { user } = useContext(AuthContext);
 
   const {
     myPacts, pact, members, rules, posts, myRole, openPacts, loading,
@@ -293,6 +299,38 @@ export default function PactPage() {
   const [postType, setPostType] = useState('update');
   const [postContent, setPostContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [reportPostId, setReportPostId] = useState(null);
+  const [reportedUserId, setReportedUserId] = useState(null);
+  const [nudgedIds, setNudgedIds] = useState(new Set());
+
+  const lastPostByUser = useMemo(() => {
+    const map = {};
+    for (const p of posts) {
+      if (!map[p.user_id] || p.created_at > map[p.user_id]) map[p.user_id] = p.created_at;
+    }
+    return map;
+  }, [posts]);
+
+  const quietMembers = useMemo(() => {
+    const cutoff = Date.now() - 48 * 3600 * 1000;
+    return members.filter((m) => {
+      if (m.user_id === user?.id) return false;
+      const last = lastPostByUser[m.user_id];
+      return !last || new Date(last).getTime() < cutoff;
+    });
+  }, [members, lastPostByUser, user]);
+
+  async function handleNudge(memberId, memberName) {
+    if (nudgedIds.has(memberId)) return;
+    setNudgedIds((prev) => new Set([...prev, memberId]));
+    await supabase.from('notifications').insert({
+      user_id: memberId,
+      type: 'pact_nudge',
+      message: `${user?.user_metadata?.first_name ?? 'A pact member'} is checking in on you — post an update in "${pact?.name ?? 'the pact'}"!`,
+      link: '/pact',
+    });
+    toast(`Nudge sent to ${memberName} 👋`, 'success');
+  }
 
   const filteredPosts = feedFilter === 'all'
     ? posts
@@ -629,6 +667,32 @@ export default function PactPage() {
             )}
           </div>
 
+          {quietMembers.length > 0 && (
+            <div className="sidebar-card quiet-members-card">
+              <h3 className="sidebar-title">🔔 Gone Quiet</h3>
+              <p className="quiet-members-hint">These members haven't posted in 48h — send a nudge.</p>
+              <div className="quiet-members-list">
+                {quietMembers.map((m) => {
+                  const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() || 'Member' : 'Member';
+                  const nudged = nudgedIds.has(m.user_id);
+                  return (
+                    <div key={m.user_id} className="quiet-member-row">
+                      <Avatar url={m.profiles?.avatar_url} name={name} size={32} />
+                      <span className="quiet-member-name">{name}</span>
+                      <button
+                        className={`nudge-btn${nudged ? ' nudged' : ''}`}
+                        onClick={() => handleNudge(m.user_id, name)}
+                        disabled={nudged}
+                      >
+                        {nudged ? 'Sent ✓' : 'Nudge 👋'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="sidebar-card rules-card">
             <h3 className="sidebar-title">
               <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -667,6 +731,8 @@ export default function PactPage() {
                   post={post}
                   onLike={handlePactLike}
                   onViewProfile={(uid) => navigate(`/profile/${uid}`)}
+                  onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }}
+                  currentUserId={user?.id}
                   commentState={commentState}
                   likedIds={likedIds}
                   toggling={toggling}
@@ -768,6 +834,14 @@ export default function PactPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {reportPostId && (
+        <ReportModal
+          postId={reportPostId}
+          reportedUserId={reportedUserId}
+          onClose={() => { setReportPostId(null); setReportedUserId(null); }}
+        />
       )}
     </div>
   );

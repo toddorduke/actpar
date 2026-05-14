@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useBlock } from '../../hooks/useBlock.js';
+import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
@@ -87,10 +88,23 @@ export default function ConnectionsPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
   const [lfFilter, setLfFilter] = useState('');
+  const [lfSearch, setLfSearch] = useState('');
   const [genderFilter, setGenderFilter] = useState('all');
   const [mobileConnOpen, setMobileConnOpen] = useState(false);
   const [sparkModalOpen, setSparkModalOpen] = useState(false);
   const sparksRemaining = Math.max(0, 5 - getSparksUsedToday());
+
+  const { search: searchCats, createOrAdopt } = useCustomCategories(user?.id);
+  const lfSuggestions = useMemo(() => searchCats(lfSearch), [lfSearch, searchCats]);
+  const hasExactMatch = lfSuggestions.some(
+    (c) => c.name.toLowerCase() === lfSearch.toLowerCase().trim(),
+  );
+
+  async function handleCategorySelect(name) {
+    await createOrAdopt(name);
+    setLfFilter(name);
+    setLfSearch('');
+  }
 
   function toggleLfFilter(cat) {
     setLfFilter((prev) => (prev === cat ? '' : cat));
@@ -162,12 +176,6 @@ export default function ConnectionsPage() {
           {(incomingSparks.length + incomingConnects.length) > 0 && (
             <span className="connections-main-tab-badge">{incomingSparks.length + incomingConnects.length}</span>
           )}
-        </button>
-        <button
-          className={`connections-main-tab${mainTab === 'coaches' ? ' active' : ''}`}
-          onClick={() => setMainTab('coaches')}
-        >
-          🏅 Find a Coach
         </button>
       </div>
 
@@ -510,6 +518,50 @@ export default function ConnectionsPage() {
               Looking For
             </h3>
             <p className="lf-filter-hint">Find partners seeking the same thing</p>
+
+            {/* Custom category search */}
+            <div className="lf-search-wrap">
+              <input
+                type="text"
+                className="lf-search-input"
+                placeholder="Search or add a focus area…"
+                value={lfSearch}
+                onChange={(e) => setLfSearch(e.target.value)}
+              />
+              {lfSearch && (
+                <button className="lf-search-clear" onClick={() => setLfSearch('')}>×</button>
+              )}
+            </div>
+
+            {lfSearch.trim().length > 0 && (
+              <div className="lf-suggestions">
+                {lfSuggestions.map((c) => (
+                  <button
+                    key={c.id}
+                    className="lf-suggestion-chip"
+                    onClick={() => handleCategorySelect(c.name)}
+                  >
+                    {c.name}
+                    {c.status === 'active'
+                      ? <span className="lf-cat-badge lf-cat-active">popular</span>
+                      : <span className="lf-cat-badge lf-cat-pending">{c.use_count}/3</span>
+                    }
+                  </button>
+                ))}
+                {lfSearch.trim().length >= 3 && !hasExactMatch && (
+                  <button
+                    className="lf-create-chip"
+                    onClick={() => handleCategorySelect(lfSearch.trim())}
+                  >
+                    + Create "{lfSearch.trim()}" as a category
+                  </button>
+                )}
+                {lfSuggestions.length === 0 && lfSearch.trim().length < 3 && (
+                  <p className="lf-search-hint">Keep typing to search…</p>
+                )}
+              </div>
+            )}
+
             <div className="lf-filter-chips">
               {LF_CATEGORIES.map((cat) => (
                 <button

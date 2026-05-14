@@ -366,6 +366,98 @@
 }
 
 /* Looking-for chips */
+/* ── Custom LF search ── */
+.settings-lf-search-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.settings-lf-search {
+  width: 100%;
+  padding: 9px 32px 9px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #111827;
+  background: #f9fafb;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.settings-lf-search::placeholder { color: #9ca3af; }
+.settings-lf-search:focus { border-color: #d97706; background: #fff; }
+
+.settings-lf-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+}
+.settings-lf-search-clear:hover { color: #374151; }
+
+.settings-lf-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 6px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.settings-lf-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+}
+.settings-lf-suggestion:hover { border-color: #d97706; color: #d97706; }
+
+.settings-lf-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.settings-lf-active { background: rgba(16,185,129,0.12); color: #059669; }
+.settings-lf-pending { background: rgba(245,158,11,0.12); color: #d97706; }
+
+.settings-lf-create {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: 1.5px dashed #d97706;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #d97706;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+}
+.settings-lf-create:hover { background: rgba(217,119,6,0.06); border-style: solid; }
+
+.settings-lf-custom { border-color: #d97706; }
+
 .settings-lf-chips {
   display: flex;
   flex-wrap: wrap;

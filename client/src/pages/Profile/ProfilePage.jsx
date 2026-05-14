@@ -8,6 +8,7 @@ import { useReflections, DEFAULT_QUESTIONS } from '../../hooks/useReflections.js
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useGoalProgress } from '../../hooks/useGoalProgress.js';
+import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
@@ -243,6 +244,7 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { profile, loading: profileLoading, updateProfile } = useProfile();
+  const { createOrAdopt } = useCustomCategories(profile?.id);
   const { reflections, affirmations, saveAnswer, saveAffirmation } = useReflections();
   const { goals, loading: goalsLoading, updateTier, addGoal, checkIn } = useGoals();
   const { progressMap, logProgress } = useGoalProgress(goals);
@@ -451,6 +453,7 @@ const ProfilePage = () => {
     if (!tag || lookingFor.includes(tag)) return;
     setLookingFor((prev) => [...prev, tag]);
     setCustomTag('');
+    createOrAdopt(tag); // register in custom_categories (fire-and-forget)
   }
 
   async function handleSaveLookingFor() {
@@ -890,14 +893,6 @@ const ProfilePage = () => {
               </h3>
               <form className="add-goal-form-wrap" onSubmit={handleAddGoal}>
                 {/* Type toggle */}
-                <div className="goal-type-toggle">
-                  <button type="button" className={`goal-type-btn${newGoalType === 'habit' ? ' active' : ''}`} onClick={() => setNewGoalType('habit')}>
-                    ✓ Habit
-                  </button>
-                  <button type="button" className={`goal-type-btn${newGoalType === 'numeric' ? ' active' : ''}`} onClick={() => setNewGoalType('numeric')}>
-                    📊 Progress Goal
-                  </button>
-                </div>
 
                 {/* Title + submit */}
                 <div className="add-goal-row">

@@ -1150,3 +1150,71 @@
   color: #f59e0b;
   white-space: nowrap;
 }
+
+/* ── Report button ─────────────────────────────────── */
+.post-report-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+.post-report-btn:hover {
+  background: rgba(148, 163, 184, 0.15);
+  color: #e2e8f0;
+}
+
+/* ── Gone Quiet / nudge card ───────────────────────── */
+.quiet-members-card { border-left: 3px solid #f59e0b; }
+
+.quiet-members-hint {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0 0 10px;
+}
+
+.quiet-members-list { display: flex; flex-direction: column; gap: 8px; }
+
+.quiet-member-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quiet-member-name {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nudge-btn {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #f59e0b;
+  background: transparent;
+  color: #f59e0b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.nudge-btn:hover:not(:disabled) {
+  background: #f59e0b;
+  color: #000;
+}
+.nudge-btn.nudged {
+  border-color: #10b981;
+  color: #10b981;
+  cursor: default;
+}

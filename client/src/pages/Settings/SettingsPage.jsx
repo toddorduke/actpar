@@ -1,9 +1,10 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import { usePushNotifications } from '../../hooks/usePushNotifications.js';
+import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './SettingsPage.css';
@@ -134,10 +135,23 @@ export default function SettingsPage() {
     }, 600);
   }, [profile?.alter_ego_name, user?.id]);
 
+  const [lfSearch, setLfSearch] = useState('');
+  const { search: searchCats, createOrAdopt } = useCustomCategories(user?.id);
+  const lfSuggestions = useMemo(() => searchCats(lfSearch), [lfSearch, searchCats]);
+  const hasExactMatch = lfSuggestions.some(
+    (c) => c.name.toLowerCase() === lfSearch.toLowerCase().trim(),
+  );
+
   function toggleLf(cat) {
     setLookingFor((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
+  }
+
+  async function handleAddCustomLf(name) {
+    await createOrAdopt(name);
+    setLookingFor((prev) => prev.includes(name) ? prev : [...prev, name]);
+    setLfSearch('');
   }
 
   async function handleSaveAccount(e) {
@@ -477,6 +491,39 @@ export default function SettingsPage() {
                 <div className="settings-field">
                   <label>Looking For Accountability In</label>
                   <span className="settings-hint" style={{ marginBottom: 8 }}>Select all that apply — used to match you with the right people</span>
+
+                  {/* Custom category search */}
+                  <div className="settings-lf-search-wrap">
+                    <input
+                      type="text"
+                      className="settings-lf-search"
+                      placeholder="Search or add a focus area…"
+                      value={lfSearch}
+                      onChange={(e) => setLfSearch(e.target.value)}
+                    />
+                    {lfSearch && (
+                      <button type="button" className="settings-lf-search-clear" onClick={() => setLfSearch('')}>×</button>
+                    )}
+                  </div>
+                  {lfSearch.trim().length > 0 && (
+                    <div className="settings-lf-suggestions">
+                      {lfSuggestions.map((c) => (
+                        <button key={c.id} type="button" className="settings-lf-suggestion" onClick={() => handleAddCustomLf(c.name)}>
+                          {c.name}
+                          {c.status === 'active'
+                            ? <span className="settings-lf-badge settings-lf-active">popular</span>
+                            : <span className="settings-lf-badge settings-lf-pending">{c.use_count}/3</span>
+                          }
+                        </button>
+                      ))}
+                      {lfSearch.trim().length >= 3 && !hasExactMatch && (
+                        <button type="button" className="settings-lf-create" onClick={() => handleAddCustomLf(lfSearch.trim())}>
+                          + Create "{lfSearch.trim()}" as a category
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   <div className="settings-lf-chips">
                     {LF_CATEGORIES.map((cat) => (
                       <button
@@ -486,6 +533,16 @@ export default function SettingsPage() {
                         onClick={() => toggleLf(cat)}
                       >
                         {cat}
+                      </button>
+                    ))}
+                    {lookingFor.filter((t) => !LF_CATEGORIES.includes(t)).map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        className="settings-lf-chip selected settings-lf-custom"
+                        onClick={() => toggleLf(tag)}
+                      >
+                        {tag} ×
                       </button>
                     ))}
                   </div>
@@ -637,19 +694,6 @@ export default function SettingsPage() {
                             })}
                           </select>
                           <span className="settings-reminder-tz">(your local time)</span>
-                        </div>
-                        <div className="settings-auto-checkin-row">
-                          <div className="settings-auto-checkin-info">
-                            <div className="settings-toggle-title" style={{ fontSize: '0.82rem' }}>Tapping reminder logs me automatically</div>
-                            <div className="settings-toggle-desc">When you tap the daily notification, all unchecked goals are logged for you instantly.</div>
-                          </div>
-                          <button
-                            type="button"
-                            className={`toggle-switch${notifAutoCheckin ? ' on' : ''}`}
-                            onClick={() => setNotifAutoCheckin(!notifAutoCheckin)}
-                          >
-                            <span className="toggle-knob" />
-                          </button>
                         </div>
                       </div>
                     )

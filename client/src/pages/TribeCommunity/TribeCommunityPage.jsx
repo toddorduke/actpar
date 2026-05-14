@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
+import { useProfile } from '../../hooks/useProfile.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
@@ -120,6 +121,7 @@ function PostCard({ post, onLike, onShare, onReport, commentState, likedIds, tog
 export default function TribeCommunityPage() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const { acceptedConnections } = useConnections();
   const { myCommunities, communities, myMemberships, createCommunity, joinCommunity, leaveCommunity } = useCommunities();
   const { posts, loading: postsLoading, createPost } = useTribePosts(null);
@@ -153,6 +155,19 @@ export default function TribeCommunityPage() {
       .slice(0, 5)
       .map(([tag, count]) => ({ tag, posts: count }));
   }, [posts]);
+
+  // Communities the user hasn't joined yet, sorted by relevance to their looking_for
+  const discoverCommunities = useMemo(() => {
+    const lookingFor = (profile?.looking_for ?? []).map((s) => s.toLowerCase());
+    const unjoined = communities.filter((c) => !myMemberships.includes(c.id));
+    if (!lookingFor.length) return unjoined;
+    return unjoined.sort((a, b) => {
+      const score = (c) => lookingFor.reduce((n, kw) =>
+        n + ((c.name ?? '').toLowerCase().includes(kw) || (c.description ?? '').toLowerCase().includes(kw) ? 1 : 0), 0
+      );
+      return score(b) - score(a);
+    });
+  }, [communities, myMemberships, profile]);
 
   const [feedTab, setFeedTab] = useState('circle');
   const [filter, setFilter] = useState('all');
@@ -466,6 +481,39 @@ export default function TribeCommunityPage() {
               <div className="stat-item"><div className="stat-number">{connectedUserIds.size > 1 ? connectedUserIds.size - 1 : 0}</div><div className="stat-label">My Sparks</div></div>
               <div className="stat-item"><div className="stat-number">{posts.length}</div><div className="stat-label">Posts</div></div>
             </div>
+          </div>
+
+          <div className="sidebar-card">
+            <h3 className="sidebar-title">✨ Discover Communities</h3>
+            {discoverCommunities.length === 0 ? (
+              <p className="discover-empty">You've joined all available communities!</p>
+            ) : (
+              <div className="discover-list">
+                {discoverCommunities.slice(0, 5).map((c) => (
+                  <div key={c.id} className="discover-item">
+                    <div className="discover-avatar">{c.name.charAt(0).toUpperCase()}</div>
+                    <div className="discover-info">
+                      <div className="discover-name">{c.name}</div>
+                      {c.description && <div className="discover-desc">{c.description}</div>}
+                    </div>
+                    <button
+                      className="discover-join-btn"
+                      onClick={async () => {
+                        await joinCommunity(c.id);
+                        navigate(`/community/${c.id}`);
+                      }}
+                    >
+                      Join
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {discoverCommunities.length > 5 && (
+              <button className="discover-more-btn" onClick={() => setShowBrowse(true)}>
+                See all {discoverCommunities.length} communities →
+              </button>
+            )}
           </div>
         </aside>
       </div>

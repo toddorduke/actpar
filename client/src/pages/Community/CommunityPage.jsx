@@ -9,6 +9,7 @@ import { useCommunityChallenges } from '../../hooks/useCommunityChallenges.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
+import ReportModal from '../../components/common/ReportModal.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './CommunityPage.css';
 
@@ -40,6 +41,8 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   const [milestone, setMilestone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [visibleCount, setVisibleCount] = useState(10);
+  const [reportPostId, setReportPostId] = useState(null);
+  const [reportedUserId, setReportedUserId] = useState(null);
 
   async function submit() {
     if (!content.trim()) return;
@@ -86,7 +89,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {pinned && (
         <div className="comm-post-card pinned-post">
           <div className="pinned-label">📌 Pinned</div>
-          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned commentState={commentState} />
+          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} />
         </div>
       )}
 
@@ -94,17 +97,25 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
 
       {feed.map((p) => p.id !== pinnedPostId && (
-        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} commentState={commentState} />
+        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} />
       ))}
 
       {visibleCount < posts.length && (
         <button className="load-more-btn" onClick={() => setVisibleCount((n) => n + 10)}>Load more</button>
       )}
+
+      {reportPostId && (
+        <ReportModal
+          postId={reportPostId}
+          reportedUserId={reportedUserId}
+          onClose={() => { setReportPostId(null); setReportedUserId(null); }}
+        />
+      )}
     </div>
   );
 }
 
-function PostCard({ post, onLike, isAdmin, onPin, isPinned, commentState }) {
+function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUserId, commentState }) {
   const [expanded, setExpanded] = useState(false);
   const truncated = post.content.length > POST_TRUNCATE && !expanded;
   const authorName = post.profiles
@@ -126,6 +137,9 @@ function PostCard({ post, onLike, isAdmin, onPin, isPinned, commentState }) {
           <button className="pin-btn" onClick={() => onPin(isPinned ? null : post.id)} title={isPinned ? 'Unpin' : 'Pin post'}>
             {isPinned ? '📌 Unpin' : '📌 Pin'}
           </button>
+        )}
+        {post.user_id !== currentUserId && (
+          <button className="comm-report-btn" onClick={() => onReport(post.id, post.user_id)} title="Report post">⋯</button>
         )}
       </div>
       <p className="comm-post-text">
@@ -661,8 +675,6 @@ const TABS = [
   ['events', '📅 Events'],
   ['members', '👥 Members'],
   ['chat', '💬 Chat'],
-  ['challenges', '🎯 Challenges'],
-  ['leaderboard', '🏆 Leaderboard'],
 ];
 
 export default function CommunityPage() {
@@ -782,8 +794,6 @@ export default function CommunityPage() {
         {activeTab === 'events' && <EventsTab communityId={communityId} isAdmin={isActualAdmin} />}
         {activeTab === 'members' && <MembersTab communityId={communityId} isAdmin={isActualAdmin} currentUserId={user?.id} />}
         {activeTab === 'chat' && <ChatTab communityId={communityId} />}
-        {activeTab === 'challenges' && <ChallengesTab communityId={communityId} />}
-        {activeTab === 'leaderboard' && <LeaderboardTab communityId={communityId} />}
       </div>
     </div>
   );

@@ -951,3 +951,90 @@
   border-radius: 999px;
   white-space: nowrap;
 }
+
+/* ── Discover Communities ──────────────────────────── */
+.discover-empty {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.discover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.discover-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discover-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.discover-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.discover-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discover-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discover-join-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #7c3aed;
+  background: transparent;
+  color: #7c3aed;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.discover-join-btn:hover {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.discover-more-btn {
+  margin-top: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #7c3aed;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: left;
+}
+.discover-more-btn:hover { text-decoration: underline; }

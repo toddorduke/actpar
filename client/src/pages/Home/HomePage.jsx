@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useGoals } from '../../hooks/useGoals.js';
+import { useProfile } from '../../hooks/useProfile.js';
 import { useReflections } from '../../hooks/useReflections.js';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
@@ -23,6 +24,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { goals, loading: goalsLoading, addGoal, deleteGoal, checkIn } = useGoals();
+  const { profile } = useProfile();
   const { saveAnswer } = useReflections();
   const { acceptedConnections } = useConnections();
   const { activity, loading: activityLoading } = useConnectionActivity(acceptedConnections);
@@ -198,35 +200,65 @@ const HomePage = () => {
         <div className="home-grid">
           <div className="home-main">
 
-            {/* Getting Started — shown until user has at least one goal AND one connection */}
-            {!goalsLoading && (goals.length === 0 || acceptedConnections.length === 0) && (
-              <div className="home-card home-getting-started">
-                <h2 className="home-card-title">🚀 Getting Started</h2>
-                <p className="home-gs-sub">Complete these steps to get the most out of ActPar.</p>
-                <div className="home-gs-steps">
-                  <div className={`home-gs-step${goals.length > 0 ? ' done' : ''}`}>
-                    <span className="home-gs-check">{goals.length > 0 ? '✅' : '⭕'}</span>
-                    <div className="home-gs-step-info">
-                      <div className="home-gs-step-title">Add your first goal</div>
-                      <div className="home-gs-step-desc">Set a habit or progress goal to track your journey</div>
-                    </div>
-                    {goals.length === 0 && (
-                      <button className="home-gs-step-btn" onClick={() => navigate('/profile')}>Go →</button>
-                    )}
+            {/* Getting Started — shown until all 4 steps are complete */}
+            {!goalsLoading && (() => {
+              const hasGoal        = goals.length > 0;
+              const hasConnection  = acceptedConnections.length > 0;
+              const hasProfile     = !!(profile?.avatar_url && profile?.tagline);
+              const hasReminders   = !!(profile?.notification_prefs?.daily_reminder);
+              const allDone = hasGoal && hasConnection && hasProfile && hasReminders;
+              if (allDone) return null;
+              const steps = [
+                {
+                  done: hasGoal,
+                  title: 'Add your first goal',
+                  desc: 'Set a habit or progress goal to track your journey',
+                  cta: 'Go →', action: () => navigate('/profile'),
+                },
+                {
+                  done: hasConnection,
+                  title: 'Connect with an accountability partner',
+                  desc: 'Find someone working toward similar goals and spark them',
+                  cta: 'Find →', action: () => navigate('/connections'),
+                },
+                {
+                  done: hasProfile,
+                  title: 'Complete your profile',
+                  desc: 'Add a photo and tagline so others can find you',
+                  cta: 'Edit →', action: () => navigate('/profile'),
+                },
+                {
+                  done: hasReminders,
+                  title: 'Enable daily reminders',
+                  desc: 'Get a nudge every day so you never miss a check-in',
+                  cta: 'Set up →', action: () => navigate('/settings'),
+                },
+              ];
+              const completedCount = steps.filter(s => s.done).length;
+              return (
+                <div className="home-card home-getting-started">
+                  <div className="home-gs-header">
+                    <h2 className="home-card-title">🚀 Getting Started</h2>
+                    <span className="home-gs-progress">{completedCount}/{steps.length}</span>
                   </div>
-                  <div className={`home-gs-step${acceptedConnections.length > 0 ? ' done' : ''}`}>
-                    <span className="home-gs-check">{acceptedConnections.length > 0 ? '✅' : '⭕'}</span>
-                    <div className="home-gs-step-info">
-                      <div className="home-gs-step-title">Connect with an accountability partner</div>
-                      <div className="home-gs-step-desc">Find someone working toward similar goals and spark them</div>
-                    </div>
-                    {acceptedConnections.length === 0 && (
-                      <button className="home-gs-step-btn" onClick={() => navigate('/connections')}>Find →</button>
-                    )}
+                  <p className="home-gs-sub">Complete these steps to get the most out of ActPar.</p>
+                  <div className="home-gs-steps">
+                    {steps.map((s) => (
+                      <div key={s.title} className={`home-gs-step${s.done ? ' done' : ''}`}>
+                        <span className="home-gs-check">{s.done ? '✅' : '⭕'}</span>
+                        <div className="home-gs-step-info">
+                          <div className="home-gs-step-title">{s.title}</div>
+                          <div className="home-gs-step-desc">{s.desc}</div>
+                        </div>
+                        {!s.done && (
+                          <button className="home-gs-step-btn" onClick={s.action}>{s.cta}</button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Daily Check-In Cards */}
             {!goalsLoading && habitGoals.length > 0 && (

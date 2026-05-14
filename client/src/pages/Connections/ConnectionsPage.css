@@ -618,6 +618,117 @@
   border-color: #d1d5db;
 }
 
+/* ── Custom category search ── */
+.lf-search-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.lf-search-input {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #111827;
+  background: #f9fafb;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.lf-search-input::placeholder { color: #9ca3af; }
+.lf-search-input:focus { border-color: #7c3aed; background: #fff; }
+
+.lf-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.lf-search-clear:hover { color: #374151; }
+
+.lf-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 6px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.lf-suggestion-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+}
+.lf-suggestion-chip:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
+  background: rgba(124,58,237,0.04);
+}
+
+.lf-cat-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.lf-cat-active {
+  background: rgba(16,185,129,0.12);
+  color: #059669;
+}
+.lf-cat-pending {
+  background: rgba(245,158,11,0.12);
+  color: #d97706;
+}
+
+.lf-create-chip {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: 1.5px dashed #a78bfa;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #7c3aed;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+}
+.lf-create-chip:hover {
+  background: rgba(124,58,237,0.06);
+  border-style: solid;
+}
+
+.lf-search-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 2px 4px;
+  font-style: italic;
+}
+
 .empty-state {
   text-align: center;
   padding: 60px 30px;
