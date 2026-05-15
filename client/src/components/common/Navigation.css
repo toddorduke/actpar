@@ -452,3 +452,23 @@
 .mobile-notif-wrap {
   display: none;
 }
+
+/* ── Messages icon in top-right ────────────────────── */
+.nav-icon-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: var(--color-muted);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+.nav-icon-btn:hover,
+.nav-icon-btn.active {
+  color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.06);
+}

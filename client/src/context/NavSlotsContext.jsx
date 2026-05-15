@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 const STORAGE_KEY = 'actpar_nav_slots';
-const DEFAULT_SLOTS = ['connect', 'tribe', 'messages'];
+const DEFAULT_SLOTS = ['connect', 'tribe'];
 
 export const NavSlotsContext = createContext(null);
 
