@@ -4,6 +4,8 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useNavSlots } from '../../context/NavSlotsContext.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
 import Avatar from './Avatar.jsx';
+import { timeAgoShort } from '../../utils/dateUtils.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './Navigation.css';
 
 const buildClassName = ({ isActive }) => `nav-tab${isActive ? ' active' : ''}`;
@@ -26,15 +28,6 @@ export const NAV_POOL = {
     icon: (
       <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-  },
-  pact: {
-    to: '/pact',
-    label: 'Pact',
-    icon: (
-      <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
       </svg>
     ),
   },
@@ -79,8 +72,8 @@ const HOME_ITEM = {
 };
 
 const YOU_ITEM = {
-  to: '/profile',
-  label: 'Profile',
+  to: '/you',
+  label: 'You',
   icon: (
     <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -88,13 +81,6 @@ const YOU_ITEM = {
   ),
 };
 
-function timeAgoShort(iso) {
-  const diff = (Date.now() - new Date(iso)) / 1000;
-  if (diff < 60) return 'now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-  return `${Math.floor(diff / 86400)}d`;
-}
 
 const Navigation = () => {
   const { user, logout } = useContext(AuthContext);
@@ -157,7 +143,7 @@ const Navigation = () => {
       <div className="notif-list">
         {notifications.map((notif) => {
           const actorName = notif.actor
-            ? `${notif.actor.first_name ?? ''} ${notif.actor.last_name ?? ''}`.trim() || 'Someone'
+            ? getDisplayName(notif.actor, 'Someone')
             : 'Someone';
           return (
             <div

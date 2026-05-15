@@ -1,60 +1,62 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './AppGuide.css';
 
+// Each slide: route to navigate to, CSS selector to spotlight
 const QUICK_SLIDES = [
   {
     emoji: '🎯',
-    title: 'Your Profile & Goals',
-    body: 'This is your home base. Set goals, log progress daily, and build streaks. Your Alter Ego is the version of you that shows up no matter what — name it and own it.',
+    title: 'Your Goals',
+    body: 'This is your home base. Set goals, log daily progress, and build streaks. Your Alter Ego is the version of you that shows up no matter what — name it and own it.',
     tip: 'Tap your profile to add your first goal right now.',
+    route: '/',
+    target: '.home-card',
   },
   {
     emoji: '⚡',
     title: 'Sparks & Connections',
-    body: 'Browse people chasing goals like yours. Send a Spark to show interest, or hit Connect to link up directly. One real accountability partner can change everything.',
-    tip: 'Head to the Sparks tab and swipe through your first few profiles.',
+    body: 'Browse people chasing goals like yours. Send a Spark to show interest — if they spark back you\'re connected and can message each other. One real accountability partner can change everything.',
+    tip: 'Head to Connections and send your first Spark.',
+    route: '/connections',
+    target: 'a[href="/connections"]',
   },
   {
     emoji: '🌍',
     title: 'The Tribe',
     body: 'ActPar\'s community feed. Post wins, share struggles, encourage others. No highlight reels — just real people doing the work every single day.',
     tip: 'Post your first update in Tribe and introduce yourself.',
+    route: '/tribe-community',
+    target: 'a[href="/tribe-community"]',
   },
   {
     emoji: '🚀',
-    title: 'You\'re Ready',
-    body: 'That\'s the core of ActPar. Your profile is set up, your goals are waiting, and a community of people on the same journey is right here.',
-    tip: 'Start with one connection, one goal, one post. The rest follows.',
+    title: "You're Ready",
+    body: 'That\'s the core of ActPar. Your goals are waiting, and a community of people on the same journey is right here. Start with one connection, one goal, one post.',
+    tip: 'The rest follows. Let\'s go.',
+    route: '/',
+    target: '.home-welcome',
   },
 ];
 
 const FULL_SLIDES = [
   ...QUICK_SLIDES.slice(0, 3),
   {
-    emoji: '🔐',
-    title: 'The Pact',
-    body: 'Create or join a private accountability circle. Set your own rules, post updates to your circle, and hold each other to the standard. Invite-only or open for anyone to join.',
-    tip: 'Go to the Pact tab to create your first circle or find an open one.',
-  },
-  {
     emoji: '💬',
     title: 'Direct Messages',
     body: 'Real one-on-one conversations with your connections. Check in on each other, share wins, call each other out — no noise, just accountability.',
     tip: 'Message a connection and set up your first check-in.',
-  },
-  {
-    emoji: '🏋️',
-    title: 'Coach Marketplace',
-    body: 'Browse verified coaches across fitness, faith, finance, sobriety, mental health, and more. Read their story, see their focus areas, and connect directly.',
-    tip: 'Head to Connections → Find a Coach to browse coaches.',
+    route: '/messages',
+    target: 'a[href="/messages"]',
   },
   {
     emoji: '🔔',
     title: 'Stay Accountable',
-    body: 'Turn on notifications so you never miss a Spark, a Pact post, or a message from your circle. Accountability only works if you show up — let ActPar remind you.',
-    tip: 'Go to Settings → Notifications to customize what alerts you get.',
+    body: 'Turn on notifications so you never miss a Spark or a message from your connections. Accountability only works if you show up — let ActPar remind you.',
+    tip: 'Go to Settings → Notifications to customize your alerts.',
+    route: '/',
+    target: '.nav-icon-btn',
   },
   QUICK_SLIDES[3],
 ];
@@ -63,10 +65,26 @@ function storageKey(userId) {
   return `actpar_guide_seen_${userId}`;
 }
 
+function findTarget(selector) {
+  if (!selector) return null;
+  const all = Array.from(document.querySelectorAll(selector));
+  // Prefer a visible element
+  return (
+    all.find((el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }) || null
+  );
+}
+
 export default function AppGuide() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [phase, setPhase] = useState(null); // null | 'choice' | 'quick' | 'full'
   const [slide, setSlide] = useState(0);
+  const [neverShow, setNeverShow] = useState(true);
+  const [spotlight, setSpotlight] = useState(null); // { top, left, width, height }
+  const rafRef = useRef(null);
 
   useEffect(() => {
     if (!user) return;
@@ -75,22 +93,58 @@ export default function AppGuide() {
     if (!seen) setPhase('choice');
   }, [user]);
 
-  async function dismiss() {
-    if (user) {
+  const dismiss = useCallback(async () => {
+    setSpotlight(null);
+    setPhase(null);
+    if (!user) return;
+    if (neverShow) {
       localStorage.setItem(storageKey(user.id), '1');
       await supabase.auth.updateUser({ data: { tour_dismissed: true } });
+    } else {
+      // Only block re-show for this session
+      sessionStorage.setItem(storageKey(user.id), '1');
     }
-    setPhase(null);
-  }
+  }, [user, neverShow]);
 
   function startGuide(type) {
     setSlide(0);
     setPhase(type);
   }
 
+  // Navigate + spotlight on each slide
+  useEffect(() => {
+    if (phase !== 'quick' && phase !== 'full') return;
+    const slides = phase === 'quick' ? QUICK_SLIDES : FULL_SLIDES;
+    const current = slides[slide];
+
+    // Navigate to the slide's page
+    navigate(current.route);
+
+    // Wait for page to render then spotlight the target
+    cancelAnimationFrame(rafRef.current);
+    const timer = setTimeout(() => {
+      if (!current.target) { setSpotlight(null); return; }
+
+      const el = findTarget(current.target);
+      if (!el) { setSpotlight(null); return; }
+
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Small extra delay to let scroll settle
+      const t2 = setTimeout(() => {
+        const r = el.getBoundingClientRect();
+        const pad = 10;
+        setSpotlight({ top: r.top - pad, left: r.left - pad, width: r.width + pad * 2, height: r.height + pad * 2, elTop: r.top, elBottom: r.bottom });
+      }, 150);
+      return () => clearTimeout(t2);
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [slide, phase, navigate]);
+
   if (!phase) return null;
 
-  // ── Choice screen ──────────────────────────────────────────────────────────
+  // ── Choice screen ─────────────────────────────────────────────────────────
   if (phase === 'choice') {
     return (
       <div className="guide-overlay">
@@ -112,7 +166,7 @@ export default function AppGuide() {
               <span className="guide-choice-btn-icon">📖</span>
               <div>
                 <div className="guide-choice-btn-label">Full Tour</div>
-                <div className="guide-choice-btn-desc">Every feature — 8 slides, 5 min</div>
+                <div className="guide-choice-btn-desc">Every feature — 6 slides, 4 min</div>
               </div>
             </button>
             <button className="guide-choice-btn ghost" onClick={dismiss}>
@@ -123,65 +177,80 @@ export default function AppGuide() {
               </div>
             </button>
           </div>
+          <label className="guide-never-show">
+            <input
+              type="checkbox"
+              checked={neverShow}
+              onChange={(e) => setNeverShow(e.target.checked)}
+            />
+            Don't show this again next time
+          </label>
         </div>
       </div>
     );
   }
 
-  // ── Slide deck ─────────────────────────────────────────────────────────────
+  // ── Slide deck ────────────────────────────────────────────────────────────
   const slides = phase === 'quick' ? QUICK_SLIDES : FULL_SLIDES;
   const current = slides[slide];
   const isLast = slide === slides.length - 1;
 
+  // Position tooltip: if target is in bottom half → show above it; else → below
+  const tooltipStyle = (() => {
+    if (!spotlight) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+    const isNearBottom = spotlight.elTop > window.innerHeight * 0.55;
+    if (isNearBottom) {
+      return { bottom: window.innerHeight - spotlight.top + 16, left: '50%', transform: 'translateX(-50%)' };
+    }
+    return { top: spotlight.top + spotlight.height + 16, left: '50%', transform: 'translateX(-50%)' };
+  })();
+
   return (
-    <div className="guide-overlay">
-      <div className="guide-modal guide-slide-modal">
-        {/* Header */}
-        <div className="guide-slide-header">
-          <span className="guide-slide-counter">{slide + 1} of {slides.length}</span>
-          <button className="guide-skip-btn" onClick={dismiss}>Skip tour</button>
+    <>
+      {/* Dim overlay — pointer events pass through to app except tooltip */}
+      <div className="guide-dim" onClick={() => {}} />
+
+      {/* Spotlight cutout */}
+      {spotlight && (
+        <div
+          className="guide-spotlight"
+          style={{ top: spotlight.top, left: spotlight.left, width: spotlight.width, height: spotlight.height }}
+        />
+      )}
+
+      {/* Floating tooltip */}
+      <div className="guide-tooltip" style={tooltipStyle}>
+        <div className="guide-tooltip-header">
+          <span className="guide-slide-counter">{slide + 1} / {slides.length}</span>
+          <button className="guide-skip-btn" onClick={dismiss}>✕ Skip</button>
         </div>
 
-        {/* Slide content */}
-        <div className="guide-slide-body">
+        <div className="guide-tooltip-body">
           <div className="guide-slide-emoji">{current.emoji}</div>
-          <h2 className="guide-slide-title">{current.title}</h2>
+          <h3 className="guide-slide-title">{current.title}</h3>
           <p className="guide-slide-text">{current.body}</p>
           <div className="guide-slide-tip">
             <span className="guide-tip-label">Try it:</span> {current.tip}
           </div>
         </div>
 
-        {/* Dot nav */}
         <div className="guide-dots">
           {slides.map((_, i) => (
-            <button
-              key={i}
-              className={`guide-dot${i === slide ? ' active' : ''}`}
-              onClick={() => setSlide(i)}
-              aria-label={`Go to slide ${i + 1}`}
-            />
+            <button key={i} className={`guide-dot${i === slide ? ' active' : ''}`} onClick={() => setSlide(i)} />
           ))}
         </div>
 
-        {/* Buttons */}
         <div className="guide-slide-actions">
           {slide > 0 && (
-            <button className="guide-back-btn" onClick={() => setSlide((s) => s - 1)}>
-              ← Back
-            </button>
+            <button className="guide-back-btn" onClick={() => setSlide((s) => s - 1)}>← Back</button>
           )}
           {isLast ? (
-            <button className="guide-next-btn" onClick={dismiss}>
-              Let's Go! 🚀
-            </button>
+            <button className="guide-next-btn" onClick={dismiss}>Let's Go! 🚀</button>
           ) : (
-            <button className="guide-next-btn" onClick={() => setSlide((s) => s + 1)}>
-              Next →
-            </button>
+            <button className="guide-next-btn" onClick={() => setSlide((s) => s + 1)}>Next →</button>
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

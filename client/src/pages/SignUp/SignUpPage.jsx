@@ -277,7 +277,6 @@ const SignUpPage = () => {
               <select id="accountType" name="accountType" value={formData.accountType} onChange={handleChange} required>
                 <option value="" disabled>Select account type</option>
                 <option value="Personal">Personal</option>
-                <option value="Coach">Coach</option>
               </select>
             </div>
 

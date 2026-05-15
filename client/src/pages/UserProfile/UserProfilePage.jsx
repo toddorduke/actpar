@@ -7,17 +7,11 @@ import { useToast } from '../../components/common/Toast.jsx';
 import { createNotification } from '../../hooks/useNotifications.js';
 import { useBlock } from '../../hooks/useBlock.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
+import { timeAgo } from '../../utils/dateUtils.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './UserProfilePage.css';
 
 const TIER_LABELS = { 1: 'Top Priority', 2: 'Important', 3: 'Foundation' };
-
-function timeAgo(iso) {
-  const diff = (Date.now() - new Date(iso)) / 1000;
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 export default function UserProfilePage() {
   const { userId } = useParams();
@@ -143,7 +137,7 @@ export default function UserProfilePage() {
     } else {
       setConnectionStatus('pending_sent');
       const { data: me } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
-      const name = me ? `${me.first_name ?? ''} ${me.last_name ?? ''}`.trim() : 'Someone';
+      const name = getDisplayName(me, 'Someone');
       createNotification({ userId, actorId: user.id, type: 'connection_request', body: `${name} sent you a spark ⚡` });
       toast('Spark sent! ⚡', 'success');
     }
@@ -175,7 +169,7 @@ export default function UserProfilePage() {
     } else {
       setConnectionStatus('accepted');
       const { data: me } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
-      const name = me ? `${me.first_name ?? ''} ${me.last_name ?? ''}`.trim() : 'Someone';
+      const name = getDisplayName(me, 'Someone');
       createNotification({ userId, actorId: user.id, type: 'connection_accepted', body: `${name} accepted your spark ⚡ You're now connected!` });
       toast('Connected! ⚡', 'success');
     }

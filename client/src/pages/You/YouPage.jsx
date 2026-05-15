@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useNavSlots } from '../../context/NavSlotsContext.jsx';
 import { NAV_POOL } from '../../components/common/Navigation.jsx';
+import { getDisplayName } from '../../utils/displayName.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import './YouPage.css';
@@ -28,13 +29,6 @@ const QUICK_LINKS = [
     emoji: '👥',
     label: 'Tribe',
     desc: 'Broader community',
-  },
-  {
-    key: 'coaches',
-    to: '/coaches',
-    emoji: '🏅',
-    label: 'Coaches',
-    desc: 'Find a certified coach',
   },
   {
     key: 'settings',
@@ -69,7 +63,7 @@ export default function YouPage() {
   }, [user]);
 
   const displayName = profile
-    ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || 'You'
+    ? getDisplayName(profile, 'You')
     : 'You';
 
   function toggleSlot(key) {

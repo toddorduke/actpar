@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useGoals } from '../../hooks/useGoals.js';
 import { supabase } from '../../lib/supabase.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './OnboardingPage.css';
 
 const CATEGORIES = [
@@ -18,13 +19,6 @@ const CATEGORIES = [
   { value: 'learning', label: '📚 Learning & Growth' },
   { value: 'career', label: '💼 Career & Business' },
   { value: 'other', label: '✨ Other' },
-];
-
-const MOTIVATIONS = [
-  'Accountability', 'Consistency', 'Community', 'Faith',
-  'Spiritual Growth', 'Sobriety', 'Mental Health', 'Financial Freedom',
-  'Family', 'Healing', 'Purpose', 'Focus', 'Confidence', 'Balance',
-  'Weight Loss', 'Strength', 'Energy', 'Gratitude', 'Career Growth',
 ];
 
 const GROWTH_AREAS = [
@@ -55,14 +49,8 @@ const WEAKNESSES = [
   "I hold on to things too long",
 ];
 
-// Quick: welcome → goal → people → done (4 screens, steps 1-4)
-// Thorough: welcome → goal → motivations → strengths → people → done (6 screens, steps 1-6)
-// step 1 = welcome (choose path)
-// step 2 = goal
-// step 3 = motivations+growth (thorough only)
-// step 4 = strengths+weaknesses (thorough only)
-// step 5 = find people
-// step 6 = done
+// Quick: welcome → goal → people → done (steps 1-4)
+// Thorough: welcome → goal → holding back → strengths → people → done (steps 1-6)
 
 export default function OnboardingPage() {
   const { user } = useContext(AuthContext);
@@ -74,7 +62,6 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [goalTitle, setGoalTitle] = useState('');
   const [goalCategory, setGoalCategory] = useState('');
-  const [motivations, setMotivations] = useState([]);
   const [workingOn, setWorkingOn] = useState([]);
   const [strengths, setStrengths] = useState([]);
   const [weaknesses, setWeaknesses] = useState([]);
@@ -104,8 +91,23 @@ export default function OnboardingPage() {
 
     const load = async () => {
       let profiles = [];
+      const seen = new Set();
 
-      if (goalCategory) {
+      // Priority 1: match by working_on overlap (what the new user is struggling with)
+      if (workingOn.length > 0) {
+        const formattedArr = `{${workingOn.map((v) => `"${v}"`).join(',')}}`;
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, avatar_url, city')
+          .neq('id', user.id)
+          .eq('onboarding_complete', true)
+          .filter('working_on', 'ov', formattedArr)
+          .limit(6);
+        (data ?? []).forEach((p) => { if (!seen.has(p.id)) { seen.add(p.id); profiles.push(p); } });
+      }
+
+      // Priority 2: match by same goal category
+      if (profiles.length < 6 && goalCategory) {
         const { data: goalRows } = await supabase
           .from('goals')
           .select('user_id')
@@ -114,16 +116,20 @@ export default function OnboardingPage() {
           .neq('user_id', user.id)
           .limit(12);
 
-        const ids = [...new Set((goalRows ?? []).map((g) => g.user_id))].slice(0, 6);
+        const ids = [...new Set((goalRows ?? []).map((g) => g.user_id))]
+          .filter((id) => !seen.has(id))
+          .slice(0, 6 - profiles.length);
+
         if (ids.length > 0) {
           const { data } = await supabase
             .from('profiles')
             .select('id, first_name, last_name, avatar_url, city')
             .in('id', ids);
-          profiles = data ?? [];
+          (data ?? []).forEach((p) => { if (!seen.has(p.id)) { seen.add(p.id); profiles.push(p); } });
         }
       }
 
+      // Fallback: recent users
       if (profiles.length === 0) {
         const { data } = await supabase
           .from('profiles')
@@ -152,7 +158,7 @@ export default function OnboardingPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [step, peopleStep, user?.id, goalCategory, mode]);
+  }, [step, peopleStep, user?.id, goalCategory, workingOn, mode]);
 
   async function handleSpark(profileId) {
     setSparkedIds((prev) => new Set([...prev, profileId]));
@@ -173,7 +179,7 @@ export default function OnboardingPage() {
     setSaving(true);
     await Promise.all([
       supabase.auth.updateUser({ data: { onboarding_complete: true, profile_setup_complete: true, working_on: workingOn, strengths, weaknesses } }),
-      supabase.from('profiles').update({ onboarding_complete: true }).eq('id', user.id),
+      supabase.from('profiles').update({ onboarding_complete: true, working_on: workingOn }).eq('id', user.id),
     ]);
     setSaving(false);
     navigate('/', { replace: true });
@@ -198,7 +204,7 @@ export default function OnboardingPage() {
             <ul className="welcome-features">
               <li><span className="feature-icon">🎯</span> Set goals and track your progress daily</li>
               <li><span className="feature-icon">⚡</span> Spark connections with like-minded people</li>
-              <li><span className="feature-icon">🤝</span> Join Pacts for group accountability</li>
+              <li><span className="feature-icon">🌍</span> Join the Tribe community for inspiration</li>
             </ul>
 
             <div className="setup-path-label">How do you want to get started?</div>
@@ -265,35 +271,16 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* ── Step 3 (thorough only): Motivations + Growth ── */}
+      {/* ── Step 3 (thorough only): What's holding you back ── */}
       {step === 3 && mode === 'thorough' && (
         <div className="onboarding-step">
           <div className="step-header">
             <div className="step-number">Step 2 of {totalSteps}</div>
-            <h2 className="step-title">What's fueling you — and what's holding you back?</h2>
+            <h2 className="step-title">What's holding you back?</h2>
             <p className="step-subtitle">Be honest with yourself. This is just between you and your goals.</p>
           </div>
           <div className="step-body">
             <div className="form-group">
-              <label className="form-label">What drives you? <span style={{ fontWeight: 400, opacity: 0.7 }}>(pick up to 3)</span></label>
-              <div className="motivations-grid">
-                {MOTIVATIONS.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className={`motivation-chip${motivations.includes(m) ? ' selected' : ''}`}
-                    onClick={() => setMotivations((prev) =>
-                      prev.includes(m) ? prev.filter((x) => x !== m) : prev.length < 3 ? [...prev, m] : prev
-                    )}
-                  >
-                    {m}{motivations.includes(m) && <span className="chip-check">✓</span>}
-                  </button>
-                ))}
-              </div>
-              {motivations.length === 3 && <p className="motivation-max-note">Maximum 3 selected</p>}
-            </div>
-            <div className="form-group" style={{ marginTop: '1.5rem' }}>
-              <label className="form-label">What are you working to overcome?</label>
               <div className="motivations-grid">
                 {GROWTH_AREAS.map((a) => (
                   <button
@@ -310,7 +297,7 @@ export default function OnboardingPage() {
           </div>
           <div className="step-actions">
             <button className="onboarding-btn primary" onClick={() => setStep(4)}>
-              {motivations.length > 0 || workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
+              {workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
             </button>
             <button className="onboarding-btn ghost" onClick={() => setStep(2)}>Back</button>
           </div>
@@ -373,8 +360,14 @@ export default function OnboardingPage() {
             <div className="step-number">Step {mode === 'quick' ? 2 : 4} of {totalSteps}</div>
             <h2 className="step-title">Find your people</h2>
             <p className="step-subtitle">
-              {goalCategory ? 'People working toward the same goals as you.' : 'Connect with others on their accountability journey.'}
+              {workingOn.length > 0 ? 'People who are working through the same struggles as you.' : goalCategory ? 'People working toward the same goals as you.' : 'Connect with others on their accountability journey.'}
             </p>
+            <div className="spark-explainer">
+              <span className="spark-explainer-icon">⚡</span>
+              <div>
+                <strong>What's a Spark?</strong> It's how you connect on ActPar. Send one to say "I see you, let's hold each other accountable." If they spark back, you're connected and can message each other.
+              </div>
+            </div>
           </div>
           <div className="step-body">
             {loadingSuggestions ? (
@@ -394,11 +387,11 @@ export default function OnboardingPage() {
                     <div className="suggestion-avatar">
                       {p.avatar_url
                         ? <img src={p.avatar_url} alt="" />
-                        : <div className="suggestion-avatar-fallback">{p.first_name?.[0] ?? '?'}</div>
+                        : <div className="suggestion-avatar-fallback">{getDisplayName(p, '?')[0]}</div>
                       }
                     </div>
                     <div className="suggestion-info">
-                      <div className="suggestion-name">{p.first_name} {p.last_name}</div>
+                      <div className="suggestion-name">{getDisplayName(p)}</div>
                       {p.goalTitle && <div className="suggestion-goal">🎯 {p.goalTitle}</div>}
                       {p.city && <div className="suggestion-city">📍 {p.city}</div>}
                     </div>
@@ -442,13 +435,6 @@ export default function OnboardingPage() {
               <div>
                 <div className="next-step-label">Check In Daily</div>
                 <div className="next-step-desc">Log your goals every day to build your streak</div>
-              </div>
-            </div>
-            <div className="next-step-card">
-              <span className="next-step-icon">🤝</span>
-              <div>
-                <div className="next-step-label">Join a Pact</div>
-                <div className="next-step-desc">Find your inner circle for real accountability</div>
               </div>
             </div>
             <div className="next-step-card">

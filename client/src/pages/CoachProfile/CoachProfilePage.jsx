@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { COACHES } from '../../data/coaches.js';
 import { useCoachProfile } from '../../hooks/useCoaches.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './CoachProfilePage.css';
 
 const TABS = ['Overview', 'Sessions', 'Workouts', 'Videos', 'Team'];
@@ -89,8 +90,7 @@ export default function CoachProfilePage() {
         content: msgContent,
       });
 
-      const myName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name]
-        .filter(Boolean).join(' ') || 'A new client';
+      const myName = getDisplayName(user?.user_metadata, 'A new client');
       await supabase.from('notifications').insert({
         user_id: coach.id,
         actor_id: user.id,

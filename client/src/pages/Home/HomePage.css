@@ -735,4 +735,22 @@
   .home-welcome-title { font-size: 1.3rem; }
 
   .home-card { padding: 18px; }
+
+  .home-sidebar {
+    flex-direction: column;
+  }
+
+  .home-sidebar-card {
+    flex: unset;
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .home-welcome { padding: 16px; }
+  .home-welcome-title { font-size: 1.15rem; }
+  .home-card { padding: 14px; }
+  .home-sidebar-card { padding: 14px; }
+  .checkin-card { padding: 10px 12px; }
+  .checkin-card-btn { padding: 6px 10px; font-size: 0.78rem; }
 }

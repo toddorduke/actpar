@@ -13,37 +13,50 @@ function urlBase64ToUint8Array(base64String) {
 
 export const usePushNotifications = () => {
   const { user } = useContext(AuthContext);
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState(() =>
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const supported = 'serviceWorker' in navigator && 'PushManager' in window;
+  const [pushError, setPushError] = useState(null);
+  const supported = typeof window !== 'undefined' &&
+    'serviceWorker' in navigator &&
+    'PushManager' in window &&
+    !!VAPID_PUBLIC_KEY;
 
   // Register service worker on mount
   useEffect(() => {
     if (!supported) return;
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.error('SW registration failed:', err);
+    });
   }, [supported]);
 
   // Check if already subscribed in DB
   useEffect(() => {
     if (!user || !supported) return;
     const check = async () => {
-      const reg = await navigator.serviceWorker.ready;
-      const existing = await reg.pushManager.getSubscription();
-      if (!existing) { setSubscribed(false); return; }
-      const { data } = await supabase
-        .from('push_subscriptions')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('endpoint', existing.endpoint)
-        .maybeSingle();
-      setSubscribed(!!data);
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.pushManager.getSubscription();
+        if (!existing) { setSubscribed(false); return; }
+        const { data } = await supabase
+          .from('push_subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('endpoint', existing.endpoint)
+          .maybeSingle();
+        setSubscribed(!!data);
+      } catch (err) {
+        console.error('Push subscription check failed:', err);
+      }
     };
     check();
   }, [user, supported]);
 
   const subscribe = useCallback(async () => {
     if (!supported || !user) return;
+    setPushError(null);
     setLoading(true);
     try {
       const perm = await Notification.requestPermission();
@@ -57,14 +70,18 @@ export const usePushNotifications = () => {
       });
 
       const { endpoint, keys } = sub.toJSON();
-      await supabase.from('push_subscriptions').upsert({
+      const { error } = await supabase.from('push_subscriptions').upsert({
         user_id: user.id,
         endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,
       }, { onConflict: 'endpoint' });
 
+      if (error) throw error;
       setSubscribed(true);
+    } catch (err) {
+      console.error('Push subscribe error:', err);
+      setPushError(err?.message ?? 'Failed to enable notifications.');
     } finally {
       setLoading(false);
     }
@@ -72,6 +89,7 @@ export const usePushNotifications = () => {
 
   const unsubscribe = useCallback(async () => {
     if (!supported || !user) return;
+    setPushError(null);
     setLoading(true);
     try {
       const reg = await navigator.serviceWorker.ready;
@@ -81,10 +99,13 @@ export const usePushNotifications = () => {
         await sub.unsubscribe();
       }
       setSubscribed(false);
+    } catch (err) {
+      console.error('Push unsubscribe error:', err);
+      setPushError(err?.message ?? 'Failed to disable notifications.');
     } finally {
       setLoading(false);
     }
   }, [user, supported]);
 
-  return { supported, permission, subscribed, loading, subscribe, unsubscribe };
+  return { supported, permission, subscribed, loading, pushError, subscribe, unsubscribe };
 };

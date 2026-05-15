@@ -7,6 +7,7 @@ import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
+import { getDisplayName } from '../../utils/displayName.js';
 import './ConnectionsPage.css';
 
 const SUGGESTED_PACTS = [
@@ -76,7 +77,7 @@ export default function ConnectionsPage() {
   }
 
   async function sendCheer(partnerId, partnerName) {
-    const myName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name].filter(Boolean).join(' ') || 'Your connection';
+    const myName = getDisplayName(user?.user_metadata, 'Your connection');
     await supabase.from('notifications').insert({
       user_id: partnerId,
       actor_id: user.id,
@@ -111,7 +112,7 @@ export default function ConnectionsPage() {
   }
 
   const visibleProfiles = browseProfiles.filter((p) => {
-    const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.toLowerCase();
+    const name = getDisplayName(p).toLowerCase();
     const alterEgo = (p.alter_ego_name ?? '').toLowerCase();
     const lfTags = (p.looking_for ?? []).join(' ').toLowerCase();
     const matchesSearch = !searchValue
@@ -189,7 +190,7 @@ export default function ConnectionsPage() {
               <h3 className="mn-section-title">Pending — Incoming</h3>
               {incomingConnects.map((req) => {
                 const p = req.profiles;
-                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                const name = getDisplayName(p, 'Someone');
                 return (
                   <div key={req.requester_id} className="mn-row">
                     <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
@@ -210,7 +211,7 @@ export default function ConnectionsPage() {
               })}
               {incomingSparks.map((req) => {
                 const p = req.profiles;
-                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                const name = getDisplayName(p, 'Someone');
                 return (
                   <div key={req.requester_id} className="mn-row mn-row-spark">
                     <div className="mn-avatar-locked"><span>⚡</span></div>
@@ -219,7 +220,7 @@ export default function ConnectionsPage() {
                       <span className="mn-badge spark-badge">⚡ Spark with message</span>
                       <span className="mn-spark-msg-blur">"{req.spark_message?.slice(0, 40)}…"</span>
                     </div>
-                    <button className="mn-premium-btn">Go Premium</button>
+                    <button className="mn-accept-btn" onClick={() => acceptConnection(req.requester_id)}>Accept</button>
                   </div>
                 );
               })}
@@ -235,7 +236,7 @@ export default function ConnectionsPage() {
             <div className="mn-connections-list">
               {acceptedConnections.map((c) => {
                 const name = c.partnerProfile
-                  ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
+                  ? getDisplayName(c.partnerProfile)
                   : 'Connected User';
                 const stats = partnerStats[c.partnerId];
                 const isToday = stats?.lastCheckin === new Date().toISOString().split('T')[0];
@@ -296,7 +297,7 @@ export default function ConnectionsPage() {
               <h3 className="mn-section-title">Sparks Sent — Waiting ({sentSparks.length})</h3>
               {sentSparks.map((req) => {
                 const p = req.profiles;
-                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                const name = getDisplayName(p, 'Someone');
                 return (
                   <div key={req.receiver_id} className="mn-row">
                     <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
@@ -326,7 +327,7 @@ export default function ConnectionsPage() {
               <h3 className="mn-section-title">Requests Sent — Waiting ({sentConnects.length})</h3>
               {sentConnects.map((req) => {
                 const p = req.profiles;
-                const name = p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : 'Someone';
+                const name = getDisplayName(p, 'Someone');
                 return (
                   <div key={req.receiver_id} className="mn-row">
                     <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
@@ -349,19 +350,6 @@ export default function ConnectionsPage() {
         </div>
       )}
 
-      {/* Find a Coach tab — redirect to coach discovery page */}
-      {mainTab === 'coaches' && (
-        <div className="find-coach-tab">
-          <div className="find-coach-promo">
-            <div className="find-coach-icon">🏅</div>
-            <h2 className="find-coach-title">Work with a Coach</h2>
-            <p className="find-coach-desc">Browse certified coaches for fitness, nutrition, mindset, and more. Book sessions directly in the app.</p>
-            <button className="find-coach-cta" onClick={() => navigate('/coaches')}>
-              Browse All Coaches →
-            </button>
-          </div>
-        </div>
-      )}
 
       {mainTab === 'connections' && <div className="connections-grid">
         {/* Left Sidebar */}
@@ -371,7 +359,7 @@ export default function ConnectionsPage() {
               <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Search by Name
+              Search by Name or Alter Ego
             </h3>
             <div className="search-container">
               <input
@@ -403,7 +391,7 @@ export default function ConnectionsPage() {
               <div className="incoming-requests-list">
                 {incomingConnects.map((req) => {
                   const name = req.profiles
-                    ? `${req.profiles.first_name ?? ''} ${req.profiles.last_name ?? ''}`.trim()
+                    ? getDisplayName(req.profiles)
                     : 'Someone';
                   return (
                     <div key={req.requester_id} className="incoming-req-item">
@@ -452,11 +440,6 @@ export default function ConnectionsPage() {
                     </div>
                   </div>
                 ))}
-                <div className="spark-paywall">
-                  <span>🔒</span>
-                  <span>Upgrade to see who sparked you &amp; read their message</span>
-                  <button className="spark-upgrade-btn">Go Premium</button>
-                </div>
               </div>
             )}
           </div>
@@ -475,115 +458,11 @@ export default function ConnectionsPage() {
             </div>
           </div>
 
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">
-              <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Quick Filters
-            </h3>
-            <div className="filter-buttons">
-              {[['all', 'All'], ['personal', '👤 Personal'], ['coach', '🏋️ Coach']].map(([f, lbl]) => (
-                <button
-                  key={f}
-                  className={`filter-btn${activeFilter === f ? ' active' : ''}`}
-                  onClick={() => setActiveFilter(f)}
-                >
-                  {lbl}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">Gender</h3>
-            <div className="filter-buttons">
-              {[['all', 'All'], ['male', '♂ Male'], ['female', '♀ Female']].map(([g, lbl]) => (
-                <button
-                  key={g}
-                  className={`filter-btn${genderFilter === g ? ' active' : ''}`}
-                  onClick={() => setGenderFilter(g)}
-                >
-                  {lbl}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">
-              <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Looking For
-            </h3>
-            <p className="lf-filter-hint">Find partners seeking the same thing</p>
-
-            {/* Custom category search */}
-            <div className="lf-search-wrap">
-              <input
-                type="text"
-                className="lf-search-input"
-                placeholder="Search or add a focus area…"
-                value={lfSearch}
-                onChange={(e) => setLfSearch(e.target.value)}
-              />
-              {lfSearch && (
-                <button className="lf-search-clear" onClick={() => setLfSearch('')}>×</button>
-              )}
-            </div>
-
-            {lfSearch.trim().length > 0 && (
-              <div className="lf-suggestions">
-                {lfSuggestions.map((c) => (
-                  <button
-                    key={c.id}
-                    className="lf-suggestion-chip"
-                    onClick={() => handleCategorySelect(c.name)}
-                  >
-                    {c.name}
-                    {c.status === 'active'
-                      ? <span className="lf-cat-badge lf-cat-active">popular</span>
-                      : <span className="lf-cat-badge lf-cat-pending">{c.use_count}/3</span>
-                    }
-                  </button>
-                ))}
-                {lfSearch.trim().length >= 3 && !hasExactMatch && (
-                  <button
-                    className="lf-create-chip"
-                    onClick={() => handleCategorySelect(lfSearch.trim())}
-                  >
-                    + Create "{lfSearch.trim()}" as a category
-                  </button>
-                )}
-                {lfSuggestions.length === 0 && lfSearch.trim().length < 3 && (
-                  <p className="lf-search-hint">Keep typing to search…</p>
-                )}
-              </div>
-            )}
-
-            <div className="lf-filter-chips">
-              {LF_CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  className={`lf-filter-chip${lfFilter === cat ? ' active' : ''}`}
-                  onClick={() => toggleLfFilter(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-            {lfFilter && (
-              <button className="lf-clear-btn" onClick={() => setLfFilter('')}>
-                Clear filter ×
-              </button>
-            )}
-          </div>
         </aside>
 
         {/* Card Stack */}
         <main className="card-stack-container">
-          {/* Mobile-only compact filter bar */}
+          {/* Mobile-only search bar */}
           <div className="mob-filter-bar">
             <input
               type="text"
@@ -592,23 +471,6 @@ export default function ConnectionsPage() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
-            <div className="mob-quick-filters">
-              {[['all', 'All'], ['personal', 'Personal'], ['coach', 'Coach']].map(([f, lbl]) => (
-                <button
-                  key={f}
-                  className={`mob-filter-chip${activeFilter === f ? ' active' : ''}`}
-                  onClick={() => setActiveFilter(f)}
-                >{lbl}</button>
-              ))}
-              <span className="mob-filter-divider" />
-              {[['all', 'All ⚤'], ['male', '♂'], ['female', '♀']].map(([g, lbl]) => (
-                <button
-                  key={g}
-                  className={`mob-filter-chip${genderFilter === g ? ' active' : ''}`}
-                  onClick={() => setGenderFilter(g)}
-                >{lbl}</button>
-              ))}
-            </div>
           </div>
 
           {loading ? (
@@ -662,7 +524,7 @@ export default function ConnectionsPage() {
                         <div className="card-content">
                           <div className="card-name-row">
                             <div className="profile-name">
-                              {`${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || 'Unknown'}
+                              {getDisplayName(profile, 'Unknown')}
                             </div>
                             <span className="card-type-badge">{profile.account_type ?? 'Personal'}</span>
                           </div>
@@ -781,7 +643,7 @@ export default function ConnectionsPage() {
                 ) : (
                   acceptedConnections.slice(0, 8).map((c) => {
                     const name = c.partnerProfile
-                      ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
+                      ? getDisplayName(c.partnerProfile)
                       : 'Connected User';
                     return (
                       <div key={c.id} className="mob-conn-item">
@@ -822,7 +684,7 @@ export default function ConnectionsPage() {
               )}
               {acceptedConnections.slice(0, 5).map((c) => {
                 const name = c.partnerProfile
-                  ? `${c.partnerProfile.first_name ?? ''} ${c.partnerProfile.last_name ?? ''}`.trim()
+                  ? getDisplayName(c.partnerProfile)
                   : 'Connected User';
                 return (
                   <div key={c.id} className="connection-item">
@@ -851,23 +713,6 @@ export default function ConnectionsPage() {
                   See all {acceptedConnections.length} connections →
                 </button>
               )}
-            </div>
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">
-              <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Suggested Pacts
-            </h3>
-            <div className="pacts-list">
-              {SUGGESTED_PACTS.map((p) => (
-                <div key={p.title} className="pact-item">
-                  <div className="pact-item-title">{p.title}</div>
-                  <div className="pact-item-members">{p.members} members</div>
-                </div>
-              ))}
             </div>
           </div>
 

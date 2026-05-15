@@ -7,82 +7,17 @@ import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import ReportModal from '../../components/common/ReportModal.jsx';
+import PostCard from '../../components/common/PostCard.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './PactPage.css';
 
-function timeAgo(isoString) {
-  const diff = (Date.now() - new Date(isoString)) / 1000;
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
-function PostCard({ post, onLike, onViewProfile, onReport, currentUserId, commentState, likedIds, toggling, likeCount }) {
-  const { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount } = commentState;
-  const liked = likedIds?.has(post.id) ?? false;
-  const isToggling = toggling?.has(post.id) ?? false;
-  const badgeMap = {
-    update: ['badge-update', '📊 Update'],
-    win: ['badge-win', '🎉 Win'],
-    challenge: ['badge-challenge', '💪 Challenge'],
-    event: ['badge-event', '📅 Event'],
-  };
-  const type = post.post_type ?? 'update';
-  const [cls, label] = badgeMap[type] || badgeMap.update;
-  const count = commentCount(post.id);
-  const isOpen = !!openPanels[post.id];
-  const authorName = post.profiles
-    ? `${post.profiles.first_name ?? ''} ${post.profiles.last_name ?? ''}`.trim() || 'Member'
-    : 'Member';
-
-  return (
-    <div className="post-card">
-      <div className="post-header">
-        <button className="post-author-btn" onClick={() => onViewProfile(post.user_id)}>
-          <Avatar url={post.profiles?.avatar_url} name={authorName} size={40} />
-        </button>
-        <div className="post-author-info">
-          <button className="post-author-btn post-author-name" onClick={() => onViewProfile(post.user_id)}>{authorName}</button>
-          <div className="post-timestamp">{timeAgo(post.created_at)}</div>
-        </div>
-        <span className={`post-badge ${cls}`}>{label}</span>
-        {post.user_id !== currentUserId && (
-          <button className="post-report-btn" onClick={() => onReport(post.id, post.user_id)} title="Report post">⋯</button>
-        )}
-      </div>
-      <p className="post-text">{post.content}</p>
-      <div className="post-actions">
-        <button
-          className={`action-btn${liked ? ' active liked' : ''}`}
-          onClick={() => onLike(post.id, likeCount ?? post.likes ?? 0)}
-          disabled={isToggling}
-        >
-          <svg className="action-icon" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-          {likeCount ?? post.likes ?? 0}
-        </button>
-        <button className={`action-btn${isOpen ? ' active' : ''}`} onClick={() => togglePanel(post.id)}>
-          <svg className="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          {count > 0 ? count : ''} Comment{count !== 1 ? 's' : ''}
-        </button>
-      </div>
-      {isOpen && (
-        <CommentPanel
-          postId={post.id}
-          postType="pact"
-          comments={commentsByPost[post.id] ?? []}
-          loading={!!loadingPost[post.id]}
-          onAdd={addComment}
-          onDelete={deleteComment}
-        />
-      )}
-    </div>
-  );
-}
+const PACT_BADGE_MAP = {
+  update: ['badge-update', '📊 Update'],
+  win: ['badge-win', '🎉 Win'],
+  challenge: ['badge-challenge', '💪 Challenge'],
+  event: ['badge-event', '📅 Event'],
+};
 
 function RulesList({ rules, myRole, onAdd, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
@@ -165,9 +100,7 @@ function PactLeaderboard({ members }) {
         setBoard(
           members
             .map((m) => {
-              const name = m.profiles
-                ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() || 'Member'
-                : 'Member';
+              const name = getDisplayName(m.profiles);
               return { userId: m.user_id, name, count: counts[m.user_id] || 0 };
             })
             .sort((a, b) => b.count - a.count)
@@ -619,7 +552,7 @@ export default function PactPage() {
             </h3>
             <div className="members-list">
               {members.map((m) => {
-                const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() || 'Member' : 'Member';
+                const name = getDisplayName(m.profiles);
                 const badge = m.role === 'founder' ? '👑' : m.role === 'co-lead' ? '⭐' : '';
                 const isMe = m.user_id === pact?.created_by || m.role === 'founder';
                 const canManage = isFounder && !isMe;
@@ -673,7 +606,7 @@ export default function PactPage() {
               <p className="quiet-members-hint">These members haven't posted in 48h — send a nudge.</p>
               <div className="quiet-members-list">
                 {quietMembers.map((m) => {
-                  const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() || 'Member' : 'Member';
+                  const name = getDisplayName(m.profiles);
                   const nudged = nudgedIds.has(m.user_id);
                   return (
                     <div key={m.user_id} className="quiet-member-row">
@@ -737,6 +670,8 @@ export default function PactPage() {
                   likedIds={likedIds}
                   toggling={toggling}
                   likeCount={localLikeCounts[post.id] ?? post.likes ?? 0}
+                  badgeMap={PACT_BADGE_MAP}
+                  commentPostType="pact"
                 />
               ))
             )}
@@ -767,7 +702,7 @@ export default function PactPage() {
                   .sort((a, b) => b.count - a.count)
                   .slice(0, 5)
                   .map(({ m, count }) => {
-                    const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() || 'Member' : 'Member';
+                    const name = getDisplayName(m.profiles);
                     return (
                       <div key={m.id} className="contributor-item">
                         <Avatar url={m.profiles?.avatar_url} name={name} size={32} />

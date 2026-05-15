@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
+import { getDisplayName } from '../utils/displayName.js';
 
 export const usePact = (activePactId = null) => {
   const { user } = useContext(AuthContext);
@@ -135,7 +136,7 @@ export const usePact = (activePactId = null) => {
         .select('first_name, last_name')
         .eq('id', user.id)
         .single();
-      const name = joiner ? `${joiner.first_name ?? ''} ${joiner.last_name ?? ''}`.trim() : 'Someone';
+      const name = getDisplayName(joiner, 'Someone');
       createNotification({
         userId: pactInfo.created_by,
         actorId: user.id,
@@ -209,7 +210,7 @@ export const usePact = (activePactId = null) => {
       setPosts((prev) => [data, ...prev]);
       // Notify all other pact members
       const posterName = data.profiles
-        ? `${data.profiles.first_name ?? ''} ${data.profiles.last_name ?? ''}`.trim() || 'Someone'
+        ? getDisplayName(data.profiles, 'Someone')
         : 'Someone';
       members
         .filter((m) => m.user_id !== user.id)

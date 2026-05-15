@@ -13,18 +13,27 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Supabase fires PASSWORD_RECOVERY when the user arrives via the reset link
   useEffect(() => {
+    let cancelled = false;
+
+    // PASSWORD_RECOVERY fires during app init (AuthContext calls getSession before
+    // this page mounts), so we can miss the event. Check the active session directly.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled && session) setReady(true);
+    });
+
+    // Also listen in case we mount before AuthContext processes the hash
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true);
     });
 
-    // If no event fires within 4 seconds the link is invalid/expired
+    // If nothing resolves within 6 seconds, the link is invalid or expired
     const timer = setTimeout(() => {
-      setInvalid((prev) => prev || !ready);
-    }, 4000);
+      if (!cancelled) setInvalid(true);
+    }, 6000);
 
     return () => {
+      cancelled = true;
       subscription.unsubscribe();
       clearTimeout(timer);
     };

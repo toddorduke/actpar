@@ -1038,59 +1038,50 @@
   /* ── Compact filter bar ── */
   .mob-filter-bar {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
     width: 100%;
-    max-width: 500px;
     margin-bottom: 12px;
   }
 
   .mob-search-input {
     width: 100%;
-    padding: 10px 14px;
+    padding: 10px 16px;
     border: 1.5px solid #d1d5db;
-    border-radius: 12px;
+    border-radius: 20px;
     background: white;
     color: #111827;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-family: inherit;
     outline: none;
     box-sizing: border-box;
   }
 
   .mob-search-input::placeholder { color: #9ca3af; }
-  .mob-search-input:focus { border-color: #f59e0b; }
-
-  .mob-quick-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-  }
+  .mob-search-input:focus { border-color: #7c3aed; }
 
   .mob-filter-chip {
-    padding: 6px 12px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.14);
+    padding: 6px 10px;
+    background: white;
+    border: 1.5px solid #d1d5db;
     border-radius: 20px;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: #d1d5db;
+    color: #374151;
     cursor: pointer;
     transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .mob-filter-chip.active {
-    background: #f59e0b;
-    border-color: #f59e0b;
-    color: #111827;
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: white;
   }
 
   .mob-filter-divider {
     width: 1px;
     height: 18px;
-    background: rgba(255,255,255,0.15);
-    margin: 0 2px;
+    background: #d1d5db;
     flex-shrink: 0;
   }
 
@@ -1582,4 +1573,15 @@
   .mn-conn-row { padding: 10px 10px; }
   .mn-conn-cheer-btn { padding: 5px 8px; font-size: 0.72rem; }
   .mn-conn-icon-btn { width: 30px; height: 30px; }
+}
+
+@media (max-width: 400px) {
+  .connections-page { padding: 16px 10px 24px; }
+  .page-title { font-size: 1.5em; }
+  .card-stack { height: 460px; }
+  .action-btn { width: 54px; height: 54px; }
+  .spark-send-btn { width: 64px; height: 64px; }
+  .card-content { padding: 12px 14px 14px; }
+  .profile-name { font-size: 1.15em; }
+  .mob-filter-chip { padding: 6px 10px; font-size: 0.76rem; }
 }

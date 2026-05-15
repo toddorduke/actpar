@@ -12,6 +12,7 @@ import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
+import { timeAgo } from '../../utils/dateUtils.js';
 import './ProfilePage.css';
 
 const TIER_LABELS = { 1: 'Top Priority', 2: 'Important', 3: 'Foundation' };
@@ -51,13 +52,6 @@ function roundNum(n) {
   return Number.isInteger(n) ? n : Math.round(n * 10) / 10;
 }
 
-function timeAgo(iso) {
-  const diff = (Date.now() - new Date(iso)) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 const LOOKING_FOR_CATEGORIES = [
   'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
@@ -1452,7 +1446,6 @@ const ProfilePage = () => {
                 <div className="shareto-options">
                   {[
                     ['tribe_feed', '📢 Tribe Community Feed'],
-                    ['pact', '🔐 My Pact'],
                     ['profile', '👤 Profile Only'],
                   ].map(([val, label]) => (
                     <button

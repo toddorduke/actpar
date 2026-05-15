@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  }
+
+  body {
+    background: #0f1729;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Ambient glow blobs */
+  .glow-purple {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%);
+    top: -160px; left: -80px;
+    pointer-events: none;
+  }
+  .glow-orange {
+    position: absolute;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%);
+    bottom: -80px; right: 60px;
+    pointer-events: none;
+  }
+  .glow-center {
+    position: absolute;
+    width: 600px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  /* Subtle grid overlay */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .content {
+    display: flex;
+    align-items: center;
+    gap: 64px;
+    z-index: 2;
+    padding: 0 80px;
+  }
+
+  /* Logo icon — SVG recreation of the ActPar mark */
+  .logo-icon { flex-shrink: 0; }
+
+  .text-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,58,237,0.18);
+    border: 1px solid rgba(124,58,237,0.35);
+    border-radius: 100px;
+    padding: 7px 18px;
+    color: #a78bfa;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-bottom: 22px;
+    width: fit-content;
+  }
+
+  .app-name {
+    font-size: 112px;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .act { color: #f8fafc; }
+  .par { color: #f97316; }
+
+  .tagline {
+    font-size: 24px;
+    color: #94a3b8;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 480px;
+  }
+
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #7c3aed, #f97316);
+    border-radius: 2px;
+    margin: 28px 0;
+  }
+
+  .footer-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 5px 14px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+  <div class="glow-purple"></div>
+  <div class="glow-orange"></div>
+  <div class="glow-center"></div>
+  <div class="grid"></div>
+
+  <div class="content">
+    <!-- Logo mark -->
+    <div class="logo-icon">
+      <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="purpleBody" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#818cf8"/>
+            <stop offset="100%" stop-color="#4f46e5"/>
+          </linearGradient>
+          <linearGradient id="orangeBody" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fb923c"/>
+            <stop offset="100%" stop-color="#ea580c"/>
+          </linearGradient>
+          <linearGradient id="darkPurple" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#312e81"/>
+            <stop offset="100%" stop-color="#1e1b4b"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Left figure head (purple) -->
+        <circle cx="52" cy="34" r="16" fill="#6366f1"/>
+
+        <!-- Right figure head (orange) -->
+        <circle cx="118" cy="46" r="14" fill="#f97316"/>
+
+        <!-- Left mountain body (purple) -->
+        <path d="M10 158 L52 62 L94 158Z" fill="url(#purpleBody)" opacity="0.95"/>
+        <!-- Darker overlap center -->
+        <path d="M72 158 L94 100 L116 158Z" fill="url(#darkPurple)"/>
+        <!-- Right mountain body (orange) -->
+        <path d="M86 158 L118 74 L152 158Z" fill="url(#orangeBody)" opacity="0.95"/>
+
+        <!-- Flag pole -->
+        <rect x="104" y="16" width="4" height="60" rx="2" fill="#818cf8"/>
+        <!-- Flag -->
+        <path d="M108 16 L136 28 L108 40Z" fill="#f97316"/>
+
+        <!-- Checkmark circle -->
+        <circle cx="90" cy="110" r="26" fill="#f97316"/>
+        <circle cx="90" cy="110" r="22" fill="#ea580c"/>
+        <polyline
+          points="78,110 86,120 104,96"
+          stroke="white"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
+      </svg>
+    </div>
+
+    <!-- Text -->
+    <div class="text-side">
+      <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Accountability Partner
+      </div>
+      <div class="app-name">
+        <span class="act">Act</span><span class="par">Par</span>
+      </div>
+      <div class="tagline">The app that keeps you accountable<br>to the goals that matter.</div>
+      <div class="divider"></div>
+      <div class="footer-chips">
+        <span class="chip">Goal Tracking</span>
+        <span class="chip">Accountability</span>
+        <span class="chip">Community</span>
+        <span class="chip">Growth</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -9,11 +9,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      // If user chose "don't remember me", sign them out when the browser is reopened
-      // (sessionStorage clears on browser close; localStorage persists)
+      // Never sign out during a password recovery flow — the reset page needs the session
+      const isRecovery = window.location.hash.includes('type=recovery') ||
+        window.location.pathname === '/reset-password';
+
       const noRemember = localStorage.getItem('actpar_no_remember');
       const sameSession = sessionStorage.getItem('actpar_session_active');
-      if (noRemember && !sameSession && session) {
+      if (noRemember && !sameSession && session && !isRecovery) {
         supabase.auth.signOut();
         setUser(null);
       } else {

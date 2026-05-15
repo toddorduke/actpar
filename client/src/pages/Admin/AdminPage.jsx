@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import { useNavigate } from 'react-router-dom';
+import { getDisplayName } from '../../utils/displayName.js';
 import './AdminPage.css';
 
 const ADMIN_EMAILS = ['toddwork1995@gmail.com'];
@@ -86,7 +87,7 @@ export default function AdminPage() {
                 <div><span className="report-label">Reporter:</span> {r.reporter?.email ?? 'Unknown'}</div>
                 <div>
                   <span className="report-label">Reported:</span>{' '}
-                  {r.reported ? `${r.reported.first_name ?? ''} ${r.reported.last_name ?? ''}`.trim() : 'Unknown'}
+                  {getDisplayName(r.reported, 'Unknown')}
                 </div>
                 {r.post_id && <div><span className="report-label">Post ID:</span> {r.post_id}</div>}
               </div>

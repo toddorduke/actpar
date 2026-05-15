@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
+import { getDisplayName } from '../../utils/displayName.js';
 import './LeaderboardPage.css';
 
 const CATEGORY_META = {
@@ -65,7 +66,7 @@ export default function LeaderboardPage() {
         if (!userMap[g.user_id]) {
           userMap[g.user_id] = {
             id: p.id,
-            name: `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'User',
+            name: getDisplayName(p, 'User'),
             avatar_url: p.avatar_url,
             alter_ego: p.alter_ego_name,
             city: p.city ?? '',

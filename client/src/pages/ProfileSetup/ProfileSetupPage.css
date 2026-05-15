@@ -145,6 +145,45 @@
   color: #9ca3af;
 }
 
+/* Category chips */
+.profile-setup-cat-count {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #9ca3af;
+  margin-left: 6px;
+}
+
+.profile-setup-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-setup-cat {
+  padding: 7px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 100px;
+  background: #fff;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.profile-setup-cat:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.profile-setup-cat.selected {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+  font-weight: 600;
+}
+
 /* Button */
 .profile-setup-btn {
   width: 100%;

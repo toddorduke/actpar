@@ -14,10 +14,39 @@ const LF_CATEGORIES = [
   'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
 ];
 
+const US_CITIES = [
+  'Albuquerque, NM', 'Anchorage, AK', 'Arlington, TX', 'Atlanta, GA', 'Aurora, CO',
+  'Austin, TX', 'Bakersfield, CA', 'Baltimore, MD', 'Baton Rouge, LA', 'Birmingham, AL',
+  'Boise, ID', 'Boston, MA', 'Buffalo, NY', 'Chandler, AZ', 'Charlotte, NC',
+  'Chesapeake, VA', 'Chicago, IL', 'Chula Vista, CA', 'Cincinnati, OH', 'Cleveland, OH',
+  'Colorado Springs, CO', 'Columbus, OH', 'Corpus Christi, TX', 'Dallas, TX', 'Denver, CO',
+  'Detroit, MI', 'Durham, NC', 'El Paso, TX', 'Fort Wayne, IN', 'Fort Worth, TX',
+  'Fremont, CA', 'Fresno, CA', 'Garland, TX', 'Gilbert, AZ', 'Glendale, AZ',
+  'Glendale, CA', 'Greensboro, NC', 'Henderson, NV', 'Hialeah, FL', 'Honolulu, HI',
+  'Houston, TX', 'Indianapolis, IN', 'Irvine, CA', 'Irving, TX', 'Jacksonville, FL',
+  'Jersey City, NJ', 'Kansas City, MO', 'Laredo, TX', 'Las Vegas, NV', 'Lexington, KY',
+  'Lincoln, NE', 'Long Beach, CA', 'Los Angeles, CA', 'Louisville, KY', 'Lubbock, TX',
+  'Madison, WI', 'Memphis, TN', 'Mesa, AZ', 'Miami, FL', 'Milwaukee, WI',
+  'Minneapolis, MN', 'Nashville, TN', 'New Orleans, LA', 'New York, NY', 'Newark, NJ',
+  'Norfolk, VA', 'North Las Vegas, NV', 'Oakland, CA', 'Oklahoma City, OK', 'Omaha, NE',
+  'Orlando, FL', 'Philadelphia, PA', 'Phoenix, AZ', 'Pittsburgh, PA', 'Plano, TX',
+  'Portland, OR', 'Raleigh, NC', 'Reno, NV', 'Richmond, VA', 'Riverside, CA',
+  'Sacramento, CA', 'Saint Paul, MN', 'San Antonio, TX', 'San Diego, CA', 'San Francisco, CA',
+  'San Jose, CA', 'Santa Ana, CA', 'Scottsdale, AZ', 'Seattle, WA', 'Spokane, WA',
+  'St. Louis, MO', 'Stockton, CA', 'Tampa, FL', 'Toledo, OH', 'Tucson, AZ',
+  'Tulsa, OK', 'Virginia Beach, VA', 'Washington, DC', 'Wichita, KS', 'Winston-Salem, NC',
+];
+
+const GROWTH_AREAS = [
+  'Beating Procrastination', 'Building Daily Discipline', 'Sharpening My Focus',
+  'Staying Consistent', 'Reigniting My Motivation', 'Mastering My Time',
+  'Silencing Self-Doubt', 'Breaking Old Habits', 'Taking More Action',
+  'Quieting Overthinking', 'Managing Stress Better', 'Showing Up for Myself',
+];
+
 const SECTIONS = [
   { id: 'account', label: 'Account', icon: '👤' },
   { id: 'profile', label: 'My Profile', icon: '✨' },
-  { id: 'coach', label: 'Coach Profile', icon: '🏅', coachOnly: true },
   { id: 'password', label: 'Password', icon: '🔒' },
   { id: 'notifications', label: 'Notifications', icon: '🔔' },
   { id: 'about', label: 'About ActPar', icon: 'ℹ️' },
@@ -32,7 +61,7 @@ export default function SettingsPage() {
   const avatarInputRef = useRef(null);
 
   const [activeSection, setActiveSection] = useState('account');
-  const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush, permission: pushPermission } = usePushNotifications();
+  const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush, permission: pushPermission, pushError } = usePushNotifications();
 
   // Account
   const [firstName, setFirstName] = useState('');
@@ -49,8 +78,12 @@ export default function SettingsPage() {
   const egoTimer = useRef(null);
   const [tagline, setTagline] = useState('');
   const [city, setCity] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
+  const cityRef = useRef(null);
   const [gender, setGender] = useState('');
   const [lookingFor, setLookingFor] = useState([]);
+  const [workingOn, setWorkingOn] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -97,6 +130,7 @@ export default function SettingsPage() {
       setCity(profile.city ?? '');
       setGender(profile.gender ?? '');
       setLookingFor(profile.looking_for ?? []);
+      setWorkingOn(profile.working_on ?? []);
       const prefs = profile.notification_prefs ?? {};
       setNotifDailyReminder(prefs.daily_reminder ?? true);
       setNotifReminderHour(prefs.reminder_hour ?? 8);
@@ -134,6 +168,18 @@ export default function SettingsPage() {
       setEgoStatus(data ? 'taken' : 'available');
     }, 600);
   }, [profile?.alter_ego_name, user?.id]);
+
+  // Close city dropdown on outside click
+  React.useEffect(() => {
+    const handler = (e) => { if (cityRef.current && !cityRef.current.contains(e.target)) setCityOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const cityOptions = useMemo(() => {
+    const q = citySearch.trim().toLowerCase();
+    return q ? US_CITIES.filter((c) => c.toLowerCase().includes(q)) : US_CITIES;
+  }, [citySearch]);
 
   const [lfSearch, setLfSearch] = useState('');
   const { search: searchCats, createOrAdopt } = useCustomCategories(user?.id);
@@ -232,6 +278,7 @@ export default function SettingsPage() {
         city: city.trim() || null,
         gender: gender || null,
         looking_for: lookingFor,
+        working_on: workingOn,
       });
     } else {
       await updateProfile({
@@ -240,6 +287,7 @@ export default function SettingsPage() {
         city: city.trim() || null,
         gender: gender || null,
         looking_for: lookingFor,
+        working_on: workingOn,
       });
     }
 
@@ -459,15 +507,58 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="settings-field">
+                <div className="settings-field" ref={cityRef}>
                   <label>City</label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="settings-input"
-                    placeholder="e.g. Atlanta, GA"
-                  />
+                  <div className="settings-city-dropdown">
+                    <button
+                      type="button"
+                      className="settings-city-trigger"
+                      onClick={() => { setCityOpen((o) => !o); setCitySearch(''); }}
+                    >
+                      <span className={city ? '' : 'settings-city-placeholder'}>
+                        {city || 'Select your city'}
+                      </span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                    {cityOpen && (
+                      <div className="settings-city-menu">
+                        <input
+                          autoFocus
+                          type="text"
+                          className="settings-city-search"
+                          placeholder="Search city..."
+                          value={citySearch}
+                          onChange={(e) => setCitySearch(e.target.value)}
+                        />
+                        <div className="settings-city-list">
+                          {city && (
+                            <button
+                              type="button"
+                              className="settings-city-option settings-city-clear"
+                              onClick={() => { setCity(''); setCityOpen(false); }}
+                            >
+                              Clear selection
+                            </button>
+                          )}
+                          {cityOptions.length === 0 && (
+                            <div className="settings-city-empty">No cities found</div>
+                          )}
+                          {cityOptions.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              className={`settings-city-option${city === c ? ' selected' : ''}`}
+                              onClick={() => { setCity(c); setCityOpen(false); }}
+                            >
+                              {c}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="settings-field">
@@ -543,6 +634,25 @@ export default function SettingsPage() {
                         onClick={() => toggleLf(tag)}
                       >
                         {tag} ×
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="settings-field">
+                  <label>What's holding you back?</label>
+                  <span className="settings-hint" style={{ marginBottom: 8 }}>Used to match you with people working through the same things</span>
+                  <div className="settings-lf-chips">
+                    {GROWTH_AREAS.map((area) => (
+                      <button
+                        key={area}
+                        type="button"
+                        className={`settings-lf-chip${workingOn.includes(area) ? ' selected' : ''}`}
+                        onClick={() => setWorkingOn((prev) =>
+                          prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
+                        )}
+                      >
+                        {area}
                       </button>
                     ))}
                   </div>
@@ -655,13 +765,15 @@ export default function SettingsPage() {
               <h3 className="settings-section-title">Notification Preferences</h3>
               <p className="settings-desc">Choose what you want to be notified about.</p>
 
-              {pushSupported && (
+              {pushSupported ? (
                 <div className="settings-push-row">
                   <div className="settings-toggle-info">
                     <div className="settings-toggle-title">Browser Push Notifications</div>
                     <div className="settings-toggle-desc">
                       {pushPermission === 'denied'
-                        ? 'Notifications blocked — enable them in your browser settings.'
+                        ? <>Notifications blocked in your browser. Go to your browser's site settings for actpar.com and allow notifications, then come back.</>
+                        : pushError
+                        ? <span style={{ color: '#ef4444' }}>{pushError}</span>
                         : 'Get notified even when the app is closed.'}
                     </div>
                   </div>
@@ -673,6 +785,15 @@ export default function SettingsPage() {
                   >
                     <span className="toggle-knob" />
                   </button>
+                </div>
+              ) : (
+                <div className="settings-push-row">
+                  <div className="settings-toggle-info">
+                    <div className="settings-toggle-title">Browser Push Notifications</div>
+                    <div className="settings-toggle-desc" style={{ color: '#9ca3af' }}>
+                      Not supported on this browser. Try Chrome or Edge on desktop, or make sure you're on HTTPS.
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -699,7 +820,6 @@ export default function SettingsPage() {
                     )
                   ],
                   [notifSparks, setNotifSparks, 'Spark Requests', 'When someone sends you a spark connection'],
-                  [notifPact, setNotifPact, 'Pact Activity', 'New posts and updates in your pacts'],
                   [notifTribe, setNotifTribe, 'Tribe Community', 'New posts in the community feed'],
                 ].map(([val, setter, title, desc, extra]) => (
                   <div key={title} className="settings-toggle-row">

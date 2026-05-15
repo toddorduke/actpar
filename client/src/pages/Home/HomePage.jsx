@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useGoals } from '../../hooks/useGoals.js';
 import { useProfile } from '../../hooks/useProfile.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import { useReflections } from '../../hooks/useReflections.js';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
@@ -83,7 +84,7 @@ const HomePage = () => {
   const [cheerSent, setCheerSent] = useState(new Set());
 
   async function sendCheer(item) {
-    const myName = [user?.user_metadata?.first_name, user?.user_metadata?.last_name].filter(Boolean).join(' ') || 'Your connection';
+    const myName = getDisplayName(user?.user_metadata, 'Your connection');
     await supabase.from('notifications').insert({
       user_id: item.profiles.id,
       actor_id: user.id,
@@ -404,7 +405,7 @@ const HomePage = () => {
                 <div className="home-activity-list">
                   {activity.slice(0, 5).map((item) => {
                     const name = item.profiles
-                      ? `${item.profiles.first_name ?? ''} ${item.profiles.last_name ?? ''}`.trim() || 'Someone'
+                      ? getDisplayName(item.profiles, 'Someone')
                       : 'Someone';
                     const milestone = isMilestone(item.day_count);
                     const isToday = item.last_checked_in === new Date().toISOString().split('T')[0];
@@ -460,7 +461,7 @@ const HomePage = () => {
                   <p className="home-empty">No new suggestions right now.</p>
                 )}
                 {suggested.map((person) => {
-                  const name = `${person.first_name ?? ''} ${person.last_name ?? ''}`.trim() || 'User';
+                  const name = getDisplayName(person, 'User');
                   return (
                     <div key={person.id} className="home-suggested-item">
                       <Avatar url={person.avatar_url} name={name} size={40} />
@@ -513,9 +514,7 @@ const HomePage = () => {
               <div className="home-quick-links">
                 <button className="home-quick-btn" onClick={() => navigate('/connections')}>⚡ Sparks</button>
                 <button className="home-quick-btn" onClick={() => navigate('/tribe-community')}>🌍 Tribe</button>
-                <button className="home-quick-btn" onClick={() => navigate('/pact')}>🔐 Pact</button>
                 <button className="home-quick-btn" onClick={() => navigate('/messages')}>💬 Messages</button>
-                <button className="home-quick-btn" onClick={() => navigate('/coaches')}>🏋️ Coaches</button>
                 <button className="home-quick-btn" onClick={() => navigate('/profile')}>👤 Profile</button>
               </div>
             </div>

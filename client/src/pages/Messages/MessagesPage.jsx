@@ -6,6 +6,7 @@ import { useDirectMessages } from '../../hooks/useDirectMessages.js';
 import { useBlock } from '../../hooks/useBlock.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
+import { getDisplayName } from '../../utils/displayName.js';
 import './MessagesPage.css';
 
 function timeAgo(iso) {
@@ -43,9 +44,7 @@ function ConversationList({ conversations, selectedId, onSelect, onNewMessage, l
       )}
 
       {conversations.map((conv) => {
-        const name = conv.partner
-          ? `${conv.partner.first_name ?? ''} ${conv.partner.last_name ?? ''}`.trim() || 'User'
-          : 'User';
+        const name = getDisplayName(conv.partner, 'User');
         const preview = conv.lastMessage?.isMine
           ? `You: ${conv.lastMessage.content}`
           : conv.lastMessage?.content ?? '';
@@ -95,9 +94,7 @@ function MessageThread({ otherUserId, onBack }) {
     setSending(false);
   }
 
-  const otherName = otherProfile
-    ? `${otherProfile.first_name ?? ''} ${otherProfile.last_name ?? ''}`.trim() || 'User'
-    : 'User';
+  const otherName = getDisplayName(otherProfile, 'User');
 
   return (
     <div className="thread-container">
@@ -210,8 +207,7 @@ function NewMessageModal({ onClose, onSelect }) {
   }, [user]);
 
   const filtered = connections.filter((p) => {
-    const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.toLowerCase();
-    return !search || name.includes(search.toLowerCase());
+    return !search || getDisplayName(p).toLowerCase().includes(search.toLowerCase());
   });
 
   return (
@@ -235,7 +231,7 @@ function NewMessageModal({ onClose, onSelect }) {
             </p>
           )}
           {filtered.map((p) => {
-            const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'User';
+            const name = getDisplayName(p, 'User');
             return (
               <button key={p.id} className="new-msg-person" onClick={() => { onSelect(p.id); onClose(); }}>
                 <Avatar url={p.avatar_url} name={name} size={42} />

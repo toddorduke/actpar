@@ -156,6 +156,12 @@
   }
 }
 
+@media (max-width: 400px) {
+  .login-box {
+    padding: 24px 16px;
+  }
+}
+
 .login-row {
   display: flex;
   align-items: center;

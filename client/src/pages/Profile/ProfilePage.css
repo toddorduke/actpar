@@ -2323,6 +2323,40 @@
   }
 }
 
+@media (max-width: 400px) {
+  .profile-header {
+    padding: 16px 14px;
+  }
+
+  .profile-header-identity {
+    gap: 10px;
+  }
+
+  .profile-avatar-img,
+  .profile-avatar-placeholder {
+    width: 64px;
+    height: 64px;
+    font-size: 1.4rem;
+  }
+
+  .profile-name {
+    font-size: 1.35rem;
+  }
+
+  .alter-ego-name {
+    font-size: 1rem;
+  }
+
+  .profile-section {
+    padding: 14px;
+  }
+
+  .profile-tab {
+    padding: 7px 10px;
+    font-size: 0.76rem;
+  }
+}
+
 /* ── About Me card ── */
 .sidebar-about-header {
   display: flex;

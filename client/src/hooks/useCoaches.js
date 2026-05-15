@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { getDisplayName } from '../utils/displayName.js';
 
 const COACH_FIELDS = [
   'id', 'first_name', 'last_name', 'avatar_url', 'city',
@@ -14,7 +15,7 @@ export function profileToCoach(p) {
   return {
     id: p.id,
     isReal: true,
-    name: `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim(),
+    name: getDisplayName(p),
     tagline: p.coach_tagline ?? p.tagline ?? '',
     specialty: p.coach_specialty ?? '',
     location: p.city ?? '',

@@ -201,3 +201,13 @@
   .you-links-grid { grid-template-columns: repeat(2, 1fr); }
   .you-profile-card { flex-wrap: wrap; }
 }
+
+@media (max-width: 400px) {
+  .you-page { padding: 16px 12px 80px; gap: 16px; }
+  .you-profile-card { padding: 16px; gap: 12px; }
+  .you-section { padding: 16px; }
+  .you-link-card { padding: 12px 6px; }
+  .you-link-emoji { font-size: 1.2rem; }
+  .you-link-label { font-size: 0.74rem; }
+  .you-nav-pill { padding: 8px 12px; font-size: 0.8rem; }
+}

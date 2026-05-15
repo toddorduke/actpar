@@ -362,8 +362,23 @@
 }
 
 @media (max-width: 540px) {
-  .about-hero { padding: 70px 20px 60px; }
+  .about-hero { padding: 60px 20px 50px; }
   .about-headline { font-size: 1.6rem; }
-  .about-section { padding: 56px 0; }
-  .about-section-title { font-size: 1.6rem; }
+  .about-section { padding: 48px 0; }
+  .about-section-title { font-size: 1.5rem; }
+  .about-mission-text h2 { font-size: 1.5rem; }
+  .about-categories-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 400px) {
+  .about-hero { padding: 48px 16px 40px; }
+  .about-headline { font-size: 1.4rem; }
+  .about-subheadline { font-size: 0.92rem; }
+  .about-section { padding: 36px 0; }
+  .about-section-title { font-size: 1.3rem; }
+  .about-hero-actions { flex-direction: column; gap: 10px; }
+  .about-cta-btn { text-align: center; }
+  .about-categories-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .about-feature-card { padding: 20px 16px; }
+  .about-footer-col { min-width: unset; }
 }

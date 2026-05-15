@@ -476,7 +476,8 @@
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .messages-page {
-    height: calc(100vh - 56px);
+    /* top nav ~54px + bottom nav 56px + safe area */
+    height: calc(100vh - 54px - 56px - env(safe-area-inset-bottom));
   }
 
   .messages-layout {
@@ -503,5 +504,9 @@
 
   .thread-container {
     height: 100%;
+  }
+
+  .thread-input-bar {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
 }

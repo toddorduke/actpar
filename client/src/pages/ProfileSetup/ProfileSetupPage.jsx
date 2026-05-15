@@ -7,6 +7,21 @@ import Avatar from '../../components/common/Avatar.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './ProfileSetupPage.css';
 
+const CATEGORIES = [
+  { value: 'faith',        label: '✝️ Faith' },
+  { value: 'fitness',      label: '💪 Fitness' },
+  { value: 'nutrition',    label: '🥗 Nutrition' },
+  { value: 'mental-health',label: '🧠 Mental Health' },
+  { value: 'career',       label: '💼 Career' },
+  { value: 'finance',      label: '💰 Finance' },
+  { value: 'sobriety',     label: '🌿 Sobriety' },
+  { value: 'reading',      label: '📚 Reading' },
+  { value: 'meditation',   label: '🧘 Meditation' },
+  { value: 'sleep',        label: '😴 Sleep' },
+  { value: 'relationships',label: '❤️ Relationships' },
+  { value: 'education',    label: '🎓 Education' },
+];
+
 const US_STATES = [
   'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
   'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
@@ -30,6 +45,7 @@ export default function ProfileSetupPage() {
   const [bio, setBio] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [lookingFor, setLookingFor] = useState([]);
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -45,6 +61,7 @@ export default function ProfileSetupPage() {
       setBio(profile.bio ?? '');
       setCity(profile.city ?? user?.user_metadata?.city ?? '');
       setState(profile.state ?? user?.user_metadata?.state ?? '');
+      setLookingFor(profile.looking_for ?? []);
       setAvatarUrl(profile.avatar_url ?? null);
     }
   }, [profile, user]);
@@ -83,6 +100,7 @@ export default function ProfileSetupPage() {
       bio: bio.trim(),
       city: city.trim() || null,
       state: state || null,
+      looking_for: lookingFor,
       avatar_url: avatarUrl ?? undefined,
       profile_setup_complete: true,
     });
@@ -160,6 +178,35 @@ export default function ProfileSetupPage() {
               rows={4}
             />
             <span className="profile-setup-char-count">{bio.length}/500</span>
+          </div>
+
+          <div className="profile-setup-group">
+            <label className="profile-setup-label">
+              What are you focused on?
+              <span className="profile-setup-cat-count"> {lookingFor.length}/3</span>
+            </label>
+            <span className="profile-setup-hint" style={{ marginBottom: 8 }}>Pick up to 3 categories.</span>
+            <div className="profile-setup-cats">
+              {CATEGORIES.map(({ value, label }) => {
+                const selected = lookingFor.includes(value);
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`profile-setup-cat${selected ? ' selected' : ''}`}
+                    onClick={() => {
+                      if (selected) {
+                        setLookingFor((prev) => prev.filter((v) => v !== value));
+                      } else if (lookingFor.length < 3) {
+                        setLookingFor((prev) => [...prev, value]);
+                      }
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="profile-setup-group">

@@ -11,24 +11,11 @@ import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import ReportModal from '../../components/common/ReportModal.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './CommunityPage.css';
 
 const POST_TRUNCATE = 300;
-
-function timeAgo(iso) {
-  const s = (Date.now() - new Date(iso)) / 1000;
-  if (s < 60) return 'Just now';
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return `${Math.floor(s / 86400)}d ago`;
-}
-
-function formatEventDate(iso) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
 
 // ── Feed Tab ─────────────────────────────────────────────
 function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
@@ -118,9 +105,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
 function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUserId, commentState }) {
   const [expanded, setExpanded] = useState(false);
   const truncated = post.content.length > POST_TRUNCATE && !expanded;
-  const authorName = post.profiles
-    ? `${post.profiles.first_name ?? ''} ${post.profiles.last_name ?? ''}`.trim() || 'Member'
-    : 'Member';
+  const authorName = getDisplayName(post.profiles);
   const { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount } = commentState;
   const isOpen = !!openPanels[post.id];
   const count = commentCount(post.id);
@@ -401,7 +386,7 @@ function MembersTab({ communityId, isAdmin, currentUserId }) {
       <div className="members-count">{members.length} member{members.length !== 1 ? 's' : ''}</div>
       <div className="members-grid">
         {members.map((m) => {
-          const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() : 'Member';
+          const name = getDisplayName(m.profiles);
           return (
             <div key={m.user_id} className="member-card">
               <Avatar url={m.profiles?.avatar_url} name={name} size={52} />
@@ -452,7 +437,7 @@ function ChatTab({ communityId }) {
         {!loading && messages.length === 0 && <div className="comm-empty">No messages yet — say hello! 👋</div>}
         {messages.map((m) => {
           const isMe = m.user_id === user?.id;
-          const name = m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() : 'Member';
+          const name = getDisplayName(m.profiles);
           return (
             <div key={m.id} className={`chat-message${isMe ? ' me' : ''}`}>
               {!isMe && <Avatar url={m.profiles?.avatar_url} name={name} size={32} />}
@@ -546,7 +531,7 @@ function ChallengesTab({ communityId }) {
         // Leaderboard
         const byUser = {};
         (ch.challenge_entries ?? []).forEach((e) => {
-          const name = e.profiles ? `${e.profiles.first_name ?? ''} ${e.profiles.last_name ?? ''}`.trim() : 'Member';
+          const name = getDisplayName(e.profiles);
           byUser[e.user_id] = { name, total: (byUser[e.user_id]?.total ?? 0) + Number(e.value) };
         });
         const leaderboard = Object.values(byUser).sort((a, b) => b.total - a.total).slice(0, 5);
@@ -639,7 +624,7 @@ function LeaderboardTab({ communityId }) {
       const ranked = members
         .map((m) => ({
           user_id: m.user_id,
-          name: m.profiles ? `${m.profiles.first_name ?? ''} ${m.profiles.last_name ?? ''}`.trim() : 'Member',
+          name: getDisplayName(m.profiles),
           avatar_url: m.profiles?.avatar_url,
           total_days: totals[m.user_id] ?? 0,
         }))

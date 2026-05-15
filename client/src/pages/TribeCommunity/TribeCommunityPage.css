@@ -1,5 +1,6 @@
 .tribe-page {
   background-color: var(--color-background);
+  overflow-x: hidden;
 }
 
 .page-header { margin-bottom: 30px; }
@@ -11,6 +12,7 @@
   grid-template-columns: 280px 1fr 320px;
   gap: 25px;
   max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -375,7 +377,8 @@
 }
 
 /* Feed */
-.feed-container { display: flex; flex-direction: column; gap: 20px; }
+.main-feed { min-width: 0; }
+.feed-container { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 .post-card {
   background: var(--color-surface);
@@ -383,6 +386,9 @@
   padding: 25px;
   box-shadow: var(--shadow-subtle);
   transition: box-shadow var(--transition-base);
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .post-card:hover { box-shadow: var(--shadow-card); }
@@ -698,33 +704,48 @@
 
 .achievement-fields, .meetup-fields { margin-bottom: 20px; }
 
+/* Tablet: collapse to single column, hide right sidebar */
 @media (max-width: 1024px) {
   .community-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  /* Main feed first */
-  .main-feed { order: -1; }
-  .left-sidebar { order: 0; }
-  .right-sidebar { display: none; } /* hide right sidebar on tablet/mobile */
+  .main-feed { order: 1; }
+  .left-sidebar { order: 2; }
+  .right-sidebar { display: none; }
 }
 
-/* Mobile toolbar (hidden on desktop) */
+/* Mobile toolbar — hidden on desktop, shown on mobile */
 .mobile-tribe-toolbar {
   display: none;
 }
 
+/* ── Mobile ── */
 @media (max-width: 768px) {
-  /* Hide left sidebar on mobile */
-  .left-sidebar { display: none; }
+  .page-header { margin-bottom: 14px; }
+  .page-title { font-size: 1.5rem; margin-bottom: 2px; }
+  .page-subtitle { font-size: 0.9rem; }
 
-  /* Show mobile toolbar */
+  /* Grid: single column, tight gap */
+  .community-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Hide both sidebars — mobile toolbar replaces left sidebar */
+  .left-sidebar { display: none !important; }
+  .right-sidebar { display: none !important; }
+
+  /* Show mobile toolbar above the feed */
   .mobile-tribe-toolbar {
     display: flex;
     align-items: center;
     gap: 10px;
-    order: -2;
+    order: 0;
     margin-bottom: 4px;
+    width: 100%;
+    min-width: 0;
   }
 
   .mobile-post-btn {
@@ -747,12 +768,13 @@
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     flex: 1;
+    min-width: 0;
   }
 
   .mobile-comm-scroll::-webkit-scrollbar { display: none; }
 
   .mobile-comm-chip {
-    padding: 8px 14px;
+    padding: 7px 14px;
     background: var(--color-surface);
     border: 1.5px solid rgba(124, 58, 237, 0.2);
     border-radius: 999px;
@@ -765,118 +787,95 @@
     transition: all 0.15s;
   }
 
-  .mobile-comm-chip:hover,
+  .mobile-comm-chip.active,
   .mobile-comm-chip--add {
     border-color: var(--color-primary);
     color: var(--color-primary);
   }
-}
 
-@media (max-width: 768px) {
-  .tribe-page {
-    overflow-x: hidden;
+  /* Main feed: full width, no overflow */
+  .main-feed {
+    order: 1;
+    width: 100%;
+    min-width: 0;
   }
 
-  .page-header {
-    margin-bottom: 18px;
+  /* Feed tabs */
+  .feed-tabs {
+    gap: 6px;
+    margin-bottom: 14px;
   }
 
-  .page-title { font-size: 1.6em; margin-bottom: 4px; }
-  .page-subtitle { font-size: 0.95em; }
-
-  .community-grid {
-    gap: 20px;
+  .feed-tab {
+    padding: 8px 14px;
+    font-size: 0.85rem;
   }
 
-  /* Create post button — full width, comfortable tap target */
-  .create-post-btn {
-    padding: 16px;
-    font-size: 1em;
-    margin-bottom: 0;
-  }
-
-  /* All sidebar cards stacked single column */
-  .left-sidebar,
-  .right-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .left-sidebar .sidebar-card,
-  .right-sidebar .sidebar-card {
-    margin-bottom: 0;
-  }
-
-  /* Individual sidebar cards: comfortable padding */
-  .sidebar-card {
-    padding: 18px 16px;
-  }
-
-  .sidebar-title {
-    font-size: 1em;
-    margin-bottom: 12px;
-  }
-
-  /* Filter buttons stacked */
-  .filter-options { gap: 8px; }
-  .filter-btn {
-    padding: 12px 14px;
-    font-size: 0.92em;
-  }
-
-  /* Trending + meetup items breathe */
-  .trending-item { padding: 10px 12px; }
-  .mini-meetup { padding: 12px; }
-
-  /* Feed cards */
+  /* Post cards */
   .post-card {
-    padding: 18px 16px;
+    padding: 16px 14px;
     border-radius: 14px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .post-header { margin-bottom: 12px; }
+  .post-header { margin-bottom: 10px; gap: 10px; }
+  .post-avatar { width: 40px; height: 40px; }
+  .post-author-name { font-size: 0.92rem; }
+  .post-timestamp { font-size: 0.78rem; }
+  .post-badge { padding: 4px 10px; font-size: 0.78rem; }
 
   .post-text {
-    font-size: 0.97em;
-    line-height: 1.65;
+    font-size: 0.95rem;
+    line-height: 1.6;
     margin-bottom: 12px;
   }
 
-  /* Action row: space evenly, no wrapping needed */
+  /* Action row */
   .post-actions {
     gap: 0;
-    padding-top: 12px;
+    padding-top: 10px;
   }
 
   .action-btn {
     flex: 1;
     justify-content: center;
-    font-size: 0.8em;
-    padding: 8px 4px;
-    gap: 5px;
+    font-size: 0.78rem;
+    padding: 8px 2px;
+    gap: 4px;
   }
 
   .action-icon { width: 16px; height: 16px; }
 
-  /* Stats grid 2×2 */
-  .stats-grid { gap: 10px; }
-  .stat-number { font-size: 1.4em; }
+  /* Circle activity cards */
+  .circle-activity-card {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 14px;
+  }
 
-  /* Modal full-screen on mobile */
+  /* Modal: slide up from bottom */
   .modal-overlay { padding: 0; align-items: flex-end; }
   .modal-content {
     border-radius: 20px 20px 0 0;
-    max-height: 92vh;
+    max-height: 90vh;
+    width: 100%;
   }
 
-  .modal-header { padding: 20px 18px 0; }
-  .modal-body { padding: 16px 18px 28px; }
+  .modal-header { padding: 18px 16px 0; }
+  .modal-body { padding: 14px 16px 24px; }
 
   .post-type-buttons { grid-template-columns: 1fr; gap: 8px; }
-  .type-btn { padding: 13px; font-size: 0.95em; }
-
+  .type-btn { padding: 12px; font-size: 0.92rem; }
   .form-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 400px) {
+  .page-title { font-size: 1.3rem; }
+  .post-card { padding: 14px 12px; border-radius: 12px; }
+  .mobile-post-btn { padding: 8px 12px; font-size: 0.82rem; }
+  .action-btn { font-size: 0.72rem; padding: 7px 2px; }
+  .circle-activity-card { padding: 10px 12px; }
 }
 
 /* ── My Circle Activity Feed ── */
@@ -890,6 +889,9 @@
   padding: 16px 18px;
   margin-bottom: 12px;
   transition: box-shadow 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .circle-activity-card:hover {
@@ -1038,3 +1040,12 @@
   text-align: left;
 }
 .discover-more-btn:hover { text-decoration: underline; }
+
+@media (max-width: 400px) {
+  .page-title { font-size: 1.4em; }
+  .sidebar-card { padding: 14px 12px; }
+  .post-card { padding: 14px 12px; border-radius: 12px; }
+  .mobile-post-btn { padding: 8px 12px; font-size: 0.82rem; }
+  .action-btn { padding: 6px 2px; font-size: 0.78em; }
+  .circle-activity-card { padding: 12px 14px; gap: 10px; }
+}

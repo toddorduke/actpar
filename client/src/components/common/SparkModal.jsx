@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getDisplayName } from '../../utils/displayName.js';
 import './SparkModal.css';
 
 const DAILY_LIMIT = 5;
@@ -18,7 +19,7 @@ export default function SparkModal({ profile, onSend, onClose }) {
   const [sending, setSending] = useState(false);
   const used = getSparksUsedToday();
   const remaining = Math.max(0, DAILY_LIMIT - used);
-  const name = `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || 'this person';
+  const name = getDisplayName(profile, 'this person');
   const canSend = remaining > 0 && message.trim().length >= 10;
 
   async function handleSend() {

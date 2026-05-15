@@ -14,11 +14,6 @@ const FEATURES = [
     desc: 'Find people working toward the same goals. Send a spark to connect and keep each other accountable.',
   },
   {
-    icon: '🤝',
-    title: 'Pacts',
-    desc: 'Form or join a group with shared commitments. Set rules, post updates, and hold each other to the standard.',
-  },
-  {
     icon: '🌍',
     title: 'Tribe Community',
     desc: 'Share wins, struggles, and encouragement with the broader ActPar community.',
@@ -27,11 +22,6 @@ const FEATURES = [
     icon: '💬',
     title: 'Direct Messages',
     desc: 'Private one-on-one conversations with your connections — real talk, real support.',
-  },
-  {
-    icon: '🏋️',
-    title: 'Coach Marketplace',
-    desc: 'Find a verified coach in your area of growth. Faith, fitness, finance, sobriety, relationships, and more.',
   },
 ];
 
@@ -176,7 +166,6 @@ export default function AboutPage() {
                 <div className="about-footer-col-title">Platform</div>
                 <Link to="/signup">Sign Up</Link>
                 <Link to="/login">Sign In</Link>
-                <Link to="/coaches">Find a Coach</Link>
               </div>
               <div className="about-footer-col">
                 <div className="about-footer-col-title">Legal</div>

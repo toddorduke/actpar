@@ -358,3 +358,11 @@
   .lb-podium { padding: 16px 8px 0; }
   .lb-row { padding: 12px 14px; }
 }
+
+@media (max-width: 400px) {
+  .lb-title { font-size: 1.35rem; }
+  .lb-container { gap: 14px; }
+  .lb-my-rank-card { padding: 14px 16px; }
+  .lb-row { padding: 10px 12px; gap: 8px; }
+  .lb-row-name { font-size: 0.82rem; }
+}

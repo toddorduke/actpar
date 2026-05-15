@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { AuthContext } from './AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from '../hooks/useNotifications.js';
+import { getDisplayName } from '../utils/displayName.js';
 
 export const ConnectionsContext = createContext(null);
 
@@ -133,7 +134,7 @@ export const ConnectionsProvider = ({ children }) => {
     if (!error) {
       setBrowseProfiles((prev) => prev.filter((p) => p.id !== receiverId));
       const { data: sender } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
-      const name = sender ? `${sender.first_name ?? ''} ${sender.last_name ?? ''}`.trim() : 'Someone';
+      const name = getDisplayName(sender, 'Someone');
       const notifBody = sparkMessage
         ? `${name} sparked you ⚡ "${sparkMessage.slice(0, 60)}${sparkMessage.length > 60 ? '…' : ''}"`
         : `${name} wants to connect with you`;
@@ -152,7 +153,7 @@ export const ConnectionsProvider = ({ children }) => {
       setIncomingSparks((prev) => prev.filter((s) => s.requester_id !== requesterId));
       setIncomingConnects((prev) => prev.filter((s) => s.requester_id !== requesterId));
       const { data: accepter } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
-      const name = accepter ? `${accepter.first_name ?? ''} ${accepter.last_name ?? ''}`.trim() : 'Someone';
+      const name = getDisplayName(accepter, 'Someone');
       createNotification({ userId: requesterId, actorId: user.id, type: 'connection_accepted', body: `${name} accepted your spark ⚡ You're now connected!` });
       fetchData();
     }

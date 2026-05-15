@@ -3,15 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { usePostComments } from '../../hooks/usePostComments.js';
 import Avatar from './Avatar.jsx';
+import { timeAgo } from '../../utils/dateUtils.js';
+import { getDisplayName } from '../../utils/displayName.js';
 import './CommentPanel.css';
-
-function timeAgo(iso) {
-  const diff = (Date.now() - new Date(iso)) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 export function useCommentState() {
   const { commentsByPost, loadingPost, fetchComments, addComment, deleteComment } = usePostComments();
@@ -62,9 +56,7 @@ export default function CommentPanel({ postId, postType, comments = [], loading,
 
       <div className="comment-list">
         {comments.map((c) => {
-          const name = c.profiles
-            ? `${c.profiles.first_name ?? ''} ${c.profiles.last_name ?? ''}`.trim() || 'Member'
-            : 'Member';
+          const name = getDisplayName(c.profiles);
           const isOwn = c.user_id === user?.id;
           return (
             <div key={c.id} className="comment-item">
