@@ -229,11 +229,6 @@ const SignUpPage = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">Phone Number <span className="signup-field-hint" style={{ fontStyle: 'normal' }}>(optional)</span></label>
-              <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} autoComplete="tel" placeholder="e.g. (404) 555-0123" />
-            </div>
-
-            <div className="form-group">
               <label htmlFor="password">Password</label>
               <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} autoComplete="new-password" required />
             </div>
@@ -284,59 +279,6 @@ const SignUpPage = () => {
                 <option value="Personal">Personal</option>
                 <option value="Coach">Coach</option>
               </select>
-            </div>
-
-            <div className="form-group">
-              <label>What do you want to achieve? <span className="signup-field-hint" style={{ fontStyle: 'normal' }}>(pick all that apply)</span></label>
-              <div className="signup-goal-chips">
-                {GOAL_CATEGORIES.map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    className={`signup-goal-chip${lookingFor.includes(cat) ? ' selected' : ''}`}
-                    onClick={() => toggleGoal(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
-                {lookingFor.filter(t => !GOAL_CATEGORIES.includes(t)).map(tag => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className="signup-goal-chip selected"
-                    onClick={() => setLookingFor(prev => prev.filter(t => t !== tag))}
-                  >
-                    {tag} ×
-                  </button>
-                ))}
-              </div>
-              <div className="signup-custom-row">
-                <input
-                  type="text"
-                  className="signup-custom-input"
-                  placeholder="Something else? Add your own…"
-                  value={customGoal}
-                  onChange={(e) => setCustomGoal(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomGoal(); } }}
-                />
-                <button type="button" className="signup-custom-add" onClick={addCustomGoal}>+</button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>What are you ready to conquer? <span className="signup-field-hint" style={{ fontStyle: 'normal' }}>(pick all that apply)</span></label>
-              <div className="signup-goal-chips">
-                {GROWTH_AREAS.map(area => (
-                  <button
-                    key={area}
-                    type="button"
-                    className={`signup-goal-chip${workingOn.includes(area) ? ' selected' : ''}`}
-                    onClick={() => toggleGrowth(area)}
-                  >
-                    {area}
-                  </button>
-                ))}
-              </div>
             </div>
 
             <label className="signup-terms-row">
