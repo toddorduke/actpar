@@ -440,10 +440,16 @@
     filter: none;
   }
 
-  /* Mobile notification bell */
-  .mobile-notif-wrap {
+  /* Mobile top-right icon cluster */
+  .mobile-top-icons {
     display: flex;
+    align-items: center;
+    gap: 4px;
     margin-left: auto;
+  }
+
+  .mobile-settings-btn {
+    display: flex;
   }
 
   .notif-dropdown-mobile {
@@ -453,8 +459,11 @@
   }
 }
 
-/* Hide mobile bell on desktop */
-.mobile-notif-wrap {
+/* Hide mobile icons on desktop */
+.mobile-top-icons {
+  display: none;
+}
+.mobile-settings-btn {
   display: none;
 }
 
