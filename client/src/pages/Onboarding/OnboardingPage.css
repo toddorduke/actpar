@@ -648,6 +648,14 @@
   margin-left: auto;
 }
 
+.goals-skip-hint {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  text-align: center;
+  margin: 4px 0 0;
+  padding: 0 8px;
+}
+
 .category-grid--compact {
   gap: 6px;
 }

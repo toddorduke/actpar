@@ -451,13 +451,12 @@ export default function OnboardingPage() {
               </div>
             ))}
           </div>
+          {!tierGoals.some((g) => g.title.trim()) && (
+            <p className="goals-skip-hint">You can add goals later from your Profile — but setting them now builds your pyramid right away.</p>
+          )}
           <div className="step-actions">
-            <button
-              className="onboarding-btn primary"
-              onClick={handleGoalsStep}
-              disabled={!tierGoals[0].title.trim()}
-            >
-              {tierGoals[0].title.trim() ? 'Save My Goals & Continue' : 'Add at least one goal to continue'}
+            <button className="onboarding-btn primary" onClick={handleGoalsStep}>
+              {tierGoals.some((g) => g.title.trim()) ? 'Save My Goals & Continue' : 'Skip for Now'}
             </button>
             <button className="onboarding-btn ghost" onClick={() => setStep(mode === 'quick' ? 2 : 3)}>Back</button>
           </div>
