@@ -373,8 +373,8 @@
   }
 
   .nav-container {
-    justify-content: center;
-    padding: 12px 24px;
+    justify-content: space-between;
+    padding: 10px 16px;
   }
 
   /* Show bottom tab bar */

@@ -230,6 +230,7 @@ export default function TribeCommunityPage() {
         <div className="mobile-tribe-toolbar">
           <button className="mobile-post-btn" onClick={() => setShowModal(true)}>+ Post</button>
           <div className="mobile-comm-scroll">
+            <button className="mobile-comm-chip mobile-comm-chip--browse" onClick={() => setShowBrowse(true)}>Browse</button>
             {myCommunities.map((c) => (
               <button key={c.id} className="mobile-comm-chip" onClick={() => navigate(`/community/${c.id}`)}>
                 {c.name}
