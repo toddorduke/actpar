@@ -1,3 +1,9 @@
+.signup-sub {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: -8px 0 16px;
+}
+
 .signup-page {
   position: relative;
   background-color: #2e003e;

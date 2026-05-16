@@ -1,69 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import './SignUpPage.css';
-
-const US_STATES = [
-  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
-  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
-  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
-  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire',
-  'New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio',
-  'Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota',
-  'Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia',
-  'Wisconsin','Wyoming',
-];
-
-const GOAL_CATEGORIES = [
-  'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
-  'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
-];
-
-const GROWTH_AREAS = [
-  'Beating Procrastination', 'Building Daily Discipline', 'Sharpening My Focus',
-  'Staying Consistent', 'Reigniting My Motivation', 'Mastering My Time',
-  'Silencing Self-Doubt', 'Breaking Old Habits', 'Taking More Action',
-  'Quieting Overthinking', 'Managing Stress Better', 'Showing Up for Myself',
-];
-
-const INITIAL_FORM = {
-  firstName: '', lastName: '', gender: '', email: '', phone: '',
-  password: '', confirmPassword: '', age: '', alterEgoName: '',
-  city: '', state: '', accountType: '',
-};
-
 
 const BUBBLE_COUNT = 7;
 
 const SignUpPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
   const [submitting, setSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [bubbles, setBubbles] = useState([]);
-  const [lookingFor, setLookingFor] = useState([]);
-  const [workingOn, setWorkingOn] = useState([]);
-  const [customGoal, setCustomGoal] = useState('');
-
-  const toggleGoal = (cat) => setLookingFor(prev =>
-    prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-  );
-  const toggleGrowth = (area) => setWorkingOn(prev =>
-    prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
-  );
-
-  function addCustomGoal() {
-    const tag = customGoal.trim();
-    if (!tag || lookingFor.includes(tag)) { setCustomGoal(''); return; }
-    setLookingFor(prev => [...prev, tag]);
-    setCustomGoal('');
-  }
-
-  // Alter ego availability
-  const [egoStatus, setEgoStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
-  const egoTimer = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,36 +56,18 @@ const SignUpPage = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const checkAlterEgo = useCallback((name) => {
-    clearTimeout(egoTimer.current);
-    if (!name.trim()) { setEgoStatus(null); return; }
-    setEgoStatus('checking');
-    egoTimer.current = setTimeout(async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id')
-        .ilike('alter_ego_name', name.trim())
-        .maybeSingle();
-      setEgoStatus(data ? 'taken' : 'available');
-    }, 600);
-  }, []);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (name === 'alterEgoName') checkAlterEgo(value);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast('Passwords do not match.', 'error'); return;
     }
     if (!agreedToTerms) {
       toast('Please agree to the Terms of Service and Privacy Policy.', 'error'); return;
-    }
-    if (egoStatus === 'taken') {
-      toast('That Alter Ego Name is already taken — try a different one.', 'error'); return;
     }
 
     setSubmitting(true);
@@ -151,29 +82,17 @@ const SignUpPage = () => {
         data: {
           first_name: formData.firstName,
           last_name: formData.lastName,
-          gender: formData.gender || null,
-          age: formData.age ? Number.parseInt(formData.age, 10) : null,
-          alter_ego_name: formData.alterEgoName || null,
-          city: formData.city || null,
-          state: formData.state || null,
-          phone: formData.phone || null,
-          account_type: formData.accountType,
-          looking_for: lookingFor,
-          working_on: workingOn,
+          account_type: 'Personal',
         },
       },
     });
 
     if (error) {
-      const msg = error.message?.toLowerCase().includes('alter_ego')
-        ? 'That Alter Ego Name is already taken — try a different one.'
-        : error.message;
-      toast(`❌ ${msg}`, 'error');
+      toast(`❌ ${error.message}`, 'error');
       setSubmitting(false);
       return;
     }
 
-    // If session is null, Supabase requires email confirmation first
     if (!signUpData.session) {
       setSubmitting(false);
       navigate('/check-email', { state: { email: formData.email } });
@@ -199,6 +118,7 @@ const SignUpPage = () => {
               <p className="signup-brand-tagline">The accountability platform for real goals, real people.</p>
             </div>
             <h2>Create Your Account</h2>
+            <p className="signup-sub">Just the basics — you'll set up your profile next.</p>
 
             <div className="form-row">
               <div className="form-group">
@@ -210,18 +130,6 @@ const SignUpPage = () => {
                 <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} autoComplete="family-name" required />
               </div>
             </div>
-
-            <fieldset className="fieldset">
-              <legend>Select your Gender:</legend>
-              <div className="radio-group">
-                {['Male', 'Female'].map(g => (
-                  <label key={g} htmlFor={`gender-${g.toLowerCase()}`} className="radio-option">
-                    <input type="radio" id={`gender-${g.toLowerCase()}`} name="gender" value={g} checked={formData.gender === g} onChange={handleChange} />
-                    {g}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
 
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -238,48 +146,6 @@ const SignUpPage = () => {
               <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} autoComplete="new-password" required />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="age">Age</label>
-                <input type="number" id="age" name="age" value={formData.age} onChange={handleChange} autoComplete="bday" min="0" max="120" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="alterEgoName">Alter Ego Name</label>
-                <input
-                  type="text" id="alterEgoName" name="alterEgoName"
-                  value={formData.alterEgoName} onChange={handleChange}
-                  autoComplete="nickname" placeholder="e.g. The Iron Version"
-                  className={egoStatus === 'taken' ? 'input-error' : egoStatus === 'available' ? 'input-success' : ''}
-                />
-                {egoStatus === 'checking' && <span className="signup-field-hint">Checking availability…</span>}
-                {egoStatus === 'available' && <span className="signup-field-hint ego-available">✓ Available!</span>}
-                {egoStatus === 'taken' && <span className="signup-field-hint ego-taken">✗ Already taken — try another.</span>}
-                {!egoStatus && <span className="signup-field-hint">Your accountability persona — who you're becoming.</span>}
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="city">City</label>
-                <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} autoComplete="address-level2" placeholder="e.g. Atlanta" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="state">State</label>
-                <select id="state" name="state" value={formData.state} onChange={handleChange}>
-                  <option value="">Select state</option>
-                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="accountType">What kind of account are you setting up:</label>
-              <select id="accountType" name="accountType" value={formData.accountType} onChange={handleChange} required>
-                <option value="" disabled>Select account type</option>
-                <option value="Personal">Personal</option>
-              </select>
-            </div>
-
             <label className="signup-terms-row">
               <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
               <span>
@@ -290,7 +156,7 @@ const SignUpPage = () => {
               </span>
             </label>
 
-            <button type="submit" disabled={submitting || !agreedToTerms || egoStatus === 'taken'}>
+            <button type="submit" disabled={submitting || !agreedToTerms}>
               {submitting ? 'Creating account...' : 'Create My Account'}
             </button>
           </form>

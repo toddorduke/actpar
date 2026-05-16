@@ -29,7 +29,7 @@ export const useGoals = () => {
 
   const addGoal = useCallback(async (title, category = null, options = {}) => {
     if (!user) return { error: 'Not authenticated' };
-    const { goal_type = 'habit', target_value, target_unit, target_period } = options;
+    const { goal_type = 'habit', target_value, target_unit, target_period, tier } = options;
     const { data, error } = await supabase
       .from('goals')
       .insert({
@@ -37,6 +37,7 @@ export const useGoals = () => {
         title,
         category,
         goal_type,
+        tier: tier ?? null,
         target_value: target_value ?? null,
         target_unit: target_unit ?? null,
         target_period: target_period ?? null,
