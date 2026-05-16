@@ -1005,6 +1005,8 @@
 /* ── Mobile compact filter bar (hidden on desktop) ── */
 .mob-filter-bar { display: none; }
 .mob-connections-row { display: none; }
+.mob-right-cards { display: none; }
+.mob-left-cards { display: none; }
 
 @media (max-width: 768px) {
   .connections-page {
@@ -1036,9 +1038,18 @@
   /* Photo: smaller on mobile so more text is visible */
   .card-header { height: 210px; }
 
-  /* Hide both sidebars — replaced by mob-filter-bar + mob-connections-row */
+  /* Hide both sidebars — key cards surfaced in mob-right-cards below */
   .left-sidebar { display: none; }
   .right-sidebar { display: none; }
+
+  /* Mobile-only cards below the stack */
+  .mob-left-cards,
+  .mob-right-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
 
   /* Action buttons */
   .action-buttons { gap: 18px; }

@@ -351,7 +351,7 @@ export default function ConnectionsPage() {
       )}
 
 
-      {mainTab === 'connections' && <div className="connections-grid">
+      {mainTab === 'connections' && <><div className="connections-grid">
         {/* Left Sidebar */}
         <aside className="left-sidebar">
           <div className="sidebar-card">
@@ -757,7 +757,172 @@ export default function ConnectionsPage() {
             </div>
           )}
         </aside>
-      </div>}
+      </div>
+
+      {/* Mobile-only: left sidebar items */}
+      <div className="mob-left-cards">
+        <div className="sidebar-card">
+          <h3 className="sidebar-title">
+            <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Search by Name or Alter Ego
+          </h3>
+          <div className="search-container">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search profiles..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <button className="search-btn">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {incomingConnects.length > 0 && (
+          <div className="sidebar-card">
+            <h3 className="sidebar-title">
+              <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Connection Requests
+              <span className="spark-count">{incomingConnects.length}</span>
+            </h3>
+            <p className="spark-description">These people want to connect with you.</p>
+            <div className="incoming-requests-list">
+              {incomingConnects.map((req) => {
+                const name = req.profiles ? getDisplayName(req.profiles) : 'Someone';
+                return (
+                  <div key={req.requester_id} className="incoming-req-item">
+                    <button className="incoming-req-avatar-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                      <Avatar url={req.profiles?.avatar_url} name={name} size={36} />
+                    </button>
+                    <button className="incoming-req-info incoming-req-name-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                      <div className="incoming-req-name">{name}</div>
+                      {req.profiles?.alter_ego_name && (
+                        <div className="incoming-req-ego">⚡ {req.profiles.alter_ego_name}</div>
+                      )}
+                    </button>
+                    <div className="incoming-req-actions">
+                      <button className="req-accept-btn" onClick={() => acceptSpark(req.requester_id)} title="Accept">✓</button>
+                      <button className="req-decline-btn" onClick={() => declineSpark(req.requester_id)} title="Decline">✗</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="sidebar-card spark-card">
+          <h3 className="sidebar-title">
+            <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Sparks ⚡
+            <span className="spark-count">{incomingSparks.length}</span>
+          </h3>
+          <p className="spark-description" style={{ marginBottom: 6 }}>
+            Sparks include a personal message from the sender — they put extra effort in.
+          </p>
+          {incomingSparks.length === 0 ? (
+            <p className="spark-description" style={{ color: '#9ca3af' }}>No sparks yet</p>
+          ) : (
+            <div className="sparks-locked">
+              {incomingSparks.slice(0, 3).map((spark) => (
+                <div key={spark.requester_id} className="spark-item spark-item-locked">
+                  <div className="spark-avatar-blur" />
+                  <div className="spark-info">
+                    <div className="spark-name-blur" />
+                    <div className="spark-alter-blur" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="sidebar-card">
+          <h3 className="sidebar-title">
+            <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Your Stats
+          </h3>
+          <div className="stats-grid">
+            <div className="stat-item"><div className="stat-number">{acceptedConnections.length}</div><div className="stat-label">Connections</div></div>
+            <div className="stat-item"><div className="stat-number">{incomingSparks.length}</div><div className="stat-label">⚡ Sparks</div></div>
+            <div className="stat-item"><div className="stat-number">{incomingConnects.length}</div><div className="stat-label">✓ Requests</div></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile-only: Your Connections + Connection Tips */}
+      <div className="mob-right-cards">
+        <div className="sidebar-card">
+          <h3 className="sidebar-title">
+            <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Your Connections
+          </h3>
+          <div className="connections-list">
+            {acceptedConnections.length === 0 && (
+              <p style={{ color: '#6b7280', fontSize: '0.9em', marginTop: 0 }}>No connections yet</p>
+            )}
+            {acceptedConnections.slice(0, 5).map((c) => {
+              const name = c.partnerProfile ? getDisplayName(c.partnerProfile) : 'Connected User';
+              return (
+                <div key={c.id} className="connection-item">
+                  <button className="connection-avatar-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                    <Avatar url={c.partnerProfile?.avatar_url} name={name} size={38} />
+                  </button>
+                  <div className="connection-info">
+                    <button className="connection-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
+                      {name}
+                    </button>
+                  </div>
+                  <button
+                    className="connection-msg-btn"
+                    onClick={() => navigate(`/messages?with=${c.partnerId}`)}
+                    title="Send message"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </button>
+                </div>
+              );
+            })}
+            {acceptedConnections.length > 5 && (
+              <button className="connections-see-all-btn" onClick={() => setMainTab('my-network')}>
+                See all {acceptedConnections.length} connections →
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="sidebar-card tips-card">
+          <h3 className="sidebar-title">
+            <svg className="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Connection Tips
+          </h3>
+          <div className="tips-list">
+            <div className="tip-item">💡 Be genuine in your profile</div>
+            <div className="tip-item">⚡ Send sparks to show extra interest</div>
+            <div className="tip-item">🎯 Focus on aligned goals</div>
+            <div className="tip-item">💬 Start conversations meaningfully</div>
+          </div>
+        </div>
+      </div>
+      </>}
     </div>
     </>
   );
