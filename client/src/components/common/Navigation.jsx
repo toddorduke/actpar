@@ -279,8 +279,10 @@ const Navigation = () => {
         <nav className="bottom-nav">
           {visibleItems.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} className={buildBottomClassName}>
-              {item.icon}
-              <span className="bottom-tab-label">{item.label}</span>
+              <span className="bottom-tab-inner">
+                {item.icon}
+                <span className="bottom-tab-label">{item.label}</span>
+              </span>
             </NavLink>
           ))}
         </nav>

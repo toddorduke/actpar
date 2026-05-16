@@ -394,11 +394,9 @@
   .bottom-tab {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    padding: 10px 4px 8px;
+    padding: 8px 2px;
     color: rgba(255,255,255,0.5);
     text-decoration: none;
     transition: color 0.15s;
@@ -406,9 +404,17 @@
     position: relative;
   }
 
+  .bottom-tab-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: background 0.15s, padding 0.15s;
+  }
+
   .bottom-tab .nav-icon {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .bottom-tab-label {
@@ -421,22 +427,17 @@
   }
 
   .bottom-tab.active {
-    color: #a78bfa;
+    color: #ffffff;
   }
 
-  .bottom-tab.active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 20%;
-    right: 20%;
-    height: 2px;
-    background: #a78bfa;
-    border-radius: 0 0 3px 3px;
+  .bottom-tab.active .bottom-tab-inner {
+    background: var(--gradient-primary);
+    border-radius: 12px;
+    padding: 5px 14px 4px;
   }
 
   .bottom-tab.active .nav-icon {
-    filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.6));
+    filter: none;
   }
 
   /* Mobile notification bell */

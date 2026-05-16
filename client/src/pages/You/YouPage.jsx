@@ -120,36 +120,6 @@ export default function YouPage() {
         </div>
       </div>
 
-      {/* Customize nav */}
-      <div className="you-section">
-        <h2 className="you-section-title">Customize Your Nav</h2>
-        <p className="you-section-sub">
-          Pick up to 3 tabs to show between <strong>Home</strong> and <strong>You</strong>.
-        </p>
-        <div className="you-nav-pills">
-          {Object.entries(NAV_POOL).map(([key, item]) => {
-            const isActive = slots.includes(key);
-            const slotNum = slots.indexOf(key) + 1;
-            return (
-              <button
-                key={key}
-                className={`you-nav-pill${isActive ? ' active' : ''}`}
-                onClick={() => toggleSlot(key)}
-              >
-                <span className="you-nav-pill-icon">{item.icon}</span>
-                <span className="you-nav-pill-label">{item.label}</span>
-                {isActive && <span className="you-nav-pill-num">{slotNum}</span>}
-              </button>
-            );
-          })}
-        </div>
-        <div className="you-nav-preview">
-          Home &nbsp;·&nbsp;{' '}
-          {slots.map((k) => NAV_POOL[k]?.label).filter(Boolean).join(' · ')}
-          &nbsp;·&nbsp; You
-        </div>
-      </div>
-
       {/* Sign out */}
       <button className="you-signout-btn" onClick={handleLogout}>
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
