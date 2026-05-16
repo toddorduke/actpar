@@ -1011,8 +1011,17 @@
     margin-bottom: 20px;
   }
 
-  /* Card stack */
-  .card-stack { height: 520px; }
+  /* Card stack — taller so content fits */
+  .card-stack { height: 580px; }
+
+  /* Profile card: allow vertical scroll inside the card */
+  .profile-card {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Photo: smaller on mobile so more text is visible */
+  .card-header { height: 210px; }
 
   /* Hide both sidebars — replaced by mob-filter-bar + mob-connections-row */
   .left-sidebar { display: none; }
@@ -1024,8 +1033,8 @@
   .spark-send-btn { width: 70px; height: 70px; }
 
   /* Card content on mobile */
-  .card-content { padding: 16px 18px 18px; }
-  .profile-name { font-size: 1.3em; }
+  .card-content { padding: 14px 16px 16px; }
+  .profile-name { font-size: 1.25em; }
   .card-tagline { font-size: 0.85em; }
   .card-goal-chip { font-size: 0.75em; padding: 4px 10px; }
 
@@ -1578,7 +1587,8 @@
 @media (max-width: 400px) {
   .connections-page { padding: 16px 10px 24px; }
   .page-title { font-size: 1.5em; }
-  .card-stack { height: 460px; }
+  .card-stack { height: 520px; }
+  .card-header { height: 190px; }
   .action-btn { width: 54px; height: 54px; }
   .spark-send-btn { width: 64px; height: 64px; }
   .card-content { padding: 12px 14px 14px; }
