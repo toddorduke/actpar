@@ -576,9 +576,12 @@ export default function ConnectionsPage() {
                               </div>
                             </div>
                           )}
-                          <div className="card-view-profile-hint">
-                            Tap card or click below to view full profile →
-                          </div>
+                          <button
+                            className="card-view-profile-btn"
+                            onClick={(e) => { e.stopPropagation(); navigate(`/profile/${profile.id}`); }}
+                          >
+                            View Full Profile →
+                          </button>
                         </div>
                       </>
                     )}
