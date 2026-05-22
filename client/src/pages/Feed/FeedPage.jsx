@@ -36,30 +36,18 @@ function getGradient(postType, postId) {
 const HEART_PATH  = 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z';
 const BUBBLE_PATH = 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z';
 
-function FeedCard({ post, liked, isToggling, likeCount, onLike, commentState }) {
-  const authorName    = getDisplayName(post.profiles);
-  const isCommentOpen = !!commentState.openPanels[post.id];
-  const commentCount  = commentState.commentCount(post.id);
-  const gradient      = getGradient(post.post_type, post.id);
-  const type          = post.post_type ?? 'general';
-  const hasMedia      = !!post.media_url;
-  const isVideo       = hasMedia && /\.(mp4|mov|webm|quicktime)$/i.test(post.media_url);
+function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount }) {
+  const authorName = getDisplayName(post.profiles);
+  const gradient   = getGradient(post.post_type, post.id);
+  const type       = post.post_type ?? 'general';
+  const hasMedia   = !!post.media_url;
+  const isVideo    = hasMedia && /\.(mp4|mov|webm|quicktime)$/i.test(post.media_url);
 
   return (
     <div className="feed-card" style={hasMedia ? {} : { background: gradient }}>
-      {/* Media background */}
-      {hasMedia && !isVideo && (
-        <img src={post.media_url} alt="" className="feed-media-bg" />
-      )}
+      {hasMedia && !isVideo && <img src={post.media_url} alt="" className="feed-media-bg" />}
       {hasMedia && isVideo && (
-        <video
-          src={post.media_url}
-          className="feed-media-bg"
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
+        <video src={post.media_url} className="feed-media-bg" autoPlay muted loop playsInline />
       )}
 
       <div className="feed-card-scrim" />
@@ -95,8 +83,8 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, commentState }) 
         </button>
 
         <button
-          className={`feed-action-btn${isCommentOpen ? ' active' : ''}`}
-          onClick={() => commentState.togglePanel(post.id)}
+          className="feed-action-btn"
+          onClick={() => onOpenComments(post.id)}
           aria-label="Comments"
         >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="28" height="28">
@@ -113,11 +101,20 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, commentState }) 
         )}
         <p className="feed-content">{post.content}</p>
       </div>
+    </div>
+  );
+}
 
-      {/* Comment sheet overlay */}
-      {isCommentOpen && (
-        <div className="feed-comment-sheet">
-          <div className="feed-comment-handle" />
+// ── Comment overlay (rendered at page level, not inside the card) ─────────────
+function CommentOverlay({ post, commentState, onClose }) {
+  return (
+    <div className="feed-comment-overlay-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="feed-comment-overlay-sheet">
+        <div className="feed-comment-overlay-header">
+          <span className="feed-comment-overlay-title">Comments</span>
+          <button className="feed-comment-overlay-close" onClick={onClose}>×</button>
+        </div>
+        <div className="feed-comment-overlay-body">
           <CommentPanel
             postId={post.id}
             postType="tribe"
@@ -127,7 +124,7 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, commentState }) 
             onDelete={commentState.deleteComment}
           />
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -286,6 +283,7 @@ export default function FeedPage() {
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   const commentState                          = useCommentState();
   const [showSheet, setShowSheet]             = useState(false);
+  const [activeCommentPostId, setActiveCommentPostId] = useState(null);
   const [toast, setToast]                     = useState('');
 
   function handleLike(postId, currentCount) {
@@ -294,11 +292,24 @@ export default function FeedPage() {
     }, null);
   }
 
+  function handleOpenComments(postId) {
+    setActiveCommentPostId(postId);
+    if (!commentState.commentsByPost[postId]) {
+      commentState.togglePanel(postId);
+    }
+  }
+
+  function handleCloseComments() {
+    setActiveCommentPostId(null);
+  }
+
   function handlePostSuccess() {
     setShowSheet(false);
     setToast('Post shared! 🎉');
     setTimeout(() => setToast(''), 3000);
   }
+
+  const activePost = posts.find((p) => p.id === activeCommentPostId) ?? null;
 
   if (loading) {
     return (
@@ -317,12 +328,7 @@ export default function FeedPage() {
         <p>Be the first to post.</p>
         <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
         {showSheet && (
-          <PostSheet
-            user={user}
-            createPost={createPost}
-            onClose={() => setShowSheet(false)}
-            onSuccess={handlePostSuccess}
-          />
+          <PostSheet user={user} createPost={createPost} onClose={() => setShowSheet(false)} onSuccess={handlePostSuccess} />
         )}
       </div>
     );
@@ -339,21 +345,25 @@ export default function FeedPage() {
             isToggling={toggling.has(post.id)}
             likeCount={localLikeCounts[post.id] ?? post.likes ?? 0}
             onLike={handleLike}
-            commentState={commentState}
+            onOpenComments={handleOpenComments}
+            commentCount={commentState.commentCount(post.id)}
           />
         ))}
       </div>
 
-      {/* Floating create button */}
+      {/* Comment overlay — rendered outside the snap scroll so it scrolls freely */}
+      {activePost && (
+        <CommentOverlay
+          post={activePost}
+          commentState={commentState}
+          onClose={handleCloseComments}
+        />
+      )}
+
       <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
 
       {showSheet && (
-        <PostSheet
-          user={user}
-          createPost={createPost}
-          onClose={() => setShowSheet(false)}
-          onSuccess={handlePostSuccess}
-        />
+        <PostSheet user={user} createPost={createPost} onClose={() => setShowSheet(false)} onSuccess={handlePostSuccess} />
       )}
 
       {toast && <div className="feed-toast">{toast}</div>}
