@@ -12,7 +12,7 @@ export const useTribePosts = (communityId = null) => {
     setLoading(true);
     let query = supabase
       .from('tribe_posts')
-      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url)')
+      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url, id)')
       .order('created_at', { ascending: false })
       .limit(200);
 
@@ -27,7 +27,7 @@ export const useTribePosts = (communityId = null) => {
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
-  const createPost = useCallback(async ({ content, post_type, milestone, community_id }) => {
+  const createPost = useCallback(async ({ content, post_type, milestone, community_id, media_url }) => {
     const modResult = checkText(content);
     if (!modResult.ok) return { data: null, error: null, moderation: modResult };
     if (milestone) {
@@ -43,8 +43,9 @@ export const useTribePosts = (communityId = null) => {
         post_type,
         milestone: milestone || null,
         community_id: community_id || null,
+        media_url: media_url || null,
       })
-      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url)')
+      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url, id)')
       .single();
     if (!error) setPosts((prev) => [data, ...prev]);
     return { data, error };

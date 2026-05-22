@@ -93,6 +93,11 @@ const SignUpPage = () => {
       return;
     }
 
+    // Fresh signup — clear any stale "no remember me" flag from a previous session
+    // so the new session survives page reloads (e.g. email confirmation redirect)
+    localStorage.removeItem('actpar_no_remember');
+    sessionStorage.setItem('actpar_session_active', '1');
+
     if (!signUpData.session) {
       setSubmitting(false);
       navigate('/check-email', { state: { email: formData.email } });

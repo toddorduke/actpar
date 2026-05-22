@@ -72,6 +72,7 @@ export default function OnboardingPage() {
   const [mode, setMode] = useState(null);
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [finishing, setFinishing] = useState(false);
 
   // Identity fields
   const [alterEgoName, setAlterEgoName] = useState('');
@@ -100,6 +101,14 @@ export default function OnboardingPage() {
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [sparkedIds, setSparkedIds] = useState(new Set());
+
+  // Navigate home only after user metadata confirms onboarding is complete —
+  // avoids a race where navigate('/') fires before React applies USER_UPDATED.
+  useEffect(() => {
+    if (finishing && user?.user_metadata?.onboarding_complete) {
+      navigate('/', { replace: true });
+    }
+  }, [finishing, user?.user_metadata?.onboarding_complete, navigate]);
 
   const firstName = profile?.first_name || user?.user_metadata?.first_name || 'there';
 
@@ -250,7 +259,9 @@ export default function OnboardingPage() {
       supabase.from('profiles').update(profileUpdate).eq('id', user.id),
     ]);
     setSaving(false);
-    navigate('/', { replace: true });
+    // Signal the useEffect to navigate once USER_UPDATED has propagated to React state.
+    // Direct navigate('/') here could race against the auth context update.
+    setFinishing(true);
   }
 
   const goalStepNumber = mode === 'quick' ? 3 : 4;

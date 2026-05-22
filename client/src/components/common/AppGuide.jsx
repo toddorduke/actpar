@@ -195,8 +195,10 @@ export default function AppGuide() {
   const current = slides[slide];
   const isLast = slide === slides.length - 1;
 
-  // Position tooltip: if target is in bottom half → show above it; else → below
+  // On mobile let CSS handle positioning entirely — inline styles fight !important and lose.
+  // On desktop, position relative to the spotlight target.
   const tooltipStyle = (() => {
+    if (window.innerWidth <= 540) return {};
     if (!spotlight) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
     const isNearBottom = spotlight.elTop > window.innerHeight * 0.55;
     if (isNearBottom) {

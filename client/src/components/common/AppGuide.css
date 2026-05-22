@@ -67,10 +67,10 @@
   width: 100%;
 }
 
-.guide-choice-btn.primary  { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; }
+.guide-choice-btn.primary  { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
 .guide-choice-btn.primary:hover { opacity: 0.92; transform: translateY(-1px); }
 .guide-choice-btn.secondary { background: #f8fafc; border-color: #e5e7eb; color: #1f2937; }
-.guide-choice-btn.secondary:hover { border-color: #7c3aed; background: #faf5ff; }
+.guide-choice-btn.secondary:hover { border-color: #f59e0b; background: #fffbeb; }
 .guide-choice-btn.ghost { background: transparent; border-color: #f3f4f6; color: #6b7280; }
 .guide-choice-btn.ghost:hover { background: #f9fafb; color: #374151; }
 
@@ -93,7 +93,7 @@
 .guide-never-show input[type="checkbox"] {
   width: 14px;
   height: 14px;
-  accent-color: #7c3aed;
+  accent-color: #f59e0b;
   cursor: pointer;
 }
 
@@ -137,6 +137,11 @@
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.28);
   animation: guideFadeUp 0.2s ease;
+  /* Fixed height so header + actions never scroll off screen */
+  max-height: min(85vh, 560px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .guide-tooltip-header {
@@ -144,6 +149,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 18px 0;
+  flex-shrink: 0;
 }
 
 .guide-slide-counter {
@@ -168,6 +174,8 @@
 
 .guide-tooltip-body {
   padding: 14px 18px 10px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .guide-slide-emoji {
@@ -216,6 +224,7 @@
   gap: 5px;
   justify-content: center;
   padding: 8px 18px 0;
+  flex-shrink: 0;
 }
 
 .guide-dot {
@@ -230,17 +239,18 @@
 }
 
 .guide-dot.active {
-  background: #7c3aed;
+  background: #f59e0b;
   width: 20px;
   border-radius: 4px;
 }
 
-/* Actions */
+/* Actions — always visible at the bottom (never scrolls away) */
 .guide-slide-actions {
   display: flex;
   gap: 10px;
   padding: 10px 18px 16px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .guide-back-btn {
@@ -258,7 +268,7 @@
 
 .guide-next-btn {
   padding: 9px 22px;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
   border: none;
   border-radius: 10px;
@@ -272,8 +282,22 @@
 
 /* ── Mobile ── */
 @media (max-width: 540px) {
-  .guide-overlay { padding: 12px; align-items: flex-end; }
-  .guide-modal { border-radius: 24px 24px 16px 16px; max-width: 100%; }
-  .guide-choice-modal { padding: 32px 24px 24px; }
-  .guide-choice-title { font-size: 1.4rem; }
+  /* Choice screen — centered and scrollable so it never overflows the screen */
+  .guide-overlay { padding: 16px 12px; align-items: center; overflow-y: auto; }
+  .guide-modal { border-radius: 20px; max-width: 100%; max-height: calc(100dvh - 32px); overflow-y: auto; }
+  .guide-choice-modal { padding: 28px 20px 20px; }
+  .guide-choice-title { font-size: 1.3rem; }
+
+  /* Slide tooltip — bottom sheet, no inline styles on mobile so CSS wins cleanly */
+  .guide-tooltip {
+    bottom: 0;
+    top: auto;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 72vh;
+    transform: none;
+  }
 }

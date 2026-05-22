@@ -2,6 +2,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const VAPID_PUBLIC_KEY  = Deno.env.get('VAPID_PUBLIC_KEY')!;
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')!;
+const SUPABASE_URL      = Deno.env.get('SUPABASE_URL')!;
 const VAPID_SUBJECT     = 'mailto:hello@actpar.com';
 
 // ── Web Push (RFC 8291 / VAPID) ───────────────────────────────────────────────
@@ -182,7 +183,37 @@ Deno.serve(async (req) => {
       .select('endpoint, p256dh, auth')
       .eq('user_id', candidate.id);
 
-    if (!subs?.length) { skipped++; continue; }
+    if (!subs?.length) {
+      // Email fallback — fetch goal then call send-email
+      try {
+        const { data: emailGoal } = await supabase
+          .from('goals')
+          .select('id, title, day_count, category')
+          .eq('user_id', candidate.id)
+          .eq('is_active', true)
+          .neq('goal_type', 'numeric')
+          .or(`last_checked_in.is.null,last_checked_in.lt.${today}`)
+          .order('tier', { ascending: true })
+          .limit(1);
+        if (emailGoal?.length) {
+          await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'daily_reminder',
+              userId: candidate.id,
+              firstName: candidate.first_name ?? '',
+              message: buildMessage(candidate.first_name ?? '', emailGoal[0] as Goal, false),
+            }),
+          });
+        }
+      } catch { /* silent — push is primary */ }
+      skipped++;
+      continue;
+    }
 
     // Step 3: find their highest-priority unchecked habit goal today
     const { data: unchecked } = await supabase

@@ -24,6 +24,7 @@ import ForgotPasswordPage from './pages/ForgotPassword/ForgotPasswordPage.jsx';
 import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage.jsx';
 import CheckEmailPage from './pages/CheckEmail/CheckEmailPage.jsx';
 import AdminPage from './pages/Admin/AdminPage.jsx';
+import FeedPage from './pages/Feed/FeedPage.jsx';
 
 // Redirects already-logged-in users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
@@ -49,7 +50,7 @@ export const AppRoutes = () => (
 
     {/* Protected routes — redirect to /login if not authenticated, /onboarding if not complete */}
     <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+    <Route path="/profile" element={<ProtectedRoute><Navigate to="/" replace /></ProtectedRoute>} />
     <Route path="/connections" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
     <Route path="/tribe-community" element={<ProtectedRoute><TribeCommunityPage /></ProtectedRoute>} />
     <Route path="/community/:id" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
@@ -61,6 +62,7 @@ export const AppRoutes = () => (
     <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
     <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
     <Route path="/you" element={<ProtectedRoute><YouPage /></ProtectedRoute>} />
+    <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
   </Routes>
 );

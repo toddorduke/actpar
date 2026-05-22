@@ -440,6 +440,24 @@
     filter: none;
   }
 
+  /* Mobile top-left avatar */
+  .mobile-avatar-wrap {
+    display: block;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .mobile-avatar-circle {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Dropdown opens to the right from the left avatar */
+  .avatar-dropdown-left {
+    left: 0;
+    right: auto;
+  }
+
   /* Mobile top-right icon cluster */
   .mobile-top-icons {
     display: flex;
@@ -459,11 +477,14 @@
   }
 }
 
-/* Hide mobile icons on desktop */
+/* Hide mobile-only elements on desktop */
 .mobile-top-icons {
   display: none;
 }
 .mobile-settings-btn {
+  display: none;
+}
+.mobile-avatar-wrap {
   display: none;
 }
 

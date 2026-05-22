@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
 
-const STORAGE_KEY = 'actpar_nav_slots';
-const DEFAULT_SLOTS = ['connect', 'tribe'];
+const STORAGE_KEY = 'actpar_nav_slots_v3';
+const DEFAULT_SLOTS = ['connect', 'tribe', 'feed'];
 
 // Keys that no longer exist — strip them from stored slots
 const REMOVED_KEYS = new Set(['pact', 'coach']);
 
 // Valid keys come from NAV_POOL in Navigation.jsx — keep in sync
-const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe']);
+const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe', 'feed']);
 
 export const NavSlotsContext = createContext(null);
 
