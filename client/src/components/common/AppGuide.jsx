@@ -194,11 +194,12 @@ export default function AppGuide() {
   const slides = phase === 'quick' ? QUICK_SLIDES : FULL_SLIDES;
   const current = slides[slide];
   const isLast = slide === slides.length - 1;
+  const isMobile = window.innerWidth <= 540;
 
-  // On mobile let CSS handle positioning entirely — inline styles fight !important and lose.
-  // On desktop, position relative to the spotlight target.
+  // On mobile: no spotlight, tooltip anchors to bottom via CSS.
+  // On desktop: position tooltip relative to the spotlight target.
   const tooltipStyle = (() => {
-    if (window.innerWidth <= 540) return {};
+    if (isMobile) return {};
     if (!spotlight) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
     const isNearBottom = spotlight.elTop > window.innerHeight * 0.55;
     if (isNearBottom) {
@@ -209,11 +210,11 @@ export default function AppGuide() {
 
   return (
     <>
-      {/* Dim overlay — pointer events pass through to app except tooltip */}
-      <div className="guide-dim" onClick={() => {}} />
+      {/* Dim overlay */}
+      <div className="guide-dim" />
 
-      {/* Spotlight cutout */}
-      {spotlight && (
+      {/* Spotlight cutout — desktop only */}
+      {!isMobile && spotlight && (
         <div
           className="guide-spotlight"
           style={{ top: spotlight.top, left: spotlight.left, width: spotlight.width, height: spotlight.height }}
