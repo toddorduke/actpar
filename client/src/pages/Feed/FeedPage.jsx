@@ -37,14 +37,24 @@ const HEART_PATH  = 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 
 const BUBBLE_PATH = 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z';
 
 function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount }) {
-  const authorName = getDisplayName(post.profiles);
-  const gradient   = getGradient(post.post_type, post.id);
-  const type       = post.post_type ?? 'general';
-  const hasMedia   = !!post.media_url;
-  const isVideo    = hasMedia && /\.(mp4|mov|webm|quicktime)$/i.test(post.media_url);
+  const authorName  = getDisplayName(post.profiles);
+  const gradient    = getGradient(post.post_type, post.id);
+  const type        = post.post_type ?? 'general';
+  const hasMedia    = !!post.media_url;
+  const isVideo     = hasMedia && /\.(mp4|mov|webm|quicktime)$/i.test(post.media_url);
+  const [burst, setBurst] = useState(false);
+
+  function handleLike() {
+    if (isToggling) return;
+    if (!liked) { setBurst(true); setTimeout(() => setBurst(false), 600); }
+    onLike(post.id, likeCount);
+  }
 
   return (
     <div className="feed-card" style={hasMedia ? {} : { background: gradient }}>
+      {/* Subtle noise texture overlay for gradient cards */}
+      {!hasMedia && <div className="feed-card-noise" />}
+
       {hasMedia && !isVideo && <img src={post.media_url} alt="" className="feed-media-bg" />}
       {hasMedia && isVideo && (
         <video src={post.media_url} className="feed-media-bg" autoPlay muted loop playsInline />
@@ -55,7 +65,9 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
       {/* Author — top left */}
       <div className="feed-top">
         <Link to={`/profile/${post.user_id}`} className="feed-author-link">
-          <Avatar url={post.profiles?.avatar_url} name={authorName} size={38} />
+          <div className="feed-avatar-ring">
+            <Avatar url={post.profiles?.avatar_url} name={authorName} size={40} />
+          </div>
           <div className="feed-author-info">
             <span className="feed-author-name">{authorName}</span>
             <span className="feed-author-time">{timeAgo(post.created_at)}</span>
@@ -70,15 +82,25 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
 
       {/* Action buttons — right side */}
       <div className="feed-actions">
+        {/* Avatar ring on right side */}
+        <Link to={`/profile/${post.user_id}`} className="feed-action-avatar">
+          <div className="feed-action-avatar-ring">
+            <Avatar url={post.profiles?.avatar_url} name={authorName} size={44} />
+          </div>
+        </Link>
+
         <button
           className={`feed-action-btn${liked ? ' liked' : ''}`}
-          onClick={() => onLike(post.id, likeCount)}
+          onClick={handleLike}
           disabled={isToggling}
           aria-label="Like"
         >
-          <svg fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" width="28" height="28">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={HEART_PATH} />
-          </svg>
+          <div className="feed-like-wrap">
+            <svg fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={HEART_PATH} />
+            </svg>
+            {burst && <span className="feed-like-burst">❤️</span>}
+          </div>
           <span className="feed-action-count">{likeCount || ''}</span>
         </button>
 
@@ -87,7 +109,7 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
           onClick={() => onOpenComments(post.id)}
           aria-label="Comments"
         >
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="28" height="28">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={BUBBLE_PATH} />
           </svg>
           <span className="feed-action-count">{commentCount || ''}</span>

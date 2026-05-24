@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useNavSlots } from '../../context/NavSlotsContext.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
+import { useProfile } from '../../hooks/useProfile.js';
 import Avatar from './Avatar.jsx';
 import { timeAgoShort } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
@@ -101,6 +102,7 @@ const Navigation = () => {
   const mobileAvatarRef = useRef(null);
   const notifRef = useRef(null);
   const { notifications, unreadCount, markRead, markAllRead, deleteNotif } = useNotifications();
+  const { profile } = useProfile();
 
   const visibleItems = [
     HOME_ITEM,
@@ -197,7 +199,7 @@ const Navigation = () => {
                 onClick={() => setDropdownOpen(o => !o)}
                 aria-label="Account menu"
               >
-                <div className="profile-avatar mobile-avatar-circle" />
+                <Avatar url={profile?.avatar_url} name={profile ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() : ''} size={34} />
               </button>
               {dropdownOpen && (
                 <div className="avatar-dropdown avatar-dropdown-left">
@@ -302,7 +304,7 @@ const Navigation = () => {
                     onClick={() => setDropdownOpen(o => !o)}
                     aria-label="Account menu"
                   >
-                    <div className="profile-avatar" />
+                    <Avatar url={profile?.avatar_url} name={profile ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() : ''} size={36} />
                   </button>
                   {dropdownOpen && (
                     <div className="avatar-dropdown">
