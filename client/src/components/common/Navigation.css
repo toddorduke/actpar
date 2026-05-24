@@ -478,14 +478,16 @@
 }
 
 /* Hide mobile-only elements on desktop */
-.mobile-top-icons {
-  display: none;
-}
-.mobile-settings-btn {
-  display: none;
-}
-.mobile-avatar-wrap {
-  display: none;
+@media (min-width: 769px) {
+  .mobile-top-icons {
+    display: none;
+  }
+  .mobile-settings-btn {
+    display: none;
+  }
+  .mobile-avatar-wrap {
+    display: none;
+  }
 }
 
 /* ── Messages icon in top-right ────────────────────── */
