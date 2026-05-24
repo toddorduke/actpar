@@ -3,8 +3,8 @@
   position: fixed;
   inset: 0;
   z-index: 9990;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,9 +12,10 @@
 }
 
 .guide-modal {
-  background: white;
+  background: #1a1a2e;
+  border: 1px solid rgba(245, 158, 11, 0.2);
   border-radius: 24px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   width: 100%;
   max-width: 480px;
   animation: guideFadeUp 0.25s ease;
@@ -36,13 +37,13 @@
 .guide-choice-title {
   font-size: 1.7rem;
   font-weight: 900;
-  color: #111827;
+  color: #fff;
   margin-bottom: 10px;
 }
 
 .guide-choice-sub {
   font-size: 0.97rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.6);
   line-height: 1.6;
   margin-bottom: 28px;
 }
@@ -60,23 +61,42 @@
   gap: 14px;
   padding: 16px 20px;
   border-radius: 16px;
-  border: 2px solid transparent;
+  border: 1.5px solid transparent;
   cursor: pointer;
   text-align: left;
   transition: all 0.15s;
   width: 100%;
 }
 
-.guide-choice-btn.primary  { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+.guide-choice-btn.primary {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+}
 .guide-choice-btn.primary:hover { opacity: 0.92; transform: translateY(-1px); }
-.guide-choice-btn.secondary { background: #f8fafc; border-color: #e5e7eb; color: #1f2937; }
-.guide-choice-btn.secondary:hover { border-color: #f59e0b; background: #fffbeb; }
-.guide-choice-btn.ghost { background: transparent; border-color: #f3f4f6; color: #6b7280; }
-.guide-choice-btn.ghost:hover { background: #f9fafb; color: #374151; }
+
+.guide-choice-btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+}
+.guide-choice-btn.secondary:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.guide-choice-btn.ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+.guide-choice-btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+}
 
 .guide-choice-btn-icon { font-size: 1.5rem; flex-shrink: 0; }
 .guide-choice-btn-label { font-size: 0.97rem; font-weight: 700; }
-.guide-choice-btn-desc { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; }
+.guide-choice-btn-desc { font-size: 0.8rem; opacity: 0.65; margin-top: 2px; }
 
 /* Never show again checkbox */
 .guide-never-show {
@@ -85,7 +105,7 @@
   justify-content: center;
   gap: 8px;
   font-size: 0.83rem;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   user-select: none;
 }
@@ -102,7 +122,7 @@
   position: fixed;
   inset: 0;
   z-index: 9991;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
 
@@ -111,15 +131,14 @@
   position: fixed;
   z-index: 9992;
   border-radius: 10px;
-  /* Huge box-shadow creates the "hole" effect — only the element itself is lit */
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
   outline: 2.5px solid #f59e0b;
   outline-offset: 0px;
   pointer-events: none;
-  transition: top 0.35s cubic-bezier(0.4,0,0.2,1),
-              left 0.35s cubic-bezier(0.4,0,0.2,1),
-              width 0.35s cubic-bezier(0.4,0,0.2,1),
-              height 0.35s cubic-bezier(0.4,0,0.2,1);
+  transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   animation: spotlightPulse 2s ease-in-out infinite;
 }
 
@@ -133,11 +152,11 @@
   position: fixed;
   z-index: 9999;
   width: min(360px, calc(100vw - 32px));
-  background: white;
+  background: #1a1a2e;
+  border: 1px solid rgba(245, 158, 11, 0.2);
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: guideFadeUp 0.2s ease;
-  /* Fixed height so header + actions never scroll off screen */
   max-height: min(85vh, 560px);
   overflow: hidden;
   display: flex;
@@ -155,7 +174,7 @@
 .guide-slide-counter {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -164,13 +183,16 @@
   background: none;
   border: none;
   font-size: 0.82rem;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   padding: 3px 8px;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
 }
-.guide-skip-btn:hover { color: #6b7280; background: #f3f4f6; }
+.guide-skip-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.06);
+}
 
 .guide-tooltip-body {
   padding: 14px 18px 10px;
@@ -187,14 +209,14 @@
 .guide-slide-title {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #111827;
+  color: #fff;
   margin-bottom: 8px;
   line-height: 1.25;
 }
 
 .guide-slide-text {
   font-size: 0.88rem;
-  color: #374151;
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.65;
   margin-bottom: 10px;
 }
@@ -203,19 +225,19 @@
   display: flex;
   gap: 6px;
   align-items: flex-start;
-  background: #fffbeb;
-  border: 1.5px solid #fde68a;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1.5px solid rgba(245, 158, 11, 0.25);
   border-radius: 10px;
   padding: 9px 12px;
   font-size: 0.82rem;
-  color: #92400e;
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.5;
 }
 
 .guide-tip-label {
   font-weight: 700;
   flex-shrink: 0;
-  color: #d97706;
+  color: #f59e0b;
 }
 
 /* Dots */
@@ -232,7 +254,7 @@
   height: 7px;
   border-radius: 50%;
   border: none;
-  background: #e5e7eb;
+  background: rgba(255, 255, 255, 0.15);
   cursor: pointer;
   padding: 0;
   transition: all 0.2s;
@@ -244,32 +266,36 @@
   border-radius: 4px;
 }
 
-/* Actions — always visible at the bottom (never scrolls away) */
+/* Actions */
 .guide-slide-actions {
   display: flex;
   gap: 10px;
   padding: 10px 18px 16px;
   justify-content: flex-end;
   flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .guide-back-btn {
   padding: 9px 18px;
   background: none;
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   font-size: 0.88rem;
   font-weight: 600;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: all 0.15s;
 }
-.guide-back-btn:hover { background: #f9fafb; color: #374151; }
+.guide-back-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+}
 
 .guide-next-btn {
   padding: 9px 22px;
   background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
+  color: #000;
   border: none;
   border-radius: 10px;
   font-size: 0.88rem;
@@ -282,13 +308,12 @@
 
 /* ── Mobile ── */
 @media (max-width: 540px) {
-  /* Choice screen — centered and scrollable so it never overflows the screen */
   .guide-overlay { padding: 16px 12px; align-items: center; overflow-y: auto; }
   .guide-modal { border-radius: 20px; max-width: 100%; max-height: calc(100dvh - 32px); overflow-y: auto; }
   .guide-choice-modal { padding: 28px 20px 20px; }
   .guide-choice-title { font-size: 1.3rem; }
 
-  /* Slide tooltip — bottom sheet, no inline styles on mobile so CSS wins cleanly */
+  /* Slide tooltip — bottom sheet on mobile */
   .guide-tooltip {
     bottom: 0;
     top: auto;
@@ -297,6 +322,7 @@
     width: 100%;
     max-width: 100%;
     border-radius: 20px 20px 0 0;
+    border-bottom: none;
     max-height: 72vh;
     transform: none;
   }
