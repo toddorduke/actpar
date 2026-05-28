@@ -869,7 +869,7 @@ export default function SettingsPage() {
                   <span className="settings-tour-icon">⚡</span>
                   <div>
                     <div className="settings-tour-label">Quick Tour</div>
-                    <div className="settings-tour-desc">The essentials — 4 slides, ~2 min</div>
+                    <div className="settings-tour-desc">Goals, Sparks &amp; Tribe — the 3 things you need to get started. 4 slides, ~2 min.</div>
                   </div>
                 </button>
                 <button
@@ -882,7 +882,7 @@ export default function SettingsPage() {
                   <span className="settings-tour-icon">📖</span>
                   <div>
                     <div className="settings-tour-label">Full Tour</div>
-                    <div className="settings-tour-desc">Every feature — 6 slides, ~4 min</div>
+                    <div className="settings-tour-desc">Everything above plus Messages &amp; Notifications. 6 slides, ~4 min.</div>
                   </div>
                 </button>
               </div>
