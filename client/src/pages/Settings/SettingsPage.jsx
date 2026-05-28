@@ -49,6 +49,7 @@ const SECTIONS = [
   { id: 'profile', label: 'My Profile', icon: '✨' },
   { id: 'password', label: 'Password', icon: '🔒' },
   { id: 'notifications', label: 'Notifications', icon: '🔔' },
+  { id: 'tour', label: 'App Tour', icon: '🗺️' },
   { id: 'about', label: 'About ActPar', icon: 'ℹ️' },
   { id: 'danger', label: 'Delete Account', icon: '⚠️' },
 ];
@@ -851,6 +852,43 @@ export default function SettingsPage() {
           )}
 
           {/* About */}
+          {activeSection === 'tour' && (
+            <section className="settings-section">
+              <h3 className="settings-section-title">App Tour</h3>
+              <p className="settings-desc">
+                Take a guided walkthrough of ActPar's features — great for new users or anyone who wants a refresher.
+              </p>
+              <div className="settings-tour-options">
+                <button
+                  className="settings-tour-btn primary"
+                  onClick={() => {
+                    navigate('/');
+                    setTimeout(() => window.dispatchEvent(new CustomEvent('actpar:start-tour', { detail: { type: 'quick' } })), 100);
+                  }}
+                >
+                  <span className="settings-tour-icon">⚡</span>
+                  <div>
+                    <div className="settings-tour-label">Quick Tour</div>
+                    <div className="settings-tour-desc">The essentials — 4 slides, ~2 min</div>
+                  </div>
+                </button>
+                <button
+                  className="settings-tour-btn"
+                  onClick={() => {
+                    navigate('/');
+                    setTimeout(() => window.dispatchEvent(new CustomEvent('actpar:start-tour', { detail: { type: 'full' } })), 100);
+                  }}
+                >
+                  <span className="settings-tour-icon">📖</span>
+                  <div>
+                    <div className="settings-tour-label">Full Tour</div>
+                    <div className="settings-tour-desc">Every feature — 6 slides, ~4 min</div>
+                  </div>
+                </button>
+              </div>
+            </section>
+          )}
+
           {activeSection === 'about' && (
             <section className="settings-section">
               <h3 className="settings-section-title">About ActPar</h3>

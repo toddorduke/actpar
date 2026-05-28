@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useNavSlots } from '../../context/NavSlotsContext.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
 import { useProfile } from '../../hooks/useProfile.js';
+import { useConversations } from '../../hooks/useConversations.js';
 import Avatar from './Avatar.jsx';
 import { timeAgoShort } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
@@ -103,6 +104,8 @@ const Navigation = () => {
   const notifRef = useRef(null);
   const { notifications, unreadCount, markRead, markAllRead, deleteNotif } = useNotifications();
   const { profile } = useProfile();
+  const { conversations } = useConversations();
+  const unreadMessages = conversations.reduce((sum, c) => sum + (c.unread || 0), 0);
 
   const visibleItems = [
     HOME_ITEM,
@@ -209,10 +212,11 @@ const Navigation = () => {
                 </button>
                 {notifOpen && <NotifList mobile />}
               </div>
-              <NavLink to="/messages" className="nav-icon-btn mobile-settings-btn" aria-label="Messages">
+              <NavLink to="/messages" className="nav-icon-btn mobile-settings-btn" aria-label="Messages" style={{ position: 'relative' }}>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
+                {unreadMessages > 0 && <span className="notif-badge">{unreadMessages > 9 ? '9+' : unreadMessages}</span>}
               </NavLink>
 
               {/* Avatar with dropdown — right side, matching desktop */}
@@ -272,10 +276,11 @@ const Navigation = () => {
             {user ? (
               <>
                 {/* Messages icon */}
-                <NavLink to="/messages" className="nav-icon-btn" aria-label="Messages">
+                <NavLink to="/messages" className="nav-icon-btn" aria-label="Messages" style={{ position: 'relative' }}>
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
+                  {unreadMessages > 0 && <span className="notif-badge">{unreadMessages > 9 ? '9+' : unreadMessages}</span>}
                 </NavLink>
 
                 {/* Desktop notification bell */}

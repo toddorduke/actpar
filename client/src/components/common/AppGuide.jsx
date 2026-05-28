@@ -93,6 +93,18 @@ export default function AppGuide() {
     if (!seen) setPhase('choice');
   }, [user]);
 
+  // Allow Settings (or anywhere) to trigger the tour via a custom event
+  useEffect(() => {
+    function handleStartTour(e) {
+      const type = e.detail?.type ?? 'choice';
+      setSlide(0);
+      setSpotlight(null);
+      setPhase(type);
+    }
+    window.addEventListener('actpar:start-tour', handleStartTour);
+    return () => window.removeEventListener('actpar:start-tour', handleStartTour);
+  }, []);
+
   const dismiss = useCallback(async () => {
     setSpotlight(null);
     setPhase(null);
