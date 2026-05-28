@@ -221,20 +221,31 @@
 
 .title-icon { width: 20px; height: 20px; color: #6b7280; }
 
-.search-container {
-  display: flex;
-  gap: 10px;
+.search-input-wrap {
+  position: relative;
   margin-bottom: 15px;
 }
 
+.search-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
 .search-input {
-  flex: 1;
-  padding: 12px 16px;
+  width: 100%;
+  padding: 12px 16px 12px 42px;
   border: 2px solid #d1d5db;
   border-radius: var(--radius-small);
   font-size: 1em;
   background: white;
   color: #111827;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .search-input::placeholder { color: #9ca3af; }
@@ -242,17 +253,6 @@
 .search-input:focus {
   outline: none;
   border-color: #f59e0b;
-}
-
-.search-btn {
-  padding: 12px 20px;
-  background: #1f2937;
-  color: white;
-  border: none;
-  border-radius: var(--radius-small);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
 }
 
 .spark-card {
