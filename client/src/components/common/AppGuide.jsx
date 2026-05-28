@@ -213,25 +213,35 @@ export default function AppGuide() {
   const tooltipStyle = (() => {
     if (isMobile) return {};
     if (!spotlight) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-    const isNearBottom = spotlight.elTop > window.innerHeight * 0.55;
-    if (isNearBottom) {
-      return { bottom: window.innerHeight - spotlight.top + 16, left: '50%', transform: 'translateX(-50%)' };
+
+    const TOOLTIP_H = 420; // generous estimate of tooltip height
+    const GAP = 16;
+    const centerX = { left: '50%', transform: 'translateX(-50%)' };
+    const spaceBelow = window.innerHeight - spotlight.elBottom - GAP;
+    const spaceAbove = spotlight.elTop - GAP;
+
+    if (spaceBelow >= TOOLTIP_H) {
+      return { top: spotlight.elBottom + GAP, ...centerX };
     }
-    return { top: spotlight.top + spotlight.height + 16, left: '50%', transform: 'translateX(-50%)' };
+    if (spaceAbove >= TOOLTIP_H) {
+      return { top: spotlight.elTop - TOOLTIP_H - GAP, ...centerX };
+    }
+    // Not enough room either side — center on screen
+    return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
   })();
 
   return (
     <>
-      {/* Dim overlay */}
-      <div className="guide-dim" />
-
-      {/* Spotlight cutout — desktop only */}
+      {/* Spotlight cutout — desktop only. Box-shadow handles all dimming so no separate dim div needed. */}
       {!isMobile && spotlight && (
         <div
           className="guide-spotlight"
           style={{ top: spotlight.top, left: spotlight.left, width: spotlight.width, height: spotlight.height }}
         />
       )}
+
+      {/* Dim overlay on mobile (no spotlight cutout) and when spotlight hasn't loaded yet */}
+      {(isMobile || !spotlight) && <div className="guide-dim" />}
 
       {/* Floating tooltip */}
       <div className="guide-tooltip" style={tooltipStyle}>

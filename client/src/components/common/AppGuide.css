@@ -131,7 +131,7 @@
   position: fixed;
   z-index: 9992;
   border-radius: 10px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72);
   outline: 2.5px solid #f59e0b;
   outline-offset: 0px;
   pointer-events: none;
@@ -157,10 +157,12 @@
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: guideFadeUp 0.2s ease;
-  max-height: min(85vh, 560px);
+  max-height: min(80vh, 520px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* Never let it go off screen */
+  max-width: calc(100vw - 32px);
 }
 
 .guide-tooltip-header {
