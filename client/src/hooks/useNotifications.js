@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { playSparkSound, playDingSound } from '../utils/sounds.js';
 
 export const useNotifications = () => {
   const { user } = useContext(AuthContext);
@@ -37,7 +38,11 @@ export const useNotifications = () => {
           .select('*, actor:profiles!notifications_actor_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name)')
           .eq('id', payload.new.id)
           .single();
-        if (data) setNotifications((prev) => [data, ...prev]);
+        if (data) {
+          setNotifications((prev) => [data, ...prev]);
+          if (data.type === 'connection_request') playSparkSound();
+          else playDingSound();
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };

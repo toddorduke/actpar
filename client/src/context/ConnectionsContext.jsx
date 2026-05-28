@@ -3,6 +3,7 @@ import { AuthContext } from './AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from '../hooks/useNotifications.js';
 import { getDisplayName } from '../utils/displayName.js';
+import { playSparkSound } from '../utils/sounds.js';
 
 export const ConnectionsContext = createContext(null);
 
@@ -132,6 +133,7 @@ export const ConnectionsProvider = ({ children }) => {
     if (sparkMessage) row.spark_message = sparkMessage;
     const { error } = await supabase.from('connections').insert(row);
     if (!error) {
+      playSparkSound();
       setBrowseProfiles((prev) => prev.filter((p) => p.id !== receiverId));
       const { data: sender } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
       const name = getDisplayName(sender, 'Someone');

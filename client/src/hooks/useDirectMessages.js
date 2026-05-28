@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { playDingSound } from '../utils/sounds.js';
 
 export const useDirectMessages = (otherUserId) => {
   const { user } = useContext(AuthContext);
@@ -65,6 +66,7 @@ export const useDirectMessages = (otherUserId) => {
           .single();
         if (data) {
           setMessages((prev) => [...prev, data]);
+          playDingSound();
           // Mark as read immediately since thread is open
           await supabase
             .from('direct_messages')
