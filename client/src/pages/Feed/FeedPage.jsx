@@ -358,6 +358,8 @@ export default function FeedPage() {
 
   return (
     <>
+      {/* Dark backdrop fills the screen behind the centered column on desktop */}
+      <div className="feed-desktop-backdrop" />
       <div className="feed-page">
         {posts.map((post) => (
           <FeedCard

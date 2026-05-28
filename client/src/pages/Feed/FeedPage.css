@@ -609,6 +609,55 @@
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+/* ── Desktop: phone-like centered column ── */
+.feed-desktop-backdrop {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  /* Full-screen dark backdrop behind the column */
+  .feed-desktop-backdrop {
+    display: block;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    z-index: 49;
+  }
+
+  /* Constrain feed to phone-like column */
+  .feed-page,
+  .feed-loading-state,
+  .feed-empty-state {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 430px;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.8);
+  }
+
+  /* FAB sits at the right edge of the column */
+  .feed-fab {
+    right: auto;
+    left: calc(50% + 143px);
+    bottom: 20px;
+  }
+
+  /* Comment sheet constrained to column */
+  .feed-comment-overlay-sheet {
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+  /* Post sheet constrained to column */
+  .feed-post-sheet {
+    max-width: 430px;
+    margin: 0 auto;
+  }
+}
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .feed-page,
