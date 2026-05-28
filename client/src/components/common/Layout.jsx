@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Navigation from './Navigation.jsx';
 import AppGuide from './AppGuide.jsx';
 
-const AUTH_ROUTES = ['/login', '/signup', '/onboarding', '/forgot-password', '/reset-password'];
+const AUTH_ROUTES = ['/login', '/signup', '/onboarding', '/forgot-password', '/reset-password', '/about'];
 
 const Layout = ({ children }) => {
   const { pathname } = useLocation();
