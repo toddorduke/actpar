@@ -15,9 +15,19 @@ const BLOCKED_WORDS = [
   'kill yourself', 'kys', 'go die', 'you should die', 'i will kill',
   'i will hurt', 'you are worthless', 'nobody likes you', 'kill u',
   'end your life', 'worthless piece', 'ugly piece',
+  'beat you up', 'beat your ass', 'fight you', 'come find you',
+  'ill hurt you', 'im going to hurt', 'going to kill',
+  // Doxxing / online harassment
+  'doxx you', 'dox you', 'find where you live', 'expose your address',
+  'i know where you live', 'swat you', 'swatting',
+  // Child safety
+  'pedo', 'pedophile', 'nonce',
   // Dangerous / illegal
   'buy drugs', 'sell drugs', 'cocaine', 'heroin', 'meth', 'fentanyl',
   'child porn', 'cp link', 'onlyfans link', 'porn link',
+  // DM solicitation / scams
+  'cash app me', 'cashapp me', 'venmo me', 'zelle me', 'send me money',
+  'pay me first', 'wire me', 'click this link', 'dm me for deals',
 ];
 
 // Words that show a mental health support message instead of hard-blocking
@@ -25,12 +35,18 @@ const CRISIS_WORDS = [
   'kill myself', 'want to die', 'suicidal', 'end my life', 'take my life',
   'no reason to live', 'better off dead', 'cut myself', 'hurt myself',
   'self harm', 'self-harm', 'overdose',
+  'i want to disappear', 'wish i was dead', 'i give up on life',
+  'no point in living', 'dont want to live', "don't want to live",
+  'cant take it anymore', "can't take it anymore", 'nothing to live for',
+  'feel completely hopeless', 'rather be dead',
 ];
 
 // Words that show a gentle warning before allowing submission
 const WARNING_WORDS = [
   'hate', 'stupid', 'idiot', 'dumb', 'loser', 'ugly', 'fat', 'disgusting',
   'freak', 'weirdo', 'pathetic', 'useless',
+  'trash', 'garbage', 'clown', 'dumbass', 'dumb ass', 'shut up',
+  'go away', 'nobody wants you', 'you suck',
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -145,8 +161,8 @@ export function validateFileType(file) {
  * Validate file size.
  */
 export function validateFileSize(file) {
-  const MAX_IMAGE = 10 * 1024 * 1024; // 10 MB
-  const MAX_VIDEO = 100 * 1024 * 1024; // 100 MB
+  const MAX_IMAGE = 10 * 1024 * 1024;  // 10 MB
+  const MAX_VIDEO = 200 * 1024 * 1024; // 200 MB
   const isVideo = file.type.startsWith('video/');
   const limit = isVideo ? MAX_VIDEO : MAX_IMAGE;
 

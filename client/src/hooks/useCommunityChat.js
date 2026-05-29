@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const useCommunityChat = (communityId) => {
   const { user } = useContext(AuthContext);
@@ -49,10 +50,13 @@ export const useCommunityChat = (communityId) => {
   }, [communityId, fetchMessages]);
 
   const sendMessage = useCallback(async (content) => {
-    if (!content.trim() || !user) return;
+    if (!content.trim() || !user) return { moderation: null };
+    const modResult = checkText(content);
+    if (!modResult.ok) return { moderation: modResult };
     await supabase
       .from('community_messages')
       .insert({ community_id: communityId, user_id: user.id, content: content.trim() });
+    return { moderation: null };
   }, [communityId, user]);
 
   return { messages, loading, sendMessage };

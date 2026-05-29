@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { playDingSound } from '../utils/sounds.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const useDirectMessages = (otherUserId) => {
   const { user } = useContext(AuthContext);
@@ -81,6 +82,8 @@ export const useDirectMessages = (otherUserId) => {
 
   const sendMessage = useCallback(async (content) => {
     if (!content.trim() || !user || !otherUserId) return { error: new Error('Missing data') };
+    const modResult = checkText(content);
+    if (!modResult.ok) return { error: null, moderation: modResult };
     const { data, error } = await supabase
       .from('direct_messages')
       .insert({ sender_id: user.id, receiver_id: otherUserId, content: content.trim() })

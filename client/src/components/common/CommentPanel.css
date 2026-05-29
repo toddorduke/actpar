@@ -135,3 +135,14 @@
 
 .comment-submit-btn:disabled { opacity: 0.4; cursor: default; }
 .comment-submit-btn:not(:disabled):hover { opacity: 0.85; }
+
+.comment-mod-error {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #fca5a5;
+  line-height: 1.5;
+}

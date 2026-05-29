@@ -79,6 +79,7 @@ function MessageThread({ otherUserId, onBack }) {
   const { isBlocked } = useBlock();
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [modError, setModError] = useState('');
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -88,9 +89,15 @@ function MessageThread({ otherUserId, onBack }) {
   async function handleSend(e) {
     e.preventDefault();
     if (!text.trim() || sending) return;
+    setModError('');
     setSending(true);
+    const result = await sendMessage(text);
+    if (result?.moderation) {
+      setModError(result.moderation.message);
+      setSending(false);
+      return;
+    }
     setText('');
-    await sendMessage(text);
     setSending(false);
   }
 
@@ -150,6 +157,10 @@ function MessageThread({ otherUserId, onBack }) {
         })}
         <div ref={bottomRef} />
       </div>
+
+      {modError && (
+        <div className="thread-mod-error">{modError}</div>
+      )}
 
       {isBlocked(otherUserId) ? (
         <div className="thread-blocked-bar">

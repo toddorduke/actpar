@@ -31,6 +31,7 @@ export default function CommentPanel({ postId, postType, comments = [], loading,
   const navigate = useNavigate();
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [modError, setModError] = useState('');
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -40,8 +41,14 @@ export default function CommentPanel({ postId, postType, comments = [], loading,
   async function handleSubmit(e) {
     e.preventDefault();
     if (!text.trim() || submitting) return;
+    setModError('');
     setSubmitting(true);
-    await onAdd(postId, postType, text);
+    const result = await onAdd(postId, postType, text);
+    if (result?.moderation) {
+      setModError(result.moderation.message);
+      setSubmitting(false);
+      return;
+    }
     setText('');
     setSubmitting(false);
   }
@@ -81,6 +88,8 @@ export default function CommentPanel({ postId, postType, comments = [], loading,
           );
         })}
       </div>
+
+      {modError && <p className="comment-mod-error">{modError}</p>}
 
       <form className="comment-input-row" onSubmit={handleSubmit}>
         <input

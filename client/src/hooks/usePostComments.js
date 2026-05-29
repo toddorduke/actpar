@@ -1,6 +1,7 @@
 import { useCallback, useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const usePostComments = () => {
   const { user } = useContext(AuthContext);
@@ -21,6 +22,8 @@ export const usePostComments = () => {
 
   const addComment = useCallback(async (postId, postType, content) => {
     if (!content.trim() || !user) return { error: new Error('Missing data') };
+    const modResult = checkText(content);
+    if (!modResult.ok) return { data: null, error: null, moderation: modResult };
     const { data, error } = await supabase
       .from('post_comments')
       .insert({ post_id: postId, post_type: postType, user_id: user.id, content: content.trim() })

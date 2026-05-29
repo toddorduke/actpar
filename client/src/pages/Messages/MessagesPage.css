@@ -288,6 +288,16 @@
 }
 
 /* Input bar */
+.thread-mod-error {
+  padding: 10px 16px;
+  background: rgba(239,68,68,0.1);
+  border-top: 1px solid rgba(239,68,68,0.25);
+  color: #fca5a5;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
 .thread-blocked-bar {
   padding: 14px 20px;
   background: #0f1623;
