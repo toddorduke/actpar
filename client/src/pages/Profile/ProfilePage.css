@@ -1557,6 +1557,72 @@
   font-weight: 600;
 }
 
+.my-post-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.my-post-type {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.my-post-community {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.my-post-milestone {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.my-post-content {
+  font-size: 0.92rem;
+  color: #1f2937;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.my-post-caption {
+  font-size: 0.85rem;
+  color: #4b5563;
+  font-style: italic;
+  margin: 0;
+}
+
+.my-post-stats {
+  font-size: 0.82rem;
+  color: rgba(31, 41, 55, 0.55);
+  font-weight: 600;
+}
+
+.my-post-media {
+  margin: 0 -24px;
+  overflow: hidden;
+}
+
+.my-post-media-file {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
 /* ── Media ────────────────────────────────────────────── */
 .photo-item-wrapper {
   position: relative;

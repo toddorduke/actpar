@@ -262,6 +262,23 @@ const ProfilePage = () => {
       .then(({ data }) => setConnectionProfiles(data ?? []));
   }, [profile?.id, acceptedConnections.length]);
 
+  // Direct fetch for the user's own posts — includes media and community name
+  const [myOwnPosts, setMyOwnPosts] = useState([]);
+  const [myOwnPostsLoading, setMyOwnPostsLoading] = useState(false);
+  useEffect(() => {
+    if (!profile?.id) return;
+    setMyOwnPostsLoading(true);
+    supabase
+      .from('tribe_posts')
+      .select('id, content, post_type, likes, created_at, milestone, media_url, caption, community_id, communities(name)')
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setMyOwnPosts(data ?? []);
+        setMyOwnPostsLoading(false);
+      });
+  }, [profile?.id]);
+
   // Confirm dialog state
   const [confirmDialog, setConfirmDialog] = useState(null);
 
@@ -1275,27 +1292,44 @@ const ProfilePage = () => {
             <svg className="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
-            <h2>My Community Posts</h2>
+            <h2>My Posts</h2>
           </div>
 
-          {postsLoading && <p className="goals-empty">Loading posts...</p>}
-          {!postsLoading && myPosts.length === 0 && (
-            <p className="goals-empty">You haven't posted to the community yet — head to Tribe to share something!</p>
+          {myOwnPostsLoading && <p className="goals-empty">Loading posts...</p>}
+          {!myOwnPostsLoading && myOwnPosts.length === 0 && (
+            <p className="goals-empty">You haven't posted yet — share something on the Feed or in a Community!</p>
           )}
 
           <div className="my-posts-list">
-            {myPosts.map((post) => {
+            {myOwnPosts.map((post) => {
               const typeLabel = post.post_type === 'achievement' ? '🏆 Achievement' : post.post_type === 'meetup' ? '📅 Meetup' : '💬 General';
+              const isVideo = post.media_url && /\.(mp4|mov|webm|quicktime)/i.test(post.media_url);
+              const communityName = post.communities?.name;
               return (
                 <div key={post.id} className="my-post-card">
                   <div className="my-post-header">
-                    <span className="my-post-type">{typeLabel}</span>
+                    <div className="my-post-header-left">
+                      <span className="my-post-type">{typeLabel}</span>
+                      {communityName && (
+                        <span className="my-post-community">📍 {communityName}</span>
+                      )}
+                    </div>
                     <span className="my-post-date">{formatDate(post.created_at)}</span>
                   </div>
                   {post.milestone && (
                     <div className="my-post-milestone">🏆 {post.milestone}</div>
                   )}
-                  <p className="my-post-content">{post.content}</p>
+                  {post.media_url && (
+                    <div className="my-post-media">
+                      {isVideo
+                        ? <video src={post.media_url} className="my-post-media-file" controls playsInline />
+                        : <img src={post.media_url} alt={post.caption || ''} className="my-post-media-file" />}
+                    </div>
+                  )}
+                  {post.content && <p className="my-post-content">{post.content}</p>}
+                  {post.caption && post.media_url && (
+                    <p className="my-post-caption">{post.caption}</p>
+                  )}
                   <div className="my-post-stats">
                     <span>❤️ {post.likes} likes</span>
                   </div>
