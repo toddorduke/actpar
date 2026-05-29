@@ -69,7 +69,7 @@ export default function UserProfilePage() {
         .order('tier'),
       supabase
         .from('tribe_posts')
-        .select('id, content, post_type, likes, created_at')
+        .select('id, content, post_type, likes, created_at, media_url, caption')
         .eq('user_id', userId)
         .order('created_at', { ascending: false }),
       supabase
@@ -184,10 +184,50 @@ export default function UserProfilePage() {
     ? Math.floor((Date.now() - new Date(profile.affirmation_start_date)) / 86400000) + 1
     : null;
 
+  // Combine dedicated media uploads + feed post media into one grid
+  const feedMedia = posts
+    .filter(p => p.media_url)
+    .map(p => ({
+      id: `post-${p.id}`,
+      file_url: p.media_url,
+      file_type: /\.(mp4|mov|webm|quicktime)/i.test(p.media_url) ? 'video' : 'image',
+      caption: p.caption || p.content,
+      created_at: p.created_at,
+    }));
+  const allMedia = [
+    ...media,
+    ...feedMedia.filter(fm => !media.some(m => m.file_url === fm.file_url)),
+  ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  // Derive achievements from existing data
+  const achievements = [];
+  const maxStreak = goals.filter(g => g.goal_type !== 'numeric').reduce((m, g) => Math.max(m, g.day_count || 0), 0);
+  if (maxStreak >= 90) achievements.push({ icon: '🔥', label: '90-Day Streak', desc: `${maxStreak} days strong` });
+  else if (maxStreak >= 30) achievements.push({ icon: '🔥', label: '30-Day Streak', desc: `${maxStreak} days strong` });
+  else if (maxStreak >= 7) achievements.push({ icon: '🔥', label: '7-Day Streak', desc: `${maxStreak} days strong` });
+
+  const completedGoals = goals.filter(g => g.goal_type === 'numeric' && g.target_value && (g.progress ?? 0) >= g.target_value);
+  if (completedGoals.length > 0) achievements.push({ icon: '🏆', label: 'Goal Crusher', desc: `${completedGoals.length} goal${completedGoals.length > 1 ? 's' : ''} completed` });
+
+  if (goals.length >= 5) achievements.push({ icon: '🎯', label: 'Overachiever', desc: `${goals.length} active goals` });
+  else if (goals.length >= 3) achievements.push({ icon: '🎯', label: 'Multi-Tasker', desc: `${goals.length} active goals` });
+
+  if (posts.length >= 30) achievements.push({ icon: '📣', label: 'Voice of the Tribe', desc: `${posts.length} posts shared` });
+  else if (posts.length >= 10) achievements.push({ icon: '📣', label: 'Regular Poster', desc: `${posts.length} posts` });
+
+  if (reflections.length >= 10) achievements.push({ icon: '💭', label: 'Deep Thinker', desc: `${reflections.length} reflections` });
+  else if (reflections.length >= 3) achievements.push({ icon: '💭', label: 'Reflective', desc: `${reflections.length} reflections` });
+
+  if (affirmationDay && affirmationDay >= 30) achievements.push({ icon: '✨', label: '30-Day Affirmation', desc: 'Challenge complete' });
+  else if (affirmationDay && affirmationDay >= 7) achievements.push({ icon: '✨', label: 'Affirmation Streak', desc: `Day ${affirmationDay}` });
+
+  if (allMedia.length >= 10) achievements.push({ icon: '📸', label: 'Content Creator', desc: `${allMedia.length} photos & videos` });
+
   const tabs = [
     { id: 'overview', label: `Goals (${goals.length})` },
-    ...(media.length > 0 ? [{ id: 'media', label: `Media (${media.length})` }] : []),
+    { id: 'media', label: `Media (${allMedia.length})` },
     { id: 'posts', label: `Posts (${posts.length})` },
+    { id: 'achievements', label: `Achievements (${achievements.length})` },
     ...(reflections.length > 0 ? [{ id: 'reflections', label: `Reflections (${reflections.length})` }] : []),
     ...(affirmations.length > 0 ? [{ id: 'affirmations', label: `Affirmations (${affirmations.length})` }] : []),
     ...(journalEntries.length > 0 ? [{ id: 'journal', label: `Journal (${journalEntries.length})` }] : []),
@@ -367,26 +407,37 @@ export default function UserProfilePage() {
         {activeTab === 'posts' && (
           <div className="up-posts">
             {posts.length === 0 && <p className="up-empty">No posts yet.</p>}
-            {posts.map((post) => (
-              <div key={post.id} className="up-post-card">
-                <div className="up-post-header">
-                  <Avatar url={profile.avatar_url} name={fullName} size={36} />
-                  <div className="up-post-meta">
-                    <span className="up-post-author">{fullName}</span>
-                    <span className="up-post-time">{timeAgo(post.created_at)}</span>
+            {posts.map((post) => {
+              const isVideo = post.media_url && /\.(mp4|mov|webm|quicktime)/i.test(post.media_url);
+              return (
+                <div key={post.id} className="up-post-card">
+                  <div className="up-post-header">
+                    <Avatar url={profile.avatar_url} name={fullName} size={36} />
+                    <div className="up-post-meta">
+                      <span className="up-post-author">{fullName}</span>
+                      <span className="up-post-time">{timeAgo(post.created_at)}</span>
+                    </div>
                   </div>
+                  {post.media_url && (
+                    <div className="up-post-media">
+                      {isVideo
+                        ? <video src={post.media_url} className="up-post-media-file" controls playsInline />
+                        : <img src={post.media_url} alt="" className="up-post-media-file" />}
+                    </div>
+                  )}
+                  {post.content && <p className="up-post-content">{post.content}</p>}
+                  <div className="up-post-likes">♥ {post.likes ?? 0}</div>
                 </div>
-                <p className="up-post-content">{post.content}</p>
-                <div className="up-post-likes">♥ {post.likes ?? 0}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* Media tab */}
         {activeTab === 'media' && (
           <div className="up-media-grid">
-            {media.map((item) => (
+            {allMedia.length === 0 && <p className="up-empty">No photos or videos shared yet.</p>}
+            {allMedia.map((item) => (
               <div key={item.id} className="up-media-item">
                 {item.file_type === 'video' ? (
                   <video src={item.file_url} className="up-media-file" controls playsInline />
@@ -394,6 +445,24 @@ export default function UserProfilePage() {
                   <img src={item.file_url} alt={item.caption ?? ''} className="up-media-file" />
                 )}
                 {item.caption && <div className="up-media-caption">{item.caption}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Achievements tab */}
+        {activeTab === 'achievements' && (
+          <div className="up-achievements">
+            {achievements.length === 0 && (
+              <p className="up-empty">No achievements yet — they're just getting started! 💪</p>
+            )}
+            {achievements.map((a, i) => (
+              <div key={i} className="up-achievement-card">
+                <div className="up-achievement-icon">{a.icon}</div>
+                <div className="up-achievement-info">
+                  <div className="up-achievement-label">{a.label}</div>
+                  <div className="up-achievement-desc">{a.desc}</div>
+                </div>
               </div>
             ))}
           </div>
