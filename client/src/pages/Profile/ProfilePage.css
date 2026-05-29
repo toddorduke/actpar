@@ -2497,6 +2497,68 @@
 }
 .goal-delete-btn:hover { background: #fef2f2; }
 
+/* Goal type toggle (Habit vs Progress Goal) */
+.goal-type-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.goal-type-btn {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.goal-type-btn.active {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+}
+
+.goal-type-btn:hover:not(.active) {
+  border-color: #9ca3af;
+  background: #f3f4f6;
+}
+
+/* 30-day streak calendar */
+.goal-checkin-calendar {
+  display: flex;
+  gap: 3px;
+  padding: 8px 0 4px;
+  overflow: hidden;
+}
+
+.goal-cal-dot {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: #e5e7eb;
+  transition: background 0.15s;
+}
+
+.goal-cal-dot.done {
+  background: #10b981;
+}
+
+.goal-cal-dot.today:not(.done) {
+  background: #fbbf24;
+}
+
+.goal-cal-dot.today.done {
+  background: #10b981;
+  outline: 2px solid #f59e0b;
+  outline-offset: 1px;
+}
+
 /* My Posts delete button */
 .my-post-delete-btn {
   margin-left: auto;

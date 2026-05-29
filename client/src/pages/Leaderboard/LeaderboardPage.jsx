@@ -312,7 +312,7 @@ export default function LeaderboardPage() {
                   <div
                     key={person.id}
                     className={`lb-row${isMe ? ' lb-row-me' : ''}`}
-                    onClick={() => navigate(isMe ? '/profile' : `/profile/${person.id}`)}
+                    onClick={() => navigate(isMe ? '/' : `/profile/${person.id}`)}
                   >
                     <div className="lb-row-rank">
                       {medal ? <span className="lb-row-medal">{medal}</span> : <span className="lb-row-num">#{i + 1}</span>}

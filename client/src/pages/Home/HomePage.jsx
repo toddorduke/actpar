@@ -79,7 +79,7 @@ function getTodayStr() {
 
 // ── GoalCard ─────────────────────────────────────────────────────────────────
 
-const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress, onDelete, onComplete }) => {
+const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress, checkinDates = new Set(), onDelete, onComplete }) => {
   const isNumeric = goal.goal_type === 'numeric';
   const habitPct = useMemo(() => Math.min((goal.day_count / 90) * 100, 100), [goal.day_count]);
   const checkedInToday = goal.last_checked_in === getTodayStr();
@@ -178,6 +178,24 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
           <div className="milestone-markers"><span>0</span><span>30</span><span>60</span><span>90</span></div>
         )}
       </div>
+
+      {!isNumeric && (
+        <div className="goal-checkin-calendar" title="Last 30 days">
+          {Array.from({ length: 30 }, (_, i) => {
+            const d = new Date(Date.now() - (29 - i) * 86400000);
+            const dateStr = d.toISOString().split('T')[0];
+            const done = checkinDates.has(dateStr);
+            const isToday = dateStr === getTodayStr();
+            return (
+              <div
+                key={dateStr}
+                className={`goal-cal-dot${done ? ' done' : ''}${isToday ? ' today' : ''}`}
+                title={`${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}${done ? ' ✓' : ''}`}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {isNumeric ? (
         <div className="log-progress-area">
@@ -344,6 +362,28 @@ const HomePage = () => {
       .then(({ data }) => setConnectionProfiles(data ?? []));
   }, [profile?.id, acceptedConnections.length]);
 
+  // — Check-in history for streak calendars (last 30 days) —
+  const [checkinHistory, setCheckinHistory] = useState({}); // { goalId: Set<'YYYY-MM-DD'> }
+  useEffect(() => {
+    const habitGoalIds = goals.filter((g) => g.goal_type !== 'numeric').map((g) => g.id);
+    if (!habitGoalIds.length) { setCheckinHistory({}); return; }
+    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    supabase
+      .from('checkin_logs')
+      .select('goal_id, checked_in_at')
+      .in('goal_id', habitGoalIds)
+      .gte('checked_in_at', since)
+      .then(({ data }) => {
+        const map = {};
+        for (const row of data ?? []) {
+          const dateStr = row.checked_in_at.slice(0, 10);
+          if (!map[row.goal_id]) map[row.goal_id] = new Set();
+          map[row.goal_id].add(dateStr);
+        }
+        setCheckinHistory(map);
+      });
+  }, [goals.length]);
+
   // — My own posts (direct query, not limited by global feed) —
   useEffect(() => {
     if (!profile?.id || activeTab !== 'posts') return;
@@ -476,6 +516,10 @@ const HomePage = () => {
     const result = await checkIn(goalId);
     setCheckingIn((p) => ({ ...p, [goalId]: false }));
     if (result?.alreadyDone) return;
+    setCheckinHistory((prev) => {
+      const existing = prev[goalId] ?? new Set();
+      return { ...prev, [goalId]: new Set([...existing, todayStr]) };
+    });
     if (result?.milestone) {
       toast(`🔥 ${result.milestone}-day streak on "${result.goalTitle}"!`, 'success', 4000);
     }
@@ -968,6 +1012,7 @@ const HomePage = () => {
                                 onCheckIn={checkIn}
                                 progressData={progressMap[goal.id]}
                                 onLogProgress={logProgress}
+                                checkinDates={checkinHistory[goal.id] ?? new Set()}
                                 onDelete={(id) => setConfirmDialog({ message: 'Remove this goal?', onConfirm: () => deleteGoal(id) })}
                                 onComplete={(id) => setConfirmDialog({ message: 'Mark this goal as completed?', onConfirm: () => completeGoal(id) })}
                               />
@@ -1224,6 +1269,18 @@ const HomePage = () => {
                   Add a Goal
                 </h3>
                 <form className="add-goal-form-wrap" onSubmit={handleAddGoal}>
+                  <div className="goal-type-toggle">
+                    <button
+                      type="button"
+                      className={`goal-type-btn${newGoalType === 'habit' ? ' active' : ''}`}
+                      onClick={() => setNewGoalType('habit')}
+                    >✓ Habit</button>
+                    <button
+                      type="button"
+                      className={`goal-type-btn${newGoalType === 'numeric' ? ' active' : ''}`}
+                      onClick={() => setNewGoalType('numeric')}
+                    >📊 Progress Goal</button>
+                  </div>
                   <div className="add-goal-row">
                     <input
                       type="text"

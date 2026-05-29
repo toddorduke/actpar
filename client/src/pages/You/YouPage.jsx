@@ -11,7 +11,7 @@ import './YouPage.css';
 const QUICK_LINKS = [
   {
     key: 'profile',
-    to: '/profile',
+    to: '/',
     emoji: '✏️',
     label: 'My Profile',
     desc: 'Edit goals, bio & photo',
@@ -97,7 +97,7 @@ export default function YouPage() {
             <div className="you-profile-tagline">"{profile.tagline}"</div>
           )}
         </div>
-        <button className="you-edit-btn" onClick={() => navigate('/profile')}>
+        <button className="you-edit-btn" onClick={() => navigate('/')}>
           Edit Profile
         </button>
       </div>

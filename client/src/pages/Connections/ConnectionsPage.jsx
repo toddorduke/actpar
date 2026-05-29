@@ -10,11 +10,6 @@ import SparkModal, { getSparksUsedToday } from '../../components/common/SparkMod
 import { getDisplayName } from '../../utils/displayName.js';
 import './ConnectionsPage.css';
 
-const SUGGESTED_PACTS = [
-  { title: 'The Phoenix Circle', members: 8 },
-  { title: 'Morning Warriors', members: 5 },
-];
-
 const LF_CATEGORIES = [
   'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
   'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
