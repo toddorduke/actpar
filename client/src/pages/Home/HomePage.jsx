@@ -511,20 +511,61 @@ const HomePage = () => {
     }
   }, [profile]);
 
-  // — Handlers —
-  async function handleQuickCheckIn(goalId) {
-    if (checkingIn[goalId]) return;
-    setCheckingIn((p) => ({ ...p, [goalId]: true }));
+  // — Nudge tracking (in-memory per session) —
+  const [nudgeSent, setNudgeSent] = useState(new Set());
+
+  // — Notify journey partner when current user checks in on a shared goal —
+  function notifyJourneyPartner(goalId) {
+    const goalTitle = goals.find((g) => g.id === goalId)?.title;
+    for (const p of partnerships) {
+      if (p.status !== 'active') continue;
+      const { partnerId, myGoalId } = partnerSide(p);
+      if (myGoalId !== goalId) continue;
+      const days = p.started_at
+        ? Math.floor((Date.now() - new Date(p.started_at)) / 86400000) + 1
+        : 1;
+      supabase.from('notifications').insert({
+        user_id: partnerId,
+        actor_id: user.id,
+        type: 'journey_checkin',
+        ref_id: p.id,
+        body: `checked in on "${goalTitle}" — Day ${days} of your journey! 🔥`,
+      });
+    }
+  }
+
+  // — Shared check-in handler used by both quick cards and GoalCard buttons —
+  async function handleGoalCheckIn(goalId) {
     const result = await checkIn(goalId);
-    setCheckingIn((p) => ({ ...p, [goalId]: false }));
-    if (result?.alreadyDone) return;
+    if (result?.alreadyDone) return result;
     setCheckinHistory((prev) => {
       const existing = prev[goalId] ?? new Set();
       return { ...prev, [goalId]: new Set([...existing, todayStr]) };
     });
+    notifyJourneyPartner(goalId);
     if (result?.milestone) {
       toast(`🔥 ${result.milestone}-day streak on "${result.goalTitle}"!`, 'success', 4000);
     }
+    return result;
+  }
+
+  // — Handlers —
+  async function handleQuickCheckIn(goalId) {
+    if (checkingIn[goalId]) return;
+    setCheckingIn((p) => ({ ...p, [goalId]: true }));
+    await handleGoalCheckIn(goalId);
+    setCheckingIn((p) => ({ ...p, [goalId]: false }));
+  }
+
+  async function handleNudge(partnerId, goalTitle) {
+    const myName = getDisplayName(profile, 'Your partner');
+    await supabase.from('notifications').insert({
+      user_id: partnerId,
+      actor_id: user.id,
+      type: 'journey_nudge',
+      body: `${myName} is checking on you — have you done "${goalTitle}" today? 💪`,
+    });
+    setNudgeSent((prev) => new Set([...prev, partnerId]));
   }
 
   async function sendCheer(item) {
@@ -1011,7 +1052,7 @@ const HomePage = () => {
                                 goal={goal}
                                 animate={animateGoals}
                                 onTierChange={updateTier}
-                                onCheckIn={checkIn}
+                                onCheckIn={handleGoalCheckIn}
                                 progressData={progressMap[goal.id]}
                                 onLogProgress={logProgress}
                                 checkinDates={checkinHistory[goal.id] ?? new Set()}
@@ -1485,12 +1526,24 @@ const HomePage = () => {
                               </div>
                             )}
                           </div>
-                          <button
-                            className="journey-msg-btn"
-                            onClick={() => navigate(`/messages?with=${partnerId}`)}
-                          >
-                            💬 Message
-                          </button>
+                          <div className="journey-action-row">
+                            {partnerGoal && !partnerCheckedToday && (
+                              <button
+                                className={`journey-nudge-btn${nudgeSent.has(partnerId) ? ' sent' : ''}`}
+                                onClick={() => !nudgeSent.has(partnerId) && handleNudge(partnerId, partnerGoal.title)}
+                                disabled={nudgeSent.has(partnerId)}
+                                title={nudgeSent.has(partnerId) ? 'Nudge sent!' : `Remind ${partnerName.split(' ')[0]} to check in`}
+                              >
+                                {nudgeSent.has(partnerId) ? '✓ Nudged' : `👋 Nudge ${partnerName.split(' ')[0]}`}
+                              </button>
+                            )}
+                            <button
+                              className="journey-msg-btn"
+                              onClick={() => navigate(`/messages?with=${partnerId}`)}
+                            >
+                              💬 Message
+                            </button>
+                          </div>
                         </div>
                       );
                     })}

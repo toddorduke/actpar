@@ -52,6 +52,8 @@ export default function NotificationsPage() {
       navigate(`/messages?with=${notif.actor_id}`);
     } else if (notif.type === 'journey_invite' || notif.type === 'journey_accepted') {
       navigate('/connections');
+    } else if (notif.type === 'journey_checkin' || notif.type === 'journey_nudge') {
+      navigate('/');
     } else if (notif.type === 'post_like') {
       navigate(notif.ref_id ? `/post/${notif.ref_id}` : '/tribe-community');
     } else if (notif.type === 'streak_milestone' || notif.type === 'progress_complete') {
