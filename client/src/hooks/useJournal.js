@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const useJournal = () => {
   const { user } = useContext(AuthContext);
@@ -22,6 +23,8 @@ export const useJournal = () => {
   useEffect(() => { fetchEntries(); }, [fetchEntries]);
 
   const createEntry = useCallback(async ({ subject, body, is_public }) => {
+    const bodyCheck = checkText(body);
+    if (!bodyCheck.ok) return { data: null, error: null, moderation: bodyCheck };
     const { data, error } = await supabase
       .from('journal_entries')
       .insert({ user_id: user.id, subject, body, is_public })

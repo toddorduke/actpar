@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
+import { checkText } from '../utils/contentModeration.js';
 
 function periodStart(period) {
   const now = new Date();
@@ -62,6 +63,10 @@ export function useGoalProgress(goals) {
 
   const logProgress = useCallback(async (goalId, value, note = '') => {
     if (!user) return { error: 'Not authenticated' };
+    if (note.trim()) {
+      const noteCheck = checkText(note);
+      if (!noteCheck.ok) return { data: null, error: null, moderation: noteCheck };
+    }
     const { data, error } = await supabase
       .from('goal_progress')
       .insert({ goal_id: goalId, user_id: user.id, value, note: note.trim() || null })

@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { checkText } from '../utils/contentModeration.js';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
@@ -95,6 +96,12 @@ export const usePact = (activePactId = null) => {
   }, [fetchMyPacts, fetchPactData]);
 
   const createPact = useCallback(async ({ name, description, initialRules, is_open }) => {
+    const nameCheck = checkText(name);
+    if (!nameCheck.ok) return { error: null, moderation: nameCheck };
+    if (description) {
+      const descCheck = checkText(description);
+      if (!descCheck.ok) return { error: null, moderation: descCheck };
+    }
     const { data: newPact, error: pactError } = await supabase
       .from('pacts')
       .insert({ name, description, created_by: user.id, is_open: is_open ?? true })
@@ -179,6 +186,8 @@ export const usePact = (activePactId = null) => {
 
   const addRule = useCallback(async (ruleText) => {
     if (!pact) return;
+    const modCheck = checkText(ruleText);
+    if (!modCheck.ok) return { error: null, moderation: modCheck };
     const { data, error } = await supabase
       .from('pact_rules')
       .insert({ pact_id: pact.id, rule_text: ruleText, position: rules.length })
@@ -188,6 +197,8 @@ export const usePact = (activePactId = null) => {
   }, [pact, rules]);
 
   const updateRule = useCallback(async (ruleId, ruleText) => {
+    const modCheck = checkText(ruleText);
+    if (!modCheck.ok) return { error: null, moderation: modCheck };
     const { data, error } = await supabase
       .from('pact_rules').update({ rule_text: ruleText }).eq('id', ruleId).select().single();
     if (!error) setRules((prev) => prev.map((r) => (r.id === ruleId ? data : r)));
@@ -202,6 +213,12 @@ export const usePact = (activePactId = null) => {
 
   const createPost = useCallback(async ({ content, post_type, milestone }) => {
     if (!pact) return;
+    const modCheck = checkText(content);
+    if (!modCheck.ok) return { data: null, error: null, moderation: modCheck };
+    if (milestone) {
+      const msCheck = checkText(milestone);
+      if (!msCheck.ok) return { data: null, error: null, moderation: msCheck };
+    }
     const { data, error } = await supabase
       .from('pact_posts')
       .insert({ pact_id: pact.id, user_id: user.id, content, post_type, milestone: milestone || null })

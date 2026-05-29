@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const useCommunityChallenges = (communityId) => {
   const { user } = useContext(AuthContext);
@@ -22,6 +23,12 @@ export const useCommunityChallenges = (communityId) => {
   useEffect(() => { fetchChallenges(); }, [fetchChallenges]);
 
   const createChallenge = useCallback(async ({ title, description, target_value, unit, start_date, end_date }) => {
+    const titleCheck = checkText(title);
+    if (!titleCheck.ok) return { data: null, error: null, moderation: titleCheck };
+    if (description) {
+      const descCheck = checkText(description);
+      if (!descCheck.ok) return { data: null, error: null, moderation: descCheck };
+    }
     const { data, error } = await supabase
       .from('community_challenges')
       .insert({ community_id: communityId, created_by: user.id, title, description, target_value, unit, start_date, end_date })
@@ -32,6 +39,10 @@ export const useCommunityChallenges = (communityId) => {
   }, [communityId, user]);
 
   const logEntry = useCallback(async (challengeId, value, note) => {
+    if (note) {
+      const noteCheck = checkText(note);
+      if (!noteCheck.ok) return { data: null, error: null, moderation: noteCheck };
+    }
     const { data, error } = await supabase
       .from('challenge_entries')
       .insert({ challenge_id: challengeId, user_id: user.id, value, note })

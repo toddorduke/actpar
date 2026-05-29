@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const useCommunities = () => {
   const { user } = useContext(AuthContext);
@@ -34,6 +35,12 @@ export const useCommunities = () => {
 
   const createCommunity = useCallback(async ({ name, description }) => {
     if (!user) return { error: 'Not authenticated' };
+    const nameCheck = checkText(name);
+    if (!nameCheck.ok) return { data: null, error: null, moderation: nameCheck };
+    if (description) {
+      const descCheck = checkText(description);
+      if (!descCheck.ok) return { data: null, error: null, moderation: descCheck };
+    }
     const { data, error } = await supabase
       .from('communities')
       .insert({ name: name.trim(), description: description?.trim() || null, created_by: user.id })

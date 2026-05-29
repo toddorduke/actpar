@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const DEFAULT_QUESTIONS = [
   "What's one thing you're grateful for today?",
@@ -33,6 +34,8 @@ export const useReflections = () => {
 
   const saveAnswer = useCallback(async ({ question, answer, isPublic }) => {
     if (!user) return { error: 'Not authenticated' };
+    const modCheck = checkText(answer);
+    if (!modCheck.ok) return { data: null, error: null, moderation: modCheck };
     const { data, error } = await supabase
       .from('reflections')
       .insert({ user_id: user.id, question, answer, is_public: isPublic, type: 'reflection' })
@@ -44,6 +47,8 @@ export const useReflections = () => {
 
   const saveAffirmation = useCallback(async ({ answer, isPublic }) => {
     if (!user) return { error: 'Not authenticated' };
+    const modCheck = checkText(answer);
+    if (!modCheck.ok) return { data: null, error: null, moderation: modCheck };
     const { data, error } = await supabase
       .from('reflections')
       .insert({ user_id: user.id, question: 'Daily Affirmation', answer, is_public: isPublic, type: 'affirmation' })

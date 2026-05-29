@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { checkText } from '../../utils/contentModeration.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { COACHES } from '../../data/coaches.js';
 import { useCoachProfile } from '../../hooks/useCoaches.js';
@@ -73,6 +74,15 @@ export default function CoachProfilePage() {
       return;
     }
     setSubmitting(true);
+
+    if (form.goal) {
+      const goalCheck = checkText(form.goal);
+      if (!goalCheck.ok) {
+        toast(goalCheck.message, 'error');
+        setSubmitting(false);
+        return;
+      }
+    }
 
     if (isUuid && coach?.isReal && user) {
       const sessionLabel = selectedSession
