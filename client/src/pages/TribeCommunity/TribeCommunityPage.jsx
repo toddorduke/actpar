@@ -6,6 +6,7 @@ import { useCommunities } from '../../hooks/useCommunities.js';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
+import { useReactions } from '../../hooks/useReactions.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
 import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import { supabase } from '../../lib/supabase.js';
@@ -32,8 +33,10 @@ export default function TribeCommunityPage() {
   const { myCommunities, communities, myMemberships, createCommunity, joinCommunity, leaveCommunity } = useCommunities();
   const { posts, loading: postsLoading, createPost } = useTribePosts(null);
   const toast = useToast();
-  const commentState = useCommentState();
+  const commentState = useCommentState(posts);
   const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
+  const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
+  useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
   const postsToday = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     return posts.filter((p) => p.created_at?.startsWith(today)).length;
@@ -345,6 +348,9 @@ export default function TribeCommunityPage() {
                       rsvpGoingCount={goingCounts[item.id] ?? 0}
                       rsvpMyStatus={myRsvps[item.id] ?? null}
                       onRsvp={toggleRsvp}
+                      reactionCounts={reactionCounts[item.id]}
+                      myReaction={myReactions[item.id]}
+                      onReact={toggleReaction}
                     />
                   );
                 })}
@@ -386,6 +392,9 @@ export default function TribeCommunityPage() {
                 rsvpGoingCount={goingCounts[post.id] ?? 0}
                 rsvpMyStatus={myRsvps[post.id] ?? null}
                 onRsvp={toggleRsvp}
+                reactionCounts={reactionCounts[post.id]}
+                myReaction={myReactions[post.id]}
+                onReact={toggleReaction}
               />
             ))}
             {visibleCount < allDisplayedPosts.length && (

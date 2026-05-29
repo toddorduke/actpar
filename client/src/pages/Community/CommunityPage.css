@@ -986,3 +986,47 @@
   background: rgba(0,0,0,0.06);
   color: #475569;
 }
+
+/* ── Post Reactions ─────────────────────────────────── */
+.comm-post-reactions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 0 4px;
+  flex-wrap: wrap;
+}
+
+.comm-reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: #374151;
+}
+
+.comm-reaction-chip:hover {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.comm-reaction-chip.active {
+  border-color: #f59e0b;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.comm-reaction-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.comm-reaction-chip.active .comm-reaction-count {
+  color: #92400e;
+}

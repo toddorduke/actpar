@@ -1,6 +1,7 @@
 import { useCallback, useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { createNotification } from './useNotifications.js';
 
 export const REACTION_EMOJIS = [
   { key: 'fire',   label: '🔥' },
@@ -57,6 +58,19 @@ export function useReactions() {
         { post_id: postId, user_id: user.id, emoji },
         { onConflict: 'post_id,user_id' }
       );
+      // Notify post owner (fire-and-forget)
+      supabase.from('tribe_posts').select('user_id').eq('id', postId).single().then(({ data: post }) => {
+        if (post?.user_id && post.user_id !== user.id) {
+          const emojiLabel = REACTION_EMOJIS.find(e => e.key === emoji)?.label ?? '';
+          createNotification({
+            userId: post.user_id,
+            actorId: user.id,
+            type: 'post_like',
+            refId: postId,
+            body: `reacted ${emojiLabel} to your post`,
+          });
+        }
+      });
     }
   }, [user, myReactions]);
 

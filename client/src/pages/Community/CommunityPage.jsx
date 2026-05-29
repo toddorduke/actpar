@@ -9,6 +9,7 @@ import { useCommunityChallenges } from '../../hooks/useCommunityChallenges.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
+import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
@@ -22,7 +23,10 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   const { user } = useContext(AuthContext);
   const { posts, loading, createPost, likePost } = useTribePosts(communityId);
   const toast = useToast();
-  const commentState = useCommentState();
+  const commentState = useCommentState(posts);
+  const postIds = useMemo(() => posts.map(p => p.id), [posts]);
+  const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
+  useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState('general');
   const [milestone, setMilestone] = useState('');
@@ -76,7 +80,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {pinned && (
         <div className="comm-post-card pinned-post">
           <div className="pinned-label">📌 Pinned</div>
-          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} />
+          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} />
         </div>
       )}
 
@@ -84,7 +88,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
 
       {feed.map((p) => p.id !== pinnedPostId && (
-        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} />
+        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} />
       ))}
 
       {visibleCount < posts.length && (
@@ -102,7 +106,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   );
 }
 
-function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUserId, commentState }) {
+function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUserId, commentState, reactionCounts, myReaction, onReact }) {
   const [expanded, setExpanded] = useState(false);
   const truncated = post.content.length > POST_TRUNCATE && !expanded;
   const authorName = getDisplayName(post.profiles);
@@ -144,6 +148,19 @@ function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUse
           💬 {count > 0 ? count : ''} Comment{count !== 1 ? 's' : ''}
         </button>
       </div>
+      {onReact && (
+        <div className="comm-post-reactions">
+          {REACTION_EMOJIS.map(({ key, label }) => {
+            const c = reactionCounts?.[key] ?? 0;
+            const active = myReaction === key;
+            return (
+              <button key={key} className={`comm-reaction-chip${active ? ' active' : ''}`} onClick={() => onReact(post.id, key)}>
+                {label}{c > 0 && <span className="comm-reaction-count">{c}</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
       {isOpen && (
         <CommentPanel
           postId={post.id}

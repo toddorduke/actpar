@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Avatar from './Avatar.jsx';
 import CommentPanel from './CommentPanel.jsx';
+import { REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 
@@ -50,6 +51,9 @@ export default function PostCard({
   rsvpGoingCount,
   rsvpMyStatus,
   onRsvp,
+  reactionCounts,
+  myReaction,
+  onReact,
 }) {
   const { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount } = commentState;
   const [expanded, setExpanded] = useState(false);
@@ -184,6 +188,24 @@ export default function PostCard({
           </button>
         )}
       </div>
+
+      {onReact && (
+        <div className="post-reactions">
+          {REACTION_EMOJIS.map(({ key, label }) => {
+            const count = reactionCounts?.[key] ?? 0;
+            const active = myReaction === key;
+            return (
+              <button
+                key={key}
+                className={`post-reaction-chip${active ? ' active' : ''}`}
+                onClick={() => onReact(post.id, key)}
+              >
+                {label}{count > 0 && <span className="post-reaction-count">{count}</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {isOpen && (
         <CommentPanel
