@@ -90,6 +90,7 @@ export default function SettingsPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Password
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
@@ -299,21 +300,41 @@ export default function SettingsPage() {
 
   async function handleChangePassword(e) {
     e.preventDefault();
+    if (!currentPassword) {
+      setPasswordMsg({ type: 'error', text: 'Please enter your current password.' });
+      return;
+    }
     if (newPassword !== confirmPassword) {
-      setPasswordMsg({ type: 'error', text: 'Passwords do not match.' });
+      setPasswordMsg({ type: 'error', text: 'New passwords do not match.' });
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordMsg({ type: 'error', text: 'Password must be at least 8 characters.' });
+      setPasswordMsg({ type: 'error', text: 'New password must be at least 8 characters.' });
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setPasswordMsg({ type: 'error', text: 'New password must be different from your current password.' });
       return;
     }
     setSavingPassword(true);
+    // Re-authenticate with current password before allowing the change
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+    if (authError) {
+      setSavingPassword(false);
+      setPasswordMsg({ type: 'error', text: 'Current password is incorrect.' });
+      setTimeout(() => setPasswordMsg(null), 4000);
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setSavingPassword(false);
     if (error) {
       setPasswordMsg({ type: 'error', text: error.message });
     } else {
       setPasswordMsg({ type: 'success', text: 'Password updated successfully.' });
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     }
@@ -728,6 +749,17 @@ export default function SettingsPage() {
             <section className="settings-section">
               <h3 className="settings-section-title">Change Password</h3>
               <form onSubmit={handleChangePassword} className="settings-form">
+                <div className="settings-field">
+                  <label>Current Password</label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="settings-input"
+                    placeholder="Enter your current password"
+                    required
+                  />
+                </div>
                 <div className="settings-field">
                   <label>New Password</label>
                   <input
