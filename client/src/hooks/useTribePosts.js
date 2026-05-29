@@ -20,7 +20,8 @@ export const useTribePosts = (communityId = null) => {
       query = query.eq('community_id', communityId);
     }
 
-    const { data } = await query;
+    const { data, error } = await query;
+    if (error) console.error('[useTribePosts] fetch error:', error);
     setPosts(data ?? []);
     setLoading(false);
   }, [communityId]);
