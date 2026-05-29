@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useBlock } from '../../hooks/useBlock.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
+import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
@@ -37,6 +38,52 @@ export default function ConnectionsPage() {
   const { blockedIds } = useBlock();
   const [partnerStats, setPartnerStats] = useState({});
   const [cheerSent, setCheerSent] = useState(new Set());
+  const { partnerships, partnerSide, proposeJourney, acceptJourney, declineJourney } = usePartnerships();
+
+  // My goals for the journey modals
+  const [myGoals, setMyGoals] = useState([]);
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('goals').select('id, title, goal_type').eq('user_id', user.id).eq('is_active', true)
+      .then(({ data }) => setMyGoals(data ?? []));
+  }, [user]);
+
+  // Journey modal state
+  const [journeyModal, setJourneyModal] = useState(null); // { partnerId, partnerName, partnerAvatar }
+  const [acceptModal, setAcceptModal] = useState(null);   // { partnershipId, partnerName, partnerGoalTitle }
+  const [journeyGoalId, setJourneyGoalId] = useState('');
+  const [proposing, setProposing] = useState(false);
+  const [accepting, setAccepting] = useState(false);
+
+  async function handleProposeJourney() {
+    if (!journeyModal || proposing) return;
+    setProposing(true);
+    await proposeJourney(journeyModal.partnerId, journeyGoalId || null);
+    setProposing(false);
+    setJourneyModal(null);
+    setJourneyGoalId('');
+  }
+
+  async function handleAcceptJourney() {
+    if (!acceptModal || accepting) return;
+    setAccepting(true);
+    await acceptJourney(acceptModal.partnershipId, journeyGoalId || null);
+    setAccepting(false);
+    setAcceptModal(null);
+    setJourneyGoalId('');
+  }
+
+  function journeyWithPartner(partnerId) {
+    return partnerships.find((p) =>
+      (p.requester_id === user?.id && p.receiver_id === partnerId) ||
+      (p.receiver_id === user?.id && p.requester_id === partnerId)
+    );
+  }
+
+  // Incoming journey invites (pending, receiver = me)
+  const incomingJourneys = partnerships.filter(
+    (p) => p.status === 'pending' && p.receiver_id === user?.id
+  );
 
   useEffect(() => {
     if (mainTab !== 'my-network' || acceptedConnections.length === 0) return;
@@ -150,6 +197,84 @@ export default function ConnectionsPage() {
         onClose={() => setSparkModalOpen(false)}
       />
     )}
+
+    {/* Propose journey modal */}
+    {journeyModal && (
+      <div className="journey-modal-overlay" onClick={(e) => e.target === e.currentTarget && setJourneyModal(null)}>
+        <div className="journey-modal">
+          <button className="journey-modal-close" onClick={() => setJourneyModal(null)}>×</button>
+          <div className="journey-modal-header">
+            <Avatar url={journeyModal.partnerAvatar} name={journeyModal.partnerName} size={56} />
+            <div>
+              <h2 className="journey-modal-title">Start a Journey Together</h2>
+              <p className="journey-modal-subtitle">with <strong>{journeyModal.partnerName}</strong></p>
+            </div>
+          </div>
+          <p className="journey-modal-hint">Which goal do you want <strong>{journeyModal.partnerName}</strong> to hold you accountable for?</p>
+          <div className="journey-goal-list">
+            {myGoals.filter((g) => g.goal_type !== 'numeric').map((g) => (
+              <button
+                key={g.id}
+                className={`journey-goal-item${journeyGoalId === g.id ? ' selected' : ''}`}
+                onClick={() => setJourneyGoalId((prev) => prev === g.id ? '' : g.id)}
+              >
+                {g.title}
+              </button>
+            ))}
+            {myGoals.filter((g) => g.goal_type !== 'numeric').length === 0 && (
+              <p className="journey-goal-empty">No habit goals yet — you can still start a journey and add one later.</p>
+            )}
+          </div>
+          {!journeyGoalId && (
+            <p className="journey-skip-hint">No goal selected — that's OK, you can add one later.</p>
+          )}
+          <button className="journey-propose-btn" onClick={handleProposeJourney} disabled={proposing}>
+            {proposing ? 'Sending...' : 'Propose Journey →'}
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* Accept journey modal */}
+    {acceptModal && (
+      <div className="journey-modal-overlay" onClick={(e) => e.target === e.currentTarget && setAcceptModal(null)}>
+        <div className="journey-modal">
+          <button className="journey-modal-close" onClick={() => setAcceptModal(null)}>×</button>
+          <div className="journey-modal-header">
+            <div className="journey-modal-rocket">🚀</div>
+            <div>
+              <h2 className="journey-modal-title">Journey Invitation</h2>
+              <p className="journey-modal-subtitle">from <strong>{acceptModal.partnerName}</strong></p>
+            </div>
+          </div>
+          {acceptModal.partnerGoalTitle && (
+            <p className="journey-modal-hint">
+              <strong>{acceptModal.partnerName}</strong> is committing to <em>"{acceptModal.partnerGoalTitle}"</em>.
+            </p>
+          )}
+          <p className="journey-modal-hint">Pick a goal to share back <span style={{ color: '#9ca3af' }}>(optional)</span>:</p>
+          <div className="journey-goal-list">
+            {myGoals.filter((g) => g.goal_type !== 'numeric').map((g) => (
+              <button
+                key={g.id}
+                className={`journey-goal-item${journeyGoalId === g.id ? ' selected' : ''}`}
+                onClick={() => setJourneyGoalId((prev) => prev === g.id ? '' : g.id)}
+              >
+                {g.title}
+              </button>
+            ))}
+          </div>
+          <div className="journey-accept-actions">
+            <button className="journey-propose-btn" onClick={handleAcceptJourney} disabled={accepting}>
+              {accepting ? 'Accepting...' : 'Accept Journey 🚀'}
+            </button>
+            <button className="journey-decline-link" onClick={() => { declineJourney(acceptModal.partnershipId); setAcceptModal(null); }}>
+              Decline
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="connections-page">
       <section className="page-header">
         <h1 className="page-title">Sparks</h1>
@@ -179,7 +304,38 @@ export default function ConnectionsPage() {
       {mainTab === 'my-network' && (
         <div className="my-network-page">
 
-          {/* Incoming requests */}
+          {/* Incoming journey invites */}
+          {incomingJourneys.length > 0 && (
+            <div className="mn-section mn-journey-invites">
+              <h3 className="mn-section-title">🚀 Journey Invitations</h3>
+              {incomingJourneys.map((p) => {
+                const requesterName = getDisplayName(p.requester, 'Someone');
+                return (
+                  <div key={p.id} className="mn-journey-invite-row">
+                    <Avatar url={p.requester?.avatar_url} name={requesterName} size={44} />
+                    <div className="mn-journey-invite-body">
+                      <div className="mn-journey-invite-text">
+                        <strong>{requesterName}</strong> wants to start an accountability journey with you
+                        {p.goal1 && <> on <em>"{p.goal1.title}"</em></>}
+                      </div>
+                    </div>
+                    <div className="mn-journey-invite-actions">
+                      <button
+                        className="mn-journey-accept-btn"
+                        onClick={() => {
+                          setJourneyGoalId('');
+                          setAcceptModal({ partnershipId: p.id, partnerName: requesterName, partnerGoalTitle: p.goal1?.title ?? null });
+                        }}
+                      >Accept</button>
+                      <button className="mn-journey-decline-btn" onClick={() => declineJourney(p.id)}>Decline</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Incoming connection requests */}
           {(incomingConnects.length > 0 || incomingSparks.length > 0) && (
             <div className="mn-section">
               <h3 className="mn-section-title">Pending — Incoming</h3>
@@ -266,6 +422,23 @@ export default function ConnectionsPage() {
                     </div>
 
                     <div className="mn-conn-actions">
+                      {(() => {
+                        const j = journeyWithPartner(c.partnerId);
+                        if (!j) return (
+                          <button
+                            className="mn-conn-journey-btn"
+                            onClick={() => { setJourneyGoalId(''); setJourneyModal({ partnerId: c.partnerId, partnerName: name, partnerAvatar: c.partnerProfile?.avatar_url }); }}
+                          >🚀 Journey</button>
+                        );
+                        if (j.status === 'pending') return (
+                          <span className="mn-conn-journey-pending">
+                            {j.requester_id === user?.id ? '⏳ Pending' : '🚀 Invited you'}
+                          </span>
+                        );
+                        return (
+                          <span className="mn-conn-journey-active">🚀 Journeying</span>
+                        );
+                      })()}
                       <button
                         className={`mn-conn-cheer-btn${cheerSent.has(c.partnerId) ? ' sent' : ''}`}
                         onClick={() => !cheerSent.has(c.partnerId) && sendCheer(c.partnerId, name)}

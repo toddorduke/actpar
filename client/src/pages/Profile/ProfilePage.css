@@ -2559,6 +2559,50 @@
   outline-offset: 1px;
 }
 
+/* ── Journey sidebar card ──────────────────────────────── */
+.journey-card { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.06)); border-color: rgba(124,58,237,0.25) !important; }
+
+.journey-list { display: flex; flex-direction: column; gap: 16px; }
+
+.journey-item {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px; border-radius: 14px;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(124,58,237,0.15);
+}
+
+.journey-item-header { display: flex; align-items: center; gap: 10px; }
+.journey-avatar-btn { background: none; border: none; cursor: pointer; padding: 0; border-radius: 50%; }
+
+.journey-item-info { display: flex; flex-direction: column; gap: 2px; }
+.journey-partner-name {
+  background: none; border: none; cursor: pointer; padding: 0;
+  font-size: 0.92rem; font-weight: 700; color: #1f2937; text-align: left;
+}
+.journey-partner-name:hover { text-decoration: underline; }
+.journey-day-count { font-size: 0.75rem; color: #7c3aed; font-weight: 700; }
+
+.journey-goals-row { display: flex; flex-direction: column; gap: 6px; }
+.journey-goal-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 8px;
+  background: #f3f4f6; border: 1px solid #e5e7eb;
+  font-size: 0.78rem;
+}
+.journey-goal-chip.done { background: #f0fdf4; border-color: #bbf7d0; }
+.journey-goal-who { font-weight: 700; color: #6b7280; flex-shrink: 0; min-width: 28px; }
+.journey-goal-chip.done .journey-goal-who { color: #16a34a; }
+.journey-goal-title { flex: 1; color: #374151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.journey-goal-status { font-size: 0.85rem; flex-shrink: 0; color: #d1d5db; }
+.journey-goal-chip.done .journey-goal-status { color: #16a34a; }
+
+.journey-msg-btn {
+  padding: 6px 0; border-radius: 8px; border: 1px solid rgba(124,58,237,0.3);
+  background: rgba(124,58,237,0.06); color: #7c3aed;
+  font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+}
+.journey-msg-btn:hover { background: rgba(124,58,237,0.14); }
+
 /* My Posts delete button */
 .my-post-delete-btn {
   margin-left: auto;

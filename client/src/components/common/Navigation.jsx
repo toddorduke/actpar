@@ -140,6 +140,8 @@ const Navigation = () => {
       navigate('/pact');
     } else if (notif.type === 'message') {
       navigate(`/messages?with=${notif.actor_id}`);
+    } else if (notif.type === 'journey_invite' || notif.type === 'journey_accepted') {
+      navigate('/connections');
     } else if (notif.type === 'post_like') {
       navigate(notif.ref_id ? `/post/${notif.ref_id}` : '/tribe-community');
     } else if (notif.type === 'streak_milestone' || notif.type === 'progress_complete') {

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useGoals } from '../../hooks/useGoals.js';
+import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useJournal } from '../../hooks/useJournal.js';
 import { useMedia } from '../../hooks/useMedia.js';
@@ -286,6 +287,7 @@ const HomePage = () => {
   const { posts, loading: postsLoading, createPost } = useTribePosts();
   const { photos, videos, uploadFile, deleteMedia } = useMedia();
   const { acceptedConnections } = useConnections();
+  const { partnerships, partnerSide } = usePartnerships();
   const { activity, loading: activityLoading } = useConnectionActivity(acceptedConnections);
 
   // — Derived —
@@ -1437,6 +1439,64 @@ const HomePage = () => {
                   </>
                 )}
               </div>
+
+              {/* My Journeys */}
+              {partnerships.filter((p) => p.status === 'active').length > 0 && (
+                <div className="profile-sidebar-card journey-card">
+                  <h3 className="sidebar-card-title">
+                    🚀 My Journeys
+                  </h3>
+                  <div className="journey-list">
+                    {partnerships.filter((p) => p.status === 'active').map((p) => {
+                      const { partnerProfile, partnerId, myGoal, partnerGoal } = partnerSide(p);
+                      const partnerName = getDisplayName(partnerProfile, 'Partner');
+                      const daysTogether = p.started_at
+                        ? Math.floor((Date.now() - new Date(p.started_at)) / 86400000) + 1
+                        : 1;
+                      const todayDateStr = getTodayStr();
+                      const myCheckedToday = myGoal?.last_checked_in === todayDateStr;
+                      const partnerCheckedToday = partnerGoal?.last_checked_in === todayDateStr;
+                      return (
+                        <div key={p.id} className="journey-item">
+                          <div className="journey-item-header">
+                            <button className="journey-avatar-btn" onClick={() => navigate(`/profile/${partnerId}`)}>
+                              <Avatar url={partnerProfile?.avatar_url} name={partnerName} size={38} />
+                            </button>
+                            <div className="journey-item-info">
+                              <button className="journey-partner-name" onClick={() => navigate(`/profile/${partnerId}`)}>
+                                {partnerName}
+                              </button>
+                              <div className="journey-day-count">Day {daysTogether} together</div>
+                            </div>
+                          </div>
+                          <div className="journey-goals-row">
+                            {myGoal && (
+                              <div className={`journey-goal-chip${myCheckedToday ? ' done' : ''}`}>
+                                <span className="journey-goal-who">You</span>
+                                <span className="journey-goal-title">{myGoal.title}</span>
+                                <span className="journey-goal-status">{myCheckedToday ? '✓' : '○'}</span>
+                              </div>
+                            )}
+                            {partnerGoal && (
+                              <div className={`journey-goal-chip${partnerCheckedToday ? ' done' : ''}`}>
+                                <span className="journey-goal-who">{partnerName.split(' ')[0]}</span>
+                                <span className="journey-goal-title">{partnerGoal.title}</span>
+                                <span className="journey-goal-status">{partnerCheckedToday ? '✓' : '○'}</span>
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            className="journey-msg-btn"
+                            onClick={() => navigate(`/messages?with=${partnerId}`)}
+                          >
+                            💬 Message
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Active Now */}
               <div className="profile-sidebar-card">
