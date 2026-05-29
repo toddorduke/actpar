@@ -12,7 +12,7 @@ export const useTribePosts = (communityId = null) => {
     setLoading(true);
     let query = supabase
       .from('tribe_posts')
-      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url, id)')
+      .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .order('created_at', { ascending: false })
       .limit(200);
 
@@ -46,7 +46,7 @@ export const useTribePosts = (communityId = null) => {
         community_id: community_id || null,
         media_url: media_url || null,
       })
-      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url, id)')
+      .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .single();
     if (!error) setPosts((prev) => [data, ...prev]);
     return { data, error };
