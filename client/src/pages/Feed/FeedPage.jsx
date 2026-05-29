@@ -588,22 +588,28 @@ export default function FeedPage() {
 
   if (loading) {
     return (
-      <div className="feed-page feed-loading-state">
-        <div className="feed-loading-spinner" />
-        <p>Loading feed…</p>
-      </div>
+      <>
+        <div className="feed-desktop-backdrop" />
+        <div className="feed-page feed-loading-state">
+          <div className="feed-loading-spinner" />
+          <p>Loading feed…</p>
+        </div>
+      </>
     );
   }
 
   if (!posts.length) {
     return (
-      <div className="feed-page feed-empty-state">
-        <span style={{ fontSize: '3rem' }}>🎬</span>
-        <h3>Nothing here yet</h3>
-        <p>Be the first to post.</p>
-        <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
-        {showSheet && <PostSheet {...sheetProps} />}
-      </div>
+      <>
+        <div className="feed-desktop-backdrop" />
+        <div className="feed-page feed-empty-state">
+          <span style={{ fontSize: '3rem' }}>🎬</span>
+          <h3>Nothing here yet</h3>
+          <p>Be the first to post.</p>
+          <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
+          {showSheet && <PostSheet {...sheetProps} />}
+        </div>
+      </>
     );
   }
 
