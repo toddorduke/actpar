@@ -417,16 +417,7 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
           />
         )}
 
-        {/* Text */}
-        <textarea
-          className="feed-post-textarea"
-          rows={4}
-          placeholder="What's your win today?"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-
-        {/* Media preview */}
+        {/* Media preview — shown above caption when media is attached */}
         {previewUrl && (
           <div className="feed-post-preview">
             {isVideo
@@ -434,8 +425,24 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
               : <img src={previewUrl} alt="preview" className="feed-post-preview-media" />
             }
             <button className="feed-post-preview-remove" onClick={removeMedia}>✕</button>
+            <span className="feed-post-preview-type">{isVideo ? '🎬 Video' : '📷 Photo'}</span>
           </div>
         )}
+
+        {/* Caption / text */}
+        {mediaFile && (
+          <div className="feed-post-caption-label">
+            <span>Caption</span>
+            <span className="feed-post-caption-optional">(optional)</span>
+          </div>
+        )}
+        <textarea
+          className="feed-post-textarea"
+          rows={mediaFile ? 2 : 4}
+          placeholder={mediaFile ? 'Add a caption…' : "What's your win today?"}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
 
         {error && <p className="feed-post-error">{error}</p>}
 

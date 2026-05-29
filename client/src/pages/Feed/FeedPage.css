@@ -585,6 +585,39 @@
   justify-content: center;
 }
 
+.feed-post-preview-type {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.feed-post-caption-label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 20px 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.feed-post-caption-optional {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.35);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .feed-post-error {
   margin: 0 20px 8px;
   font-size: 0.85rem;
