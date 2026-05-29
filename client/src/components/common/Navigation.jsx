@@ -184,6 +184,9 @@ const Navigation = () => {
           );
         })}
       </div>
+      <NavLink to="/notifications" className="notif-see-all" onClick={() => setNotifOpen(false)}>
+        See all notifications →
+      </NavLink>
     </div>
   );
 
@@ -198,20 +201,12 @@ const Navigation = () => {
           {/* Mobile-only icons: notifications + messages + avatar (right side) */}
           {user && (
             <div className="mobile-top-icons">
-              <div className="notif-wrap">
-                <button
-                  type="button"
-                  className="notif-btn"
-                  onClick={() => { setNotifOpen(o => !o); setDropdownOpen(false); }}
-                  aria-label="Notifications"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                  {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                </button>
-                {notifOpen && <NotifList mobile />}
-              </div>
+              <NavLink to="/notifications" className="notif-btn nav-icon-btn" aria-label="Notifications" style={{ position: 'relative' }}>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+              </NavLink>
               <NavLink to="/messages" className="nav-icon-btn mobile-settings-btn" aria-label="Messages" style={{ position: 'relative' }}>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

@@ -498,6 +498,65 @@
 
 .join-meetup-btn:hover { background: #d97706; transform: translateY(-2px); }
 
+/* ── Meetup RSVP row ── */
+.meetup-rsvp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.meetup-rsvp-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.meetup-rsvp-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.meetup-rsvp-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid transparent;
+}
+
+.meetup-rsvp-btn.going {
+  background: #fff;
+  border-color: #10b981;
+  color: #065f46;
+}
+.meetup-rsvp-btn.going:hover,
+.meetup-rsvp-btn.going.active {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+.meetup-rsvp-btn.cant {
+  background: #fff;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+.meetup-rsvp-btn.cant:hover,
+.meetup-rsvp-btn.cant.active {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
 .post-actions {
   display: flex;
   gap: 15px;

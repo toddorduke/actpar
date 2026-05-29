@@ -360,6 +360,20 @@
 .notif-type-badge.connect { background: #10b981; color: white; font-size: 0.65rem; }
 .notif-type-badge.milestone { background: #f97316; }
 
+.notif-see-all {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.notif-see-all:hover { background: rgba(124, 58, 237, 0.04); }
+
 /* ── Mobile bottom tab bar ── */
 .bottom-nav {
   display: none;

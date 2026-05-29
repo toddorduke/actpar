@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
+import { useConnections } from '../../hooks/useConnections.js';
 import { supabase } from '../../lib/supabase.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
@@ -35,8 +36,9 @@ function getGradient(postType, postId) {
 
 const HEART_PATH  = 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z';
 const BUBBLE_PATH = 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z';
+const SHARE_PATH  = 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z';
 
-function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount }) {
+function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount, onShare }) {
   const authorName  = getDisplayName(post.profiles);
   const gradient    = getGradient(post.post_type, post.id);
   const type        = post.post_type ?? 'general';
@@ -82,13 +84,6 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
 
       {/* Action buttons — right side */}
       <div className="feed-actions">
-        {/* Avatar ring on right side */}
-        <Link to={`/profile/${post.user_id}`} className="feed-action-avatar">
-          <div className="feed-action-avatar-ring">
-            <Avatar url={post.profiles?.avatar_url} name={authorName} size={44} />
-          </div>
-        </Link>
-
         <button
           className={`feed-action-btn${liked ? ' liked' : ''}`}
           onClick={handleLike}
@@ -113,6 +108,17 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={BUBBLE_PATH} />
           </svg>
           <span className="feed-action-count">{commentCount || ''}</span>
+        </button>
+
+        <button
+          className="feed-action-btn"
+          onClick={() => onShare(post)}
+          aria-label="Share"
+        >
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="28" height="28">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={SHARE_PATH} />
+          </svg>
+          <span className="feed-action-count">Share</span>
         </button>
       </div>
 
@@ -151,16 +157,169 @@ function CommentOverlay({ post, commentState, onClose }) {
   );
 }
 
+// ── Share sheet ───────────────────────────────────────────────────────────────
+
+function ShareSheet({ post, user, connections, onClose }) {
+  const [view, setView]     = useState('main'); // 'main' | 'friends'
+  const [search, setSearch] = useState('');
+  const [sent, setSent]     = useState(new Set());
+  const [copied, setCopied] = useState(false);
+
+  const postUrl = `${import.meta.env.VITE_APP_URL}/post/${post.id}`;
+  const snippet = post.content.length > 100 ? post.content.slice(0, 100).trimEnd() + '…' : post.content;
+
+  const filtered = connections.filter((c) => {
+    const name = `${c.partnerProfile?.first_name ?? ''} ${c.partnerProfile?.last_name ?? ''} ${c.partnerProfile?.alter_ego_name ?? ''}`.toLowerCase();
+    return name.includes(search.toLowerCase());
+  });
+
+  async function sendToFriend(partnerId) {
+    const msg = `Check this out 👀\n"${snippet}"\n${postUrl}`;
+    await supabase.from('direct_messages').insert({
+      sender_id: user.id,
+      receiver_id: partnerId,
+      content: msg,
+    });
+    setSent((prev) => new Set([...prev, partnerId]));
+  }
+
+  async function handleCopyLink() {
+    await navigator.clipboard.writeText(postUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleNativeShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'ActPar', text: snippet, url: postUrl });
+      } catch {}
+    } else {
+      handleCopyLink();
+    }
+  }
+
+  return (
+    <div className="fss-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="fss-sheet">
+        <div className="fss-handle" />
+
+        {view === 'main' && (
+          <>
+            <div className="fss-header">
+              <span className="fss-title">Share Post</span>
+              <button className="fss-close" onClick={onClose}>×</button>
+            </div>
+
+            <button className="fss-option" onClick={() => setView('friends')}>
+              <div className="fss-option-icon">👥</div>
+              <div className="fss-option-body">
+                <div className="fss-option-label">Send to a Friend</div>
+                <div className="fss-option-desc">Send via ActPar messages</div>
+              </div>
+              <span className="fss-chevron">›</span>
+            </button>
+
+            <button className="fss-option" onClick={handleCopyLink}>
+              <div className="fss-option-icon">🔗</div>
+              <div className="fss-option-body">
+                <div className="fss-option-label">{copied ? 'Copied!' : 'Copy Link'}</div>
+                <div className="fss-option-desc">actpar.com/post/…</div>
+              </div>
+            </button>
+
+            <button className="fss-option" onClick={handleNativeShare}>
+              <div className="fss-option-icon">↗</div>
+              <div className="fss-option-body">
+                <div className="fss-option-label">Share Outside App</div>
+                <div className="fss-option-desc">Text, WhatsApp, Instagram…</div>
+              </div>
+            </button>
+          </>
+        )}
+
+        {view === 'friends' && (
+          <>
+            <div className="fss-header">
+              <button className="fss-back" onClick={() => setView('main')}>←</button>
+              <span className="fss-title">Send to Friend</span>
+              <button className="fss-close" onClick={onClose}>×</button>
+            </div>
+
+            <div className="fss-search-wrap">
+              <input
+                className="fss-search"
+                placeholder="Search connections…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="fss-friends-list">
+              {filtered.length === 0 && (
+                <p className="fss-empty">No connections found</p>
+              )}
+              {filtered.map((c) => {
+                const p    = c.partnerProfile;
+                const name = getDisplayName(p, 'Someone');
+                const pid  = p?.id;
+                const wasSent = sent.has(pid);
+                return (
+                  <div key={pid} className="fss-friend-row">
+                    <Avatar url={p?.avatar_url} name={name} size={40} />
+                    <div className="fss-friend-info">
+                      <div className="fss-friend-name">{name}</div>
+                      {p?.alter_ego_name && <div className="fss-friend-ego">⚡ {p.alter_ego_name}</div>}
+                    </div>
+                    <button
+                      className={`fss-send-btn${wasSent ? ' sent' : ''}`}
+                      onClick={() => !wasSent && sendToFriend(pid)}
+                      disabled={wasSent}
+                    >
+                      {wasSent ? '✓ Sent' : 'Send'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Post creation sheet ───────────────────────────────────────────────────────
 
-function PostSheet({ user, createPost, onClose, onSuccess }) {
+// Upload via XHR so we get progress events
+async function xhrUpload(path, file, token, onProgress) {
+  return new Promise((resolve, reject) => {
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/media/${path}`;
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.setRequestHeader('Cache-Control', '3600');
+    xhr.setRequestHeader('x-upsert', 'false');
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(JSON.parse(xhr.responseText)?.message ?? 'Upload failed'));
+    };
+    xhr.onerror = () => reject(new Error('Network error during upload'));
+    xhr.send(file);
+  });
+}
+
+function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress, onUploadDone, onUploadError }) {
   const [postType, setPostType]       = useState('general');
   const [content, setContent]         = useState('');
   const [milestone, setMilestone]     = useState('');
   const [mediaFile, setMediaFile]     = useState(null);
   const [previewUrl, setPreviewUrl]   = useState(null);
-  const [uploading, setUploading]     = useState(false);
-  const [submitting, setSubmitting]   = useState(false);
   const [error, setError]             = useState('');
   const fileRef                       = useRef(null);
 
@@ -185,35 +344,44 @@ function PostSheet({ user, createPost, onClose, onSuccess }) {
 
   async function handleSubmit() {
     if (!content.trim() && !mediaFile) { setError('Add some text or media to post.'); return; }
-    setSubmitting(true);
-    setError('');
+
+    const capturedContent   = content.trim();
+    const capturedType      = postType;
+    const capturedMilestone = milestone;
+    const capturedFile      = mediaFile;
+
+    // Close sheet immediately — upload continues in background
+    onClose();
 
     let media_url = null;
 
-    if (mediaFile) {
-      setUploading(true);
-      const ext  = mediaFile.name.split('.').pop();
-      const path = `posts/${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from('media')
-        .upload(path, mediaFile, { cacheControl: '3600', upsert: false });
-      setUploading(false);
-      if (uploadErr) { setError(`Upload failed: ${uploadErr.message}`); setSubmitting(false); return; }
-      const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
-      media_url = urlData.publicUrl;
+    if (capturedFile) {
+      onUploadStart();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const ext  = capturedFile.name.split('.').pop();
+        const path = `posts/${user.id}/${Date.now()}.${ext}`;
+        await xhrUpload(path, capturedFile, session.access_token, onUploadProgress);
+        const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+        media_url = urlData.publicUrl;
+      } catch (err) {
+        onUploadError(err.message);
+        return;
+      }
     }
 
     const { error: postErr, moderation } = await createPost({
-      content: content.trim(),
-      post_type: postType,
-      milestone: postType === 'achievement' ? milestone : null,
+      content: capturedContent,
+      post_type: capturedType,
+      milestone: capturedType === 'achievement' ? capturedMilestone : null,
       media_url,
     });
 
-    setSubmitting(false);
-    if (moderation) { setError(moderation.message); return; }
-    if (postErr)    { setError(postErr.message); return; }
-    onSuccess();
+    if (moderation || postErr) {
+      onUploadError(moderation?.message ?? postErr?.message ?? 'Post failed');
+      return;
+    }
+    onUploadDone();
   }
 
   const isVideo = previewUrl && mediaFile && ALLOWED_VIDEO.includes(mediaFile.type);
@@ -285,9 +453,9 @@ function PostSheet({ user, createPost, onClose, onSuccess }) {
           <button
             className="feed-post-submit-btn"
             onClick={handleSubmit}
-            disabled={submitting || (!content.trim() && !mediaFile)}
+            disabled={!content.trim() && !mediaFile}
           >
-            {uploading ? 'Uploading…' : submitting ? 'Posting…' : 'Post'}
+            Post
           </button>
         </div>
       </div>
@@ -299,6 +467,7 @@ function PostSheet({ user, createPost, onClose, onSuccess }) {
 
 export default function FeedPage() {
   const { user }                              = useContext(AuthContext);
+  const { acceptedConnections }               = useConnections();
   const { posts, loading, createPost }        = useTribePosts(null);
   const postIds                               = useMemo(() => posts.map((p) => p.id), [posts]);
   const { likedIds, toggleLike, toggling }    = usePostLikes(postIds, 'tribe');
@@ -306,7 +475,32 @@ export default function FeedPage() {
   const commentState                          = useCommentState();
   const [showSheet, setShowSheet]             = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState(null);
-  const [toast, setToast]                     = useState('');
+  const [sharePost, setSharePost]             = useState(null);
+
+  // Upload progress state
+  const [uploadBar, setUploadBar] = useState(null); // null | { status, progress }
+  const uploadTimerRef = useRef(null);
+
+  function clearUploadBar() {
+    clearTimeout(uploadTimerRef.current);
+    uploadTimerRef.current = setTimeout(() => setUploadBar(null), 3000);
+  }
+
+  function handleUploadStart() {
+    clearTimeout(uploadTimerRef.current);
+    setUploadBar({ status: 'uploading', progress: 0 });
+  }
+  function handleUploadProgress(pct) {
+    setUploadBar({ status: 'uploading', progress: pct });
+  }
+  function handleUploadDone() {
+    setUploadBar({ status: 'done', progress: 100 });
+    clearUploadBar();
+  }
+  function handleUploadError(msg) {
+    setUploadBar({ status: 'error', progress: 100, message: msg });
+    clearUploadBar();
+  }
 
   function handleLike(postId, currentCount) {
     toggleLike(postId, currentCount, (id, newCount) => {
@@ -325,13 +519,17 @@ export default function FeedPage() {
     setActiveCommentPostId(null);
   }
 
-  function handlePostSuccess() {
-    setShowSheet(false);
-    setToast('Post shared! 🎉');
-    setTimeout(() => setToast(''), 3000);
-  }
-
   const activePost = posts.find((p) => p.id === activeCommentPostId) ?? null;
+
+  const sheetProps = {
+    user,
+    createPost,
+    onClose: () => setShowSheet(false),
+    onUploadStart: handleUploadStart,
+    onUploadProgress: handleUploadProgress,
+    onUploadDone: handleUploadDone,
+    onUploadError: handleUploadError,
+  };
 
   if (loading) {
     return (
@@ -349,15 +547,28 @@ export default function FeedPage() {
         <h3>Nothing here yet</h3>
         <p>Be the first to post.</p>
         <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
-        {showSheet && (
-          <PostSheet user={user} createPost={createPost} onClose={() => setShowSheet(false)} onSuccess={handlePostSuccess} />
-        )}
+        {showSheet && <PostSheet {...sheetProps} />}
       </div>
     );
   }
 
   return (
     <>
+      {/* Upload progress bar — fixed at very top of screen */}
+      {uploadBar && (
+        <div className={`feed-upload-bar feed-upload-bar--${uploadBar.status}`}>
+          <div
+            className="feed-upload-bar-fill"
+            style={{ width: `${uploadBar.progress}%` }}
+          />
+          <span className="feed-upload-bar-label">
+            {uploadBar.status === 'uploading' && `Uploading… ${uploadBar.progress}%`}
+            {uploadBar.status === 'done'      && '✓ Posted!'}
+            {uploadBar.status === 'error'     && `✗ ${uploadBar.message ?? 'Upload failed'}`}
+          </span>
+        </div>
+      )}
+
       {/* Dark backdrop fills the screen behind the centered column on desktop */}
       <div className="feed-desktop-backdrop" />
       <div className="feed-page">
@@ -371,11 +582,12 @@ export default function FeedPage() {
             onLike={handleLike}
             onOpenComments={handleOpenComments}
             commentCount={commentState.commentCount(post.id)}
+            onShare={setSharePost}
           />
         ))}
       </div>
 
-      {/* Comment overlay — rendered outside the snap scroll so it scrolls freely */}
+      {/* Comment overlay */}
       {activePost && (
         <CommentOverlay
           post={activePost}
@@ -384,13 +596,19 @@ export default function FeedPage() {
         />
       )}
 
-      <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
-
-      {showSheet && (
-        <PostSheet user={user} createPost={createPost} onClose={() => setShowSheet(false)} onSuccess={handlePostSuccess} />
+      {/* Share sheet */}
+      {sharePost && (
+        <ShareSheet
+          post={sharePost}
+          user={user}
+          connections={acceptedConnections}
+          onClose={() => setSharePost(null)}
+        />
       )}
 
-      {toast && <div className="feed-toast">{toast}</div>}
+      <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
+
+      {showSheet && <PostSheet {...sheetProps} />}
     </>
   );
 }

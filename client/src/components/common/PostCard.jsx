@@ -27,6 +27,9 @@ const BUBBLE_SVG = (
  *  showMilestone      — if true, shows achievement-milestone div for 'achievement' posts
  *  commentPostType    — 'pact' | 'tribe'
  *  avatarSize         — default 40
+ *  rsvpGoingCount     — number of people going (meetup posts only)
+ *  rsvpMyStatus       — 'going' | 'not_going' | null (meetup posts only)
+ *  onRsvp             — (postId, status) => void (meetup posts only)
  */
 export default function PostCard({
   post,
@@ -44,6 +47,9 @@ export default function PostCard({
   showMilestone = false,
   commentPostType = 'tribe',
   avatarSize = 40,
+  rsvpGoingCount,
+  rsvpMyStatus,
+  onRsvp,
 }) {
   const { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount } = commentState;
   const [expanded, setExpanded] = useState(false);
@@ -115,6 +121,29 @@ export default function PostCard({
         </p>
         {showMilestone && type === 'achievement' && post.milestone && (
           <div className="achievement-milestone">🏆 {post.milestone}</div>
+        )}
+        {type === 'meetup' && onRsvp && (
+          <div className="meetup-rsvp-row">
+            <span className="meetup-rsvp-label">
+              {rsvpGoingCount > 0
+                ? `${rsvpGoingCount} ${rsvpGoingCount === 1 ? 'person' : 'people'} going`
+                : 'Be the first to RSVP'}
+            </span>
+            <div className="meetup-rsvp-btns">
+              <button
+                className={`meetup-rsvp-btn going${rsvpMyStatus === 'going' ? ' active' : ''}`}
+                onClick={() => onRsvp(post.id, 'going')}
+              >
+                ✓ Going
+              </button>
+              <button
+                className={`meetup-rsvp-btn cant${rsvpMyStatus === 'not_going' ? ' active' : ''}`}
+                onClick={() => onRsvp(post.id, 'not_going')}
+              >
+                ✗ Can't make it
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

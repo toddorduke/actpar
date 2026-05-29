@@ -7,6 +7,7 @@ import { useProfile } from '../../hooks/useProfile.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
+import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import ReportModal from '../../components/common/ReportModal.jsx';
@@ -46,19 +47,26 @@ export default function TribeCommunityPage() {
   const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
 
+  const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
+
   const trendingTags = useMemo(() => {
-    const counts = {};
+    const now = Date.now();
+    const DAY  = 86_400_000;
+    const WEEK = 7 * DAY;
+    const scores = {};
     posts.forEach((p) => {
-      const matches = p.content.match(/#\w+/g) ?? [];
-      matches.forEach((tag) => {
+      const age    = now - new Date(p.created_at).getTime();
+      const weight = age < DAY ? 4 : age < WEEK ? 2 : 1;
+      (p.content.match(/#\w+/g) ?? []).forEach((tag) => {
         const t = tag.toLowerCase();
-        counts[t] = (counts[t] || 0) + 1;
+        scores[t] = (scores[t] ?? 0) + weight;
       });
     });
-    return Object.entries(counts)
+    return Object.entries(scores)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
-      .map(([tag, count]) => ({ tag, posts: count }));
+      .map(([tag, score]) => ({ tag, posts: score }));
   }, [posts]);
 
   // Communities the user hasn't joined yet, sorted by relevance to their looking_for
@@ -334,6 +342,9 @@ export default function TribeCommunityPage() {
                       showMilestone
                       commentPostType="tribe"
                       avatarSize={42}
+                      rsvpGoingCount={goingCounts[item.id] ?? 0}
+                      rsvpMyStatus={myRsvps[item.id] ?? null}
+                      onRsvp={toggleRsvp}
                     />
                   );
                 })}
@@ -372,6 +383,9 @@ export default function TribeCommunityPage() {
                 showMilestone
                 commentPostType="tribe"
                 avatarSize={42}
+                rsvpGoingCount={goingCounts[post.id] ?? 0}
+                rsvpMyStatus={myRsvps[post.id] ?? null}
+                onRsvp={toggleRsvp}
               />
             ))}
             {visibleCount < allDisplayedPosts.length && (

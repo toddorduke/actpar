@@ -1,0 +1,87 @@
+.pp-page {
+  min-height: 100vh;
+  background: #0f1117;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px 80px;
+}
+
+.pp-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: ppSpin 0.8s linear infinite;
+  margin-top: 80px;
+}
+@keyframes ppSpin { to { transform: rotate(360deg); } }
+
+.pp-missing { color: rgba(255,255,255,0.4); margin-top: 80px; }
+
+.pp-card {
+  width: 100%;
+  max-width: 500px;
+  background: #1a1d27;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.pp-back {
+  display: block;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 16px 20px 8px;
+  transition: color 0.15s;
+}
+.pp-back:hover { color: #fff; }
+
+.pp-media-wrap { width: 100%; background: #000; }
+.pp-media { width: 100%; max-height: 500px; object-fit: contain; display: block; }
+
+.pp-body { padding: 20px; }
+
+.pp-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.pp-author-name { font-size: 0.95rem; font-weight: 700; color: #fff; }
+.pp-author-time { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+
+.pp-milestone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.pp-content {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.pp-feed-btn {
+  background: #f59e0b;
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pp-feed-btn:hover { background: #d97706; }

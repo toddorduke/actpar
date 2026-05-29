@@ -1,0 +1,214 @@
+.np-page {
+  min-height: 100vh;
+  background: #0f1117;
+  color: #f9fafb;
+  padding: 24px 16px 80px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.np-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.np-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.np-mark-all-btn {
+  background: none;
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.np-mark-all-btn:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: #f59e0b;
+}
+
+/* Filter tabs */
+.np-filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.np-filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.np-filter-tab:hover { color: rgba(255, 255, 255, 0.75); }
+.np-filter-tab.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.np-filter-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 1px 7px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.np-filter-count.unread {
+  background: #f59e0b;
+  color: #000;
+}
+
+/* Loading */
+.np-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: rgba(255, 255, 255, 0.4);
+}
+.np-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: npSpin 0.8s linear infinite;
+}
+@keyframes npSpin { to { transform: rotate(360deg); } }
+
+/* Empty */
+.np-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 80px 0;
+  color: rgba(255, 255, 255, 0.4);
+}
+.np-empty-icon { font-size: 2.8rem; }
+.np-empty p { font-size: 0.95rem; margin: 0; }
+
+/* Groups */
+.np-group { margin-bottom: 28px; }
+
+.np-group-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+/* Items */
+.np-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  margin-bottom: 4px;
+}
+.np-item:hover { background: rgba(255, 255, 255, 0.05); }
+.np-item.unread { background: rgba(245, 158, 11, 0.06); }
+.np-item.unread:hover { background: rgba(245, 158, 11, 0.1); }
+
+.np-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.np-type-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border: 2px solid #0f1117;
+}
+.np-type-badge.spark { background: #f59e0b; }
+.np-type-badge.connect { background: #10b981; }
+.np-type-badge.milestone { background: #ef4444; }
+.np-type-badge.like { background: #ec4899; }
+.np-type-badge.cheer { background: #8b5cf6; }
+.np-type-badge.msg { background: #3b82f6; }
+
+.np-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.np-item-text {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+.np-item.unread .np-item-text { color: #fff; font-weight: 500; }
+.np-item-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.np-unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #f59e0b;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.np-dismiss-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.np-dismiss-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .np-page { padding-top: 16px; }
+  .np-title { font-size: 1.3rem; }
+}

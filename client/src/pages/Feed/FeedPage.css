@@ -1,3 +1,38 @@
+/* ── Upload progress bar ── */
+.feed-upload-bar {
+  position: fixed;
+  top: 70px; /* sits just below nav */
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.feed-upload-bar-fill {
+  height: 3px;
+  border-radius: 3px;
+  background: #f59e0b;
+  transition: width 0.25s ease, background 0.3s;
+}
+
+.feed-upload-bar--done .feed-upload-bar-fill   { background: #10b981; }
+.feed-upload-bar--error .feed-upload-bar-fill  { background: #ef4444; }
+
+.feed-upload-bar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.01em;
+}
+
+.feed-upload-bar--done  .feed-upload-bar-label { color: #10b981; }
+.feed-upload-bar--error .feed-upload-bar-label { color: #ef4444; }
+
 /* ── Feed container — full-screen snap scroll ── */
 .feed-page {
   position: fixed;
@@ -132,11 +167,11 @@
 .feed-actions {
   position: absolute;
   right: 14px;
-  bottom: 80px;
+  bottom: 90px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   z-index: 2;
 }
 
@@ -384,7 +419,8 @@
 /* ── Floating create button ── */
 .feed-fab {
   position: fixed;
-  right: 20px;
+  left: 20px;
+  right: auto;
   bottom: calc(72px + env(safe-area-inset-bottom));
   width: 52px;
   height: 52px;
@@ -638,10 +674,10 @@
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.8);
   }
 
-  /* FAB sits at the right edge of the column */
+  /* FAB sits at the left edge of the column */
   .feed-fab {
+    left: calc(50% - 215px - 20px);
     right: auto;
-    left: calc(50% + 143px);
     bottom: 20px;
   }
 
@@ -672,7 +708,7 @@
   }
 
   .feed-actions {
-    bottom: 24px;
+    bottom: 80px;
     right: 12px;
   }
 
@@ -685,4 +721,164 @@
     font-size: 0.95rem;
     -webkit-line-clamp: 5;
   }
+}
+
+/* ── Share sheet ── */
+.fss-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+}
+
+.fss-sheet {
+  width: 100%;
+  background: #1a1d27;
+  border-radius: 24px 24px 0 0;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  max-height: 80dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.fss-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin: 12px auto 4px;
+  flex-shrink: 0;
+}
+
+.fss-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px 16px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.fss-title {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.fss-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.fss-back {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Main options */
+.fss-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+.fss-option:hover { background: rgba(255,255,255,0.04); }
+
+.fss-option-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.fss-option-body { flex: 1; }
+.fss-option-label { font-size: 0.92rem; font-weight: 600; color: #fff; }
+.fss-option-desc  { font-size: 0.76rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.fss-chevron { color: rgba(255,255,255,0.3); font-size: 1.2rem; }
+
+/* Friend picker */
+.fss-search-wrap {
+  padding: 0 16px 12px;
+  flex-shrink: 0;
+}
+.fss-search {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.88rem;
+  box-sizing: border-box;
+  outline: none;
+}
+.fss-search::placeholder { color: rgba(255,255,255,0.3); }
+
+.fss-friends-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 16px;
+}
+
+.fss-friend-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.fss-friend-info { flex: 1; min-width: 0; }
+.fss-friend-name { font-size: 0.88rem; font-weight: 600; color: #fff; }
+.fss-friend-ego  { font-size: 0.74rem; color: #f59e0b; }
+
+.fss-send-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #f59e0b;
+  background: transparent;
+  color: #f59e0b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.fss-send-btn:hover { background: #f59e0b; color: #000; }
+.fss-send-btn.sent {
+  border-color: #10b981;
+  color: #10b981;
+  cursor: default;
+}
+
+.fss-empty {
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.85rem;
+  padding: 24px 0;
+}
+
+@media (min-width: 769px) {
+  .fss-backdrop { justify-content: center; align-items: flex-end; }
+  .fss-sheet { max-width: 430px; border-radius: 24px 24px 0 0; }
 }

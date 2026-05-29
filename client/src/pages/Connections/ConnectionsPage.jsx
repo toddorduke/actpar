@@ -214,11 +214,11 @@ export default function ConnectionsPage() {
                 const name = getDisplayName(p, 'Someone');
                 return (
                   <div key={req.requester_id} className="mn-row mn-row-spark">
-                    <div className="mn-avatar-locked"><span>⚡</span></div>
+                    <Avatar url={p?.avatar_url} name={name} size={40} />
                     <div className="mn-info">
-                      <span className="mn-name-locked">Hidden — upgrade to reveal</span>
-                      <span className="mn-badge spark-badge">⚡ Spark with message</span>
-                      <span className="mn-spark-msg-blur">"{req.spark_message?.slice(0, 40)}…"</span>
+                      <span className="mn-name">{name}</span>
+                      <span className="mn-badge spark-badge">⚡ Sparked you</span>
+                      {req.spark_message && <span className="mn-spark-msg">"{req.spark_message.slice(0, 60)}{req.spark_message.length > 60 ? '…' : ''}"</span>}
                     </div>
                     <button className="mn-accept-btn" onClick={() => acceptConnection(req.requester_id)}>Accept</button>
                   </div>
@@ -428,16 +428,21 @@ export default function ConnectionsPage() {
             {incomingSparks.length === 0 ? (
               <p className="spark-description" style={{ color: '#9ca3af' }}>No sparks yet</p>
             ) : (
-              <div className="sparks-locked">
-                {incomingSparks.slice(0, 3).map((spark) => (
-                  <div key={spark.requester_id} className="spark-item spark-item-locked">
-                    <div className="spark-avatar-blur" />
-                    <div className="spark-info">
-                      <div className="spark-name-blur" />
-                      <div className="spark-alter-blur" />
+              <div className="sparks-list">
+                {incomingSparks.slice(0, 3).map((spark) => {
+                  const sp = spark.profiles;
+                  const spName = getDisplayName(sp, 'Someone');
+                  return (
+                    <div key={spark.requester_id} className="spark-item">
+                      <Avatar url={sp?.avatar_url} name={spName} size={36} />
+                      <div className="spark-info">
+                        <div className="spark-name">{spName}</div>
+                        {sp?.alter_ego_name && <div className="spark-alter">⚡ {sp.alter_ego_name}</div>}
+                      </div>
+                      <button className="spark-accept-btn" onClick={() => acceptConnection(spark.requester_id)}>Accept</button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

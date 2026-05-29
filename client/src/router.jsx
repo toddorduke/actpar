@@ -25,6 +25,8 @@ import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage.jsx';
 import CheckEmailPage from './pages/CheckEmail/CheckEmailPage.jsx';
 import AdminPage from './pages/Admin/AdminPage.jsx';
 import FeedPage from './pages/Feed/FeedPage.jsx';
+import NotificationsPage from './pages/Notifications/NotificationsPage.jsx';
+import PostPage from './pages/Post/PostPage.jsx';
 
 // Redirects already-logged-in users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
@@ -63,6 +65,8 @@ export const AppRoutes = () => (
     <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
     <Route path="/you" element={<ProtectedRoute><YouPage /></ProtectedRoute>} />
     <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+    <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+    <Route path="/post/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
   </Routes>
 );
