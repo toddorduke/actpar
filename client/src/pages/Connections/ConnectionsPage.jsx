@@ -11,6 +11,15 @@ import SparkModal, { getSparksUsedToday } from '../../components/common/SparkMod
 import { getDisplayName } from '../../utils/displayName.js';
 import './ConnectionsPage.css';
 
+// Local hours 6 AM–11 PM converted to UTC for the deadline picker
+const DEADLINE_OPTIONS = Array.from({ length: 18 }, (_, i) => i + 6).map((h) => {
+  const d = new Date();
+  d.setHours(h, 0, 0, 0);
+  const utcHour = d.getUTCHours();
+  const display = h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h - 12}:00 PM`;
+  return { localHour: h, utcHour, display };
+});
+
 const LF_CATEGORIES = [
   'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
   'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
@@ -52,16 +61,24 @@ export default function ConnectionsPage() {
   const [journeyModal, setJourneyModal] = useState(null); // { partnerId, partnerName, partnerAvatar }
   const [acceptModal, setAcceptModal] = useState(null);   // { partnershipId, partnerName, partnerGoalTitle }
   const [journeyGoalId, setJourneyGoalId] = useState('');
+  const [journeyDeadlineHour, setJourneyDeadlineHour] = useState('');
   const [proposing, setProposing] = useState(false);
   const [accepting, setAccepting] = useState(false);
 
   async function handleProposeJourney() {
     if (!journeyModal || proposing) return;
     setProposing(true);
-    await proposeJourney(journeyModal.partnerId, journeyGoalId || null);
+    let deadlineUtcHour = null;
+    let deadlineDisplay = null;
+    if (journeyDeadlineHour !== '') {
+      const opt = DEADLINE_OPTIONS.find((o) => o.localHour === parseInt(journeyDeadlineHour));
+      if (opt) { deadlineUtcHour = opt.utcHour; deadlineDisplay = opt.display; }
+    }
+    await proposeJourney(journeyModal.partnerId, journeyGoalId || null, deadlineUtcHour, deadlineDisplay);
     setProposing(false);
     setJourneyModal(null);
     setJourneyGoalId('');
+    setJourneyDeadlineHour('');
   }
 
   async function handleAcceptJourney() {
@@ -71,6 +88,7 @@ export default function ConnectionsPage() {
     setAccepting(false);
     setAcceptModal(null);
     setJourneyGoalId('');
+    setJourneyDeadlineHour('');
   }
 
   function journeyWithPartner(partnerId) {
@@ -228,6 +246,24 @@ export default function ConnectionsPage() {
           {!journeyGoalId && (
             <p className="journey-skip-hint">No goal selected — that's OK, you can add one later.</p>
           )}
+          <div className="journey-deadline-section">
+            <label className="journey-deadline-label">Daily check-in deadline <span className="journey-deadline-optional">(optional)</span></label>
+            <select
+              className="journey-deadline-select"
+              value={journeyDeadlineHour}
+              onChange={(e) => setJourneyDeadlineHour(e.target.value)}
+            >
+              <option value="">No deadline</option>
+              {DEADLINE_OPTIONS.map((opt) => (
+                <option key={opt.localHour} value={String(opt.localHour)}>{opt.display}</option>
+              ))}
+            </select>
+            <p className="journey-deadline-hint">
+              {journeyDeadlineHour
+                ? `We'll remind you both if you haven't checked in by ${DEADLINE_OPTIONS.find((o) => o.localHour === parseInt(journeyDeadlineHour))?.display} each day.`
+                : "Set a daily deadline and we'll both get a reminder if you haven't logged in yet."}
+            </p>
+          </div>
           <button className="journey-propose-btn" onClick={handleProposeJourney} disabled={proposing}>
             {proposing ? 'Sending...' : 'Propose Journey →'}
           </button>
@@ -250,6 +286,11 @@ export default function ConnectionsPage() {
           {acceptModal.partnerGoalTitle && (
             <p className="journey-modal-hint">
               <strong>{acceptModal.partnerName}</strong> is committing to <em>"{acceptModal.partnerGoalTitle}"</em>.
+            </p>
+          )}
+          {acceptModal.deadlineDisplay && (
+            <p className="journey-modal-hint journey-deadline-info">
+              ⏰ Proposed daily deadline: <strong>{acceptModal.deadlineDisplay}</strong> — we'll remind you both if you haven't checked in by then.
             </p>
           )}
           <p className="journey-modal-hint">Pick a goal to share back <span style={{ color: '#9ca3af' }}>(optional)</span>:</p>
@@ -324,7 +365,7 @@ export default function ConnectionsPage() {
                         className="mn-journey-accept-btn"
                         onClick={() => {
                           setJourneyGoalId('');
-                          setAcceptModal({ partnershipId: p.id, partnerName: requesterName, partnerGoalTitle: p.goal1?.title ?? null });
+                          setAcceptModal({ partnershipId: p.id, partnerName: requesterName, partnerGoalTitle: p.goal1?.title ?? null, deadlineDisplay: p.deadline_display ?? null });
                         }}
                       >Accept</button>
                       <button className="mn-journey-decline-btn" onClick={() => declineJourney(p.id)}>Decline</button>

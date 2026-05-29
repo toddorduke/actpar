@@ -42,11 +42,18 @@ export function usePartnerships() {
     };
   }
 
-  const proposeJourney = useCallback(async (receiverId, goalId) => {
+  const proposeJourney = useCallback(async (receiverId, goalId, deadlineUtcHour = null, deadlineDisplay = null) => {
     if (!user) return { error: 'Not authenticated' };
     const { data, error } = await supabase
       .from('partnerships')
-      .insert({ requester_id: user.id, receiver_id: receiverId, goal_id_1: goalId || null, status: 'pending' })
+      .insert({
+        requester_id: user.id,
+        receiver_id: receiverId,
+        goal_id_1: goalId || null,
+        status: 'pending',
+        deadline_utc_hour: deadlineUtcHour,
+        deadline_display: deadlineDisplay,
+      })
       .select()
       .single();
     if (!error && data) {
