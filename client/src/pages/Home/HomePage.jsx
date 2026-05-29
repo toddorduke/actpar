@@ -79,7 +79,7 @@ function getTodayStr() {
 
 // ── GoalCard ─────────────────────────────────────────────────────────────────
 
-const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress }) => {
+const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress, onDelete, onComplete }) => {
   const isNumeric = goal.goal_type === 'numeric';
   const habitPct = useMemo(() => Math.min((goal.day_count / 90) * 100, 100), [goal.day_count]);
   const checkedInToday = goal.last_checked_in === getTodayStr();
@@ -233,6 +233,19 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
           ))}
         </div>
       )}
+
+      <div className="goal-card-footer">
+        {onComplete && !isNumeric && (
+          <button className="goal-footer-btn goal-complete-btn" onClick={() => onComplete(goal.id)}>
+            ✓ Mark Complete
+          </button>
+        )}
+        {onDelete && (
+          <button className="goal-footer-btn goal-delete-btn" onClick={() => onDelete(goal.id)}>
+            Remove Goal
+          </button>
+        )}
+      </div>
     </div>
   );
 };
@@ -249,7 +262,7 @@ const HomePage = () => {
   const { profile, loading: profileLoading, updateProfile } = useProfile();
   const { createOrAdopt } = useCustomCategories(profile?.id);
   const { reflections, affirmations, saveAnswer, saveAffirmation } = useReflections();
-  const { goals, loading: goalsLoading, updateTier, addGoal, checkIn } = useGoals();
+  const { goals, loading: goalsLoading, updateTier, addGoal, checkIn, deleteGoal, completeGoal } = useGoals();
   const { progressMap, logProgress } = useGoalProgress(goals);
   const { entries, loading: journalLoading, createEntry, deleteEntry } = useJournal();
   const { posts, loading: postsLoading, createPost } = useTribePosts();
@@ -266,10 +279,8 @@ const HomePage = () => {
     goals.forEach((g) => { map[g.tier ?? 3].push(g); });
     return map;
   }, [goals]);
-  const myPosts = useMemo(() => {
-    if (!profile) return [];
-    return posts.filter((p) => p.user_id === profile.id);
-  }, [posts, profile]);
+  const [myOwnPosts, setMyOwnPosts] = useState([]);
+  const [myPostsLoading, setMyPostsLoading] = useState(false);
   const activeQuestions = profile?.reflection_questions ?? DEFAULT_QUESTIONS;
   const affirmationDayNumber = useMemo(() => {
     if (!profile?.affirmation_start_date) return null;
@@ -327,11 +338,24 @@ const HomePage = () => {
     );
     supabase
       .from('profiles')
-      .select('id, first_name, last_name, tagline, city')
+      .select('id, first_name, last_name, tagline, city, avatar_url')
       .in('id', partnerIds)
       .limit(5)
       .then(({ data }) => setConnectionProfiles(data ?? []));
   }, [profile?.id, acceptedConnections.length]);
+
+  // — My own posts (direct query, not limited by global feed) —
+  useEffect(() => {
+    if (!profile?.id || activeTab !== 'posts') return;
+    setMyPostsLoading(true);
+    supabase
+      .from('tribe_posts')
+      .select('*')
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false })
+      .limit(50)
+      .then(({ data }) => { setMyOwnPosts(data ?? []); setMyPostsLoading(false); });
+  }, [profile?.id, activeTab]);
 
   // — Suggested people —
   const [suggested, setSuggested] = useState([]);
@@ -572,6 +596,12 @@ const HomePage = () => {
     const { error } = await updateProfile({ looking_for: lookingFor });
     setSavingLookingFor(false);
     if (!error) toast('Looking For updated! 🔍', 'success');
+  }
+
+  async function handleDeletePost(postId) {
+    await supabase.from('tribe_posts').delete().eq('id', postId);
+    setMyOwnPosts((prev) => prev.filter((p) => p.id !== postId));
+    toast('Post deleted.', 'success');
   }
 
   async function handleSubmitPost() {
@@ -938,6 +968,8 @@ const HomePage = () => {
                                 onCheckIn={checkIn}
                                 progressData={progressMap[goal.id]}
                                 onLogProgress={logProgress}
+                                onDelete={(id) => setConfirmDialog({ message: 'Remove this goal?', onConfirm: () => deleteGoal(id) })}
+                                onComplete={(id) => setConfirmDialog({ message: 'Mark this goal as completed?', onConfirm: () => completeGoal(id) })}
                               />
                             ))}
                           </div>
@@ -1026,7 +1058,7 @@ const HomePage = () => {
                           <img src={photo.file_url} alt={photo.caption || 'photo'} className="photo-item" />
                           <div className="media-overlay">
                             <span className="media-visibility-badge">{photo.visibility}</span>
-                            <button className="media-delete-btn" onClick={() => deleteMedia(photo.id, photo.file_url)}>×</button>
+                            <button className="media-delete-btn" onClick={() => setConfirmDialog({ message: 'Delete this photo?', onConfirm: () => deleteMedia(photo.id, photo.file_url) })}>×</button>
                           </div>
                         </div>
                       ))}
@@ -1048,7 +1080,7 @@ const HomePage = () => {
                           <video src={video.file_url} className="video-player" controls playsInline preload="metadata" />
                           <div className="video-item-footer">
                             <div className="video-title">{video.caption || 'Video'}</div>
-                            <button className="media-delete-btn" onClick={() => deleteMedia(video.id, video.file_url)}>×</button>
+                            <button className="media-delete-btn" onClick={() => setConfirmDialog({ message: 'Delete this video?', onConfirm: () => deleteMedia(video.id, video.file_url) })}>×</button>
                           </div>
                         </div>
                       ))}
@@ -1365,7 +1397,7 @@ const HomePage = () => {
                     const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'Member';
                     return (
                       <div key={p.id} className="active-member-item" style={{ cursor: 'pointer' }} onClick={() => navigate(`/profile/${p.id}`)}>
-                        <div className="active-member-avatar" />
+                        <Avatar url={p.avatar_url} name={name} size={36} />
                         <div className="active-member-info">
                           <div className="active-member-name">{name}</div>
                           <div className="active-member-status">{p.tagline || p.city || 'Spark connection'}</div>
@@ -1453,16 +1485,22 @@ const HomePage = () => {
               </svg>
               <h2>My Community Posts</h2>
             </div>
-            {postsLoading && <p className="goals-empty">Loading posts...</p>}
-            {!postsLoading && myPosts.length === 0 && <p className="goals-empty">You haven't posted to the community yet — head to Tribe to share something!</p>}
+            {myPostsLoading && <p className="goals-empty">Loading posts...</p>}
+            {!myPostsLoading && myOwnPosts.length === 0 && <p className="goals-empty">You haven't posted to the community yet — head to Tribe to share something!</p>}
             <div className="my-posts-list">
-              {myPosts.map((post) => {
+              {myOwnPosts.map((post) => {
                 const typeLabel = post.post_type === 'achievement' ? '🏆 Achievement' : post.post_type === 'meetup' ? '📅 Meetup' : '💬 General';
                 return (
                   <div key={post.id} className="my-post-card">
                     <div className="my-post-header">
                       <span className="my-post-type">{typeLabel}</span>
                       <span className="my-post-date">{formatDate(post.created_at)}</span>
+                      <button
+                        type="button"
+                        className="my-post-delete-btn"
+                        onClick={() => setConfirmDialog({ message: 'Delete this post?', onConfirm: () => handleDeletePost(post.id) })}
+                        title="Delete post"
+                      >×</button>
                     </div>
                     {post.milestone && <div className="my-post-milestone">🏆 {post.milestone}</div>}
                     <p className="my-post-content">{post.content}</p>

@@ -51,11 +51,11 @@ export default function NotificationsPage() {
     } else if (notif.type === 'new_message') {
       navigate(`/messages?with=${notif.actor_id}`);
     } else if (notif.type === 'post_like') {
-      navigate('/tribe-community');
+      navigate(notif.ref_id ? `/post/${notif.ref_id}` : '/tribe-community');
     } else if (notif.type === 'streak_milestone' || notif.type === 'progress_complete') {
-      navigate('/profile');
+      navigate('/');
     } else if (notif.type === 'cheer') {
-      navigate('/you');
+      navigate('/');
     } else if (notif.type === 'booking_request') {
       navigate(`/messages?with=${notif.actor_id}`);
     }

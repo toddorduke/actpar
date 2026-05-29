@@ -8,18 +8,18 @@ import { supabase } from '../../lib/supabase.js';
 import './ProfileSetupPage.css';
 
 const CATEGORIES = [
-  { value: 'faith',        label: '✝️ Faith' },
-  { value: 'fitness',      label: '💪 Fitness' },
-  { value: 'nutrition',    label: '🥗 Nutrition' },
-  { value: 'mental-health',label: '🧠 Mental Health' },
-  { value: 'career',       label: '💼 Career' },
-  { value: 'finance',      label: '💰 Finance' },
-  { value: 'sobriety',     label: '🌿 Sobriety' },
-  { value: 'reading',      label: '📚 Reading' },
-  { value: 'meditation',   label: '🧘 Meditation' },
-  { value: 'sleep',        label: '😴 Sleep' },
-  { value: 'relationships',label: '❤️ Relationships' },
-  { value: 'education',    label: '🎓 Education' },
+  { value: 'Faith / Church', label: '✝️ Faith / Church' },
+  { value: 'Fitness',        label: '💪 Fitness' },
+  { value: 'Nutrition',      label: '🥗 Nutrition' },
+  { value: 'Mental Health',  label: '🧠 Mental Health' },
+  { value: 'Career',         label: '💼 Career' },
+  { value: 'Finance',        label: '💰 Finance' },
+  { value: 'Sobriety',       label: '🌿 Sobriety' },
+  { value: 'Reading',        label: '📚 Reading' },
+  { value: 'Meditation',     label: '🧘 Meditation' },
+  { value: 'Sleep',          label: '😴 Sleep' },
+  { value: 'Relationships',  label: '❤️ Relationships' },
+  { value: 'Education',      label: '🎓 Education' },
 ];
 
 const US_STATES = [

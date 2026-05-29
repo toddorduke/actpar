@@ -22,7 +22,14 @@ export default function PostPage() {
   }, [id]);
 
   if (loading) return <div className="pp-page"><div className="pp-spinner" /></div>;
-  if (!post)   return <div className="pp-page"><p className="pp-missing">Post not found.</p></div>;
+  if (!post) return (
+    <div className="pp-page">
+      <div className="pp-card">
+        <button className="pp-back" onClick={() => navigate(-1)}>← Back</button>
+        <p className="pp-missing">Post not found.</p>
+      </div>
+    </div>
+  );
 
   const authorName = getDisplayName(post.profiles);
   const isVideo    = post.media_url && /\.(mp4|mov|webm|quicktime)$/i.test(post.media_url);

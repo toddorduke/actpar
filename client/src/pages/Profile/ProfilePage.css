@@ -2464,3 +2464,50 @@
   margin: 6px 0 0;
   max-width: 340px;
 }
+
+/* Goal card footer actions */
+.goal-card-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.goal-footer-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: transparent;
+}
+
+.goal-complete-btn {
+  color: #16a34a;
+  border-color: #16a34a;
+}
+.goal-complete-btn:hover { background: #f0fdf4; }
+
+.goal-delete-btn {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+.goal-delete-btn:hover { background: #fef2f2; }
+
+/* My Posts delete button */
+.my-post-delete-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.my-post-delete-btn:hover { color: #ef4444; }
