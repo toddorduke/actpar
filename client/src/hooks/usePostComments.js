@@ -2,6 +2,7 @@ import { useCallback, useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { checkText } from '../utils/contentModeration.js';
+import { createNotification } from './useNotifications.js';
 
 export const usePostComments = () => {
   const { user } = useContext(AuthContext);
@@ -34,6 +35,18 @@ export const usePostComments = () => {
         ...prev,
         [postId]: [...(prev[postId] ?? []), data],
       }));
+      // Notify the post owner (fire-and-forget — don't block UI)
+      supabase.from('tribe_posts').select('user_id').eq('id', postId).single().then(({ data: post }) => {
+        if (post?.user_id && post.user_id !== user.id) {
+          createNotification({
+            userId: post.user_id,
+            actorId: user.id,
+            type: 'post_like',
+            refId: postId,
+            body: 'commented on your post 💬',
+          });
+        }
+      });
     }
     return { data, error };
   }, [user]);

@@ -1,10 +1,11 @@
-import React, { useContext, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { supabase } from '../../lib/supabase.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
+import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
@@ -38,7 +39,7 @@ const HEART_PATH  = 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 
 const BUBBLE_PATH = 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z';
 const SHARE_PATH  = 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z';
 
-function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount, onShare }) {
+function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount, onShare, reactionCounts, myReaction, onReact }) {
   const authorName  = getDisplayName(post.profiles);
   const gradient    = getGradient(post.post_type, post.id);
   const type        = post.post_type ?? 'general';
@@ -49,7 +50,7 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
   function handleLike() {
     if (isToggling) return;
     if (!liked) { setBurst(true); setTimeout(() => setBurst(false), 600); }
-    onLike(post.id, likeCount);
+    onLike(post.id, likeCount, post.user_id);
   }
 
   return (
@@ -128,6 +129,22 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
           <div className="feed-milestone">🎯 {post.milestone}</div>
         )}
         <p className="feed-content">{post.content}</p>
+        {/* Reaction chips */}
+        <div className="feed-reactions">
+          {REACTION_EMOJIS.map(({ key, label }) => {
+            const count = reactionCounts?.[key] ?? 0;
+            const active = myReaction === key;
+            return (
+              <button
+                key={key}
+                className={`feed-reaction-chip${active ? ' active' : ''}`}
+                onClick={() => onReact(post.id, key)}
+              >
+                {label}{count > 0 && <span className="feed-reaction-count">{count}</span>}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -480,9 +497,40 @@ export default function FeedPage() {
   const { likedIds, toggleLike, toggling }    = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   const commentState                          = useCommentState(posts);
+  const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
   const [showSheet, setShowSheet]             = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState(null);
   const [sharePost, setSharePost]             = useState(null);
+  const [sortMode, setSortMode]               = useState('top'); // 'top' | 'latest'
+  const [todayCheckins, setTodayCheckins]     = useState(0);
+
+  // Load reactions whenever post ids change
+  useEffect(() => {
+    if (postIds.length) loadReactions(postIds);
+  }, [postIds.join(',')]);
+
+  // Today's check-in pulse
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    supabase
+      .from('goals')
+      .select('id', { count: 'exact', head: true })
+      .eq('last_checked_in', today)
+      .then(({ count }) => setTodayCheckins(count ?? 0));
+  }, []);
+
+  // Ranked feed: engagement score with recency decay
+  const rankedPosts = useMemo(() => {
+    if (sortMode === 'latest') return posts;
+    const now = Date.now();
+    return [...posts].sort((a, b) => {
+      const hA = (now - new Date(a.created_at)) / 3600000;
+      const hB = (now - new Date(b.created_at)) / 3600000;
+      const sA = ((a.likes ?? 0) + (a.comments_count ?? 0) * 2) / Math.pow(hA + 2, 1.5);
+      const sB = ((b.likes ?? 0) + (b.comments_count ?? 0) * 2) / Math.pow(hB + 2, 1.5);
+      return sB - sA;
+    });
+  }, [posts, sortMode]);
 
   // Upload progress state
   const [uploadBar, setUploadBar] = useState(null); // null | { status, progress }
@@ -509,10 +557,10 @@ export default function FeedPage() {
     clearUploadBar();
   }
 
-  function handleLike(postId, currentCount) {
+  function handleLike(postId, currentCount, postOwnerId) {
     toggleLike(postId, currentCount, (id, newCount) => {
       setLocalLikeCounts((prev) => ({ ...prev, [id]: newCount }));
-    }, null);
+    }, postOwnerId);
   }
 
   function handleOpenComments(postId) {
@@ -576,10 +624,27 @@ export default function FeedPage() {
         </div>
       )}
 
+      {/* Pulse banner + sort toggle */}
+      <div className="feed-top-bar">
+        {todayCheckins > 0 && (
+          <div className="feed-pulse">🔥 {todayCheckins} check-in{todayCheckins !== 1 ? 's' : ''} today</div>
+        )}
+        <div className="feed-sort-toggle">
+          <button
+            className={`feed-sort-btn${sortMode === 'top' ? ' active' : ''}`}
+            onClick={() => setSortMode('top')}
+          >Top</button>
+          <button
+            className={`feed-sort-btn${sortMode === 'latest' ? ' active' : ''}`}
+            onClick={() => setSortMode('latest')}
+          >Latest</button>
+        </div>
+      </div>
+
       {/* Dark backdrop fills the screen behind the centered column on desktop */}
       <div className="feed-desktop-backdrop" />
       <div className="feed-page">
-        {posts.map((post) => (
+        {rankedPosts.map((post) => (
           <FeedCard
             key={post.id}
             post={post}
@@ -590,6 +655,9 @@ export default function FeedPage() {
             onOpenComments={handleOpenComments}
             commentCount={commentState.commentCount(post.id)}
             onShare={setSharePost}
+            reactionCounts={reactionCounts[post.id]}
+            myReaction={myReactions[post.id]}
+            onReact={toggleReaction}
           />
         ))}
       </div>

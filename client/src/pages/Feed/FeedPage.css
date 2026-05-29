@@ -279,6 +279,95 @@
   overflow: hidden;
 }
 
+/* ── Reaction chips ── */
+.feed-reactions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.feed-reaction-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  backdrop-filter: blur(4px);
+}
+
+.feed-reaction-chip:hover { background: rgba(255,255,255,0.22); }
+.feed-reaction-chip.active {
+  background: rgba(245, 158, 11, 0.35);
+  border-color: rgba(245, 158, 11, 0.6);
+  transform: scale(1.08);
+}
+
+.feed-reaction-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ── Pulse banner + sort toggle ── */
+.feed-top-bar {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  pointer-events: none;
+}
+
+.feed-pulse {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  color: #fbbf24;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(245,158,11,0.3);
+  pointer-events: auto;
+}
+
+.feed-sort-toggle {
+  display: flex;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid rgba(255,255,255,0.12);
+  pointer-events: auto;
+}
+
+.feed-sort-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.feed-sort-btn.active {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
 @keyframes feedSheetUp {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
