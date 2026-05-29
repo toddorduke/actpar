@@ -1,0 +1,45 @@
+.nf-page {
+  min-height: 100vh;
+  background: #0f1117;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.nf-code {
+  font-size: 6rem;
+  font-weight: 900;
+  color: rgba(245,158,11,0.15);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin-bottom: 8px;
+}
+
+.nf-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.nf-desc {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 28px;
+}
+
+.nf-btn {
+  background: #f59e0b;
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 28px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.nf-btn:hover { background: #d97706; }
