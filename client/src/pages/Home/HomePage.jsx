@@ -386,6 +386,8 @@ const HomePage = () => {
       });
   }, [goals.length]);
 
+  const [activeTab, setActiveTab] = useState('overview');
+
   // — My own posts (direct query, not limited by global feed) —
   useEffect(() => {
     if (!profile?.id || activeTab !== 'posts') return;
@@ -425,7 +427,6 @@ const HomePage = () => {
   const [cheerSent, setCheerSent] = useState(new Set());
 
   // — UI state —
-  const [activeTab, setActiveTab] = useState('overview');
   const [animateGoals, setAnimateGoals] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ tagline: '', bio: '', alter_ego_name: '', city: '' });
