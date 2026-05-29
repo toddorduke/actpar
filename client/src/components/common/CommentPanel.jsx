@@ -7,9 +7,16 @@ import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import './CommentPanel.css';
 
-export function useCommentState() {
+export function useCommentState(posts = []) {
   const { commentsByPost, loadingPost, fetchComments, addComment, deleteComment } = usePostComments();
   const [openPanels, setOpenPanels] = useState({});
+
+  // Seed db-backed counts so they show immediately without opening the panel
+  const dbCounts = useState(() => {
+    const map = {};
+    posts.forEach(p => { if (p.comments_count != null) map[p.id] = p.comments_count; });
+    return map;
+  })[0];
 
   function togglePanel(postId) {
     const isOpening = !openPanels[postId];
@@ -20,7 +27,9 @@ export function useCommentState() {
   }
 
   function commentCount(postId) {
-    return (commentsByPost[postId] ?? []).length;
+    // Once loaded in-memory, use that; otherwise fall back to db count
+    if (commentsByPost[postId] != null) return commentsByPost[postId].length;
+    return dbCounts[postId] ?? 0;
   }
 
   return { openPanels, commentsByPost, loadingPost, togglePanel, addComment, deleteComment, commentCount };

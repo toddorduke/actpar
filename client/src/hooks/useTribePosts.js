@@ -12,7 +12,7 @@ export const useTribePosts = (communityId = null) => {
     setLoading(true);
     let query = supabase
       .from('tribe_posts')
-      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url, id)')
+      .select('*, profiles(first_name, last_name, alter_ego_name, avatar_url, id), comments_count')
       .order('created_at', { ascending: false })
       .limit(200);
 

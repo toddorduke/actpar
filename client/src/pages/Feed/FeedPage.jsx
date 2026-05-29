@@ -479,7 +479,7 @@ export default function FeedPage() {
   const postIds                               = useMemo(() => posts.map((p) => p.id), [posts]);
   const { likedIds, toggleLike, toggling }    = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
-  const commentState                          = useCommentState();
+  const commentState                          = useCommentState(posts);
   const [showSheet, setShowSheet]             = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState(null);
   const [sharePost, setSharePost]             = useState(null);
