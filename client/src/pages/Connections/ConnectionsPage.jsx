@@ -345,6 +345,13 @@ export default function ConnectionsPage() {
       {mainTab === 'my-network' && (
         <div className="my-network-page">
 
+          {/* Status legend */}
+          <div className="mn-legend">
+            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--connected" />Connected — accepted, can journey</span>
+            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--waiting" />Waiting — they haven't responded yet</span>
+            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--journey" />🚀 Journey — shared accountability goal</span>
+          </div>
+
           {/* Incoming journey invites */}
           {incomingJourneys.length > 0 && (
             <div className="mn-section mn-journey-invites">
@@ -423,7 +430,11 @@ export default function ConnectionsPage() {
           <div className="mn-section">
             <h3 className="mn-section-title">Your Connections ({acceptedConnections.length})</h3>
             {acceptedConnections.length === 0 && (
-              <p className="mn-empty">No connections yet — start sparking!</p>
+              <p className="mn-empty">
+                {(sentSparks.length + sentConnects.length) > 0
+                  ? 'No accepted connections yet — your requests are waiting below.'
+                  : 'No connections yet — go to Discover and send some sparks!'}
+              </p>
             )}
             <div className="mn-connections-list">
               {acceptedConnections.map((c) => {
@@ -500,13 +511,15 @@ export default function ConnectionsPage() {
             </div>
           </div>
 
-          {/* Sent pending sparks */}
-          {sentSparks.length > 0 && (
+          {/* Sent pending — sparks + connects merged */}
+          {(sentSparks.length + sentConnects.length) > 0 && (
             <div className="mn-section">
-              <h3 className="mn-section-title">Sparks Sent — Waiting ({sentSparks.length})</h3>
-              {sentSparks.map((req) => {
+              <h3 className="mn-section-title">Waiting on Them ({sentSparks.length + sentConnects.length})</h3>
+              <p className="mn-section-hint">You reached out — once they accept you'll be connected.</p>
+              {[...sentSparks, ...sentConnects].map((req) => {
                 const p = req.profiles;
                 const name = getDisplayName(p, 'Someone');
+                const isSpark = !!req.spark_message;
                 return (
                   <div key={req.receiver_id} className="mn-row">
                     <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
@@ -516,39 +529,14 @@ export default function ConnectionsPage() {
                       <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
                         {name}
                       </button>
-                      <span className="mn-badge spark-badge">⚡ Spark sent</span>
+                      <span className={`mn-badge ${isSpark ? 'spark-badge' : 'connect-badge'}`}>
+                        {isSpark ? '⚡ Spark sent' : '✓ Request sent'}
+                      </span>
                       {req.spark_message && (
                         <span className="mn-sent-msg">"{req.spark_message}"</span>
                       )}
                     </div>
-                    <button className="mn-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel spark">
-                      ✗
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Sent pending regular connects */}
-          {sentConnects.length > 0 && (
-            <div className="mn-section">
-              <h3 className="mn-section-title">Requests Sent — Waiting ({sentConnects.length})</h3>
-              {sentConnects.map((req) => {
-                const p = req.profiles;
-                const name = getDisplayName(p, 'Someone');
-                return (
-                  <div key={req.receiver_id} className="mn-row">
-                    <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
-                      <Avatar url={p?.avatar_url} name={name} size={44} />
-                    </button>
-                    <div className="mn-info">
-                      <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
-                        {name}
-                      </button>
-                      <span className="mn-badge connect-badge">✓ Request pending</span>
-                    </div>
-                    <button className="mn-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel request">
+                    <button className="mn-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel">
                       ✗
                     </button>
                   </div>

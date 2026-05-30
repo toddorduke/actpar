@@ -1728,3 +1728,37 @@
 .journey-deadline-select:focus { outline: none; border-color: #7c3aed; }
 .journey-deadline-hint { font-size: 0.78rem; color: #6b7280; margin: 0; font-style: italic; line-height: 1.4; }
 .journey-deadline-info { color: #a78bfa; font-style: normal; }
+
+/* ── My Network legend & hints ── */
+.mn-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+}
+.mn-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+.mn-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mn-legend-dot--connected { background: #10b981; }
+.mn-legend-dot--waiting   { background: #f59e0b; }
+.mn-legend-dot--journey   { background: #7c3aed; }
+
+.mn-section-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: -6px 0 10px;
+}
