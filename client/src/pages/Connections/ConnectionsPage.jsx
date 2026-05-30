@@ -399,7 +399,7 @@ export default function ConnectionsPage() {
                       <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
                         {name}
                       </button>
-                      <span className="mn-badge connect-badge">Wants to connect</span>
+                      <span className="mn-status-line">Sent you a connection request — accept to link up</span>
                     </div>
                     <div className="mn-actions">
                       <button className="mn-accept-btn" onClick={() => acceptSpark(req.requester_id)}>Accept</button>
@@ -413,10 +413,14 @@ export default function ConnectionsPage() {
                 const name = getDisplayName(p, 'Someone');
                 return (
                   <div key={req.requester_id} className="mn-row mn-row-spark">
-                    <Avatar url={p?.avatar_url} name={name} size={40} />
+                    <button className="mn-avatar-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                      <Avatar url={p?.avatar_url} name={name} size={44} />
+                    </button>
                     <div className="mn-info">
-                      <span className="mn-name">{name}</span>
-                      <span className="mn-badge spark-badge">⚡ Sparked you — has a message</span>
+                      <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
+                        {name}
+                      </button>
+                      <span className="mn-status-line">⚡ Sparked you with a personal message</span>
                       {req.spark_message && <span className="mn-spark-msg">"{req.spark_message.slice(0, 60)}{req.spark_message.length > 60 ? '…' : ''}"</span>}
                     </div>
                     <button className="mn-accept-btn" onClick={() => acceptConnection(req.requester_id)}>Accept</button>
@@ -453,10 +457,11 @@ export default function ConnectionsPage() {
                       <button className="mn-conn-name-btn" onClick={() => navigate(`/profile/${c.partnerId}`)}>
                         {name}
                       </button>
+                      <span className="mn-status-line mn-status-line--connected">
+                        ✅ Connected
+                        {c.partnerProfile?.alter_ego_name ? ` · ⚡ ${c.partnerProfile.alter_ego_name}` : ''}
+                      </span>
                       <div className="mn-conn-meta">
-                        {c.partnerProfile?.alter_ego_name && (
-                          <span className="mn-conn-ego">⚡ {c.partnerProfile.alter_ego_name}</span>
-                        )}
                         {stats && (
                           <>
                             {stats.bestStreak > 0 && (
@@ -529,8 +534,8 @@ export default function ConnectionsPage() {
                       <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.receiver_id}`)}>
                         {name}
                       </button>
-                      <span className={`mn-badge ${isSpark ? 'spark-badge' : 'connect-badge'}`}>
-                        {isSpark ? '⚡ Spark with message' : '✓ Connection request sent'}
+                      <span className="mn-status-line">
+                        {isSpark ? '⚡ You sparked them with a message — awaiting their response' : '✓ You sent a connection request — awaiting their response'}
                       </span>
                       {req.spark_message && (
                         <span className="mn-sent-msg">"{req.spark_message}"</span>
