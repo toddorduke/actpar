@@ -224,7 +224,7 @@ export default function TribeCommunityPage() {
             <h3 className="sidebar-title">🔥 Trending Now</h3>
             <div className="trending-list">
               {trendingTags.length === 0 ? (
-                <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0 }}>
+                <p style={{ fontSize: '0.85rem', color: '#ffffff', margin: 0, fontWeight: 500 }}>
                   No hashtags yet — add one to your next post!
                 </p>
               ) : trendingTags.map((t) => (

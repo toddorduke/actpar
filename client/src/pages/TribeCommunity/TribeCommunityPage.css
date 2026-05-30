@@ -567,7 +567,7 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.action-btn {
+.tribe-page .action-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -575,16 +575,16 @@
   background: transparent;
   border: none;
   border-radius: 8px;
-  color: #ffffff;
+  color: #ffffff !important;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-base);
 }
 
-.action-btn:hover { background: #f3f4f6; color: var(--color-primary); }
-.action-btn.active { color: var(--color-primary); background: rgba(124, 58, 237, 0.06); }
-.action-btn.report-btn { margin-left: auto; }
-.action-btn.report-btn:hover { background: #fef2f2; color: #ef4444; }
+.tribe-page .action-btn:hover { background: rgba(255,255,255,0.1); color: #f59e0b !important; }
+.tribe-page .action-btn.active { color: #f59e0b !important; background: rgba(245,158,11,0.12); }
+.tribe-page .action-btn.report-btn { margin-left: auto; }
+.tribe-page .action-btn.report-btn:hover { background: rgba(239,68,68,0.15); color: #ef4444 !important; }
 .action-icon { width: 20px; height: 20px; }
 
 .post-reactions {
