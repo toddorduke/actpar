@@ -17,15 +17,15 @@
 }
 
 .sidebar-card {
-  background: var(--color-surface);
+  background: #ffffff;
   border-radius: var(--radius-medium);
   padding: 20px;
-  box-shadow: var(--shadow-subtle);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  border: 1px solid #d1d5db;
   margin-bottom: 20px;
 }
 
-.sidebar-title { font-size: 1.1em; font-weight: 600; color: var(--color-text); margin-bottom: 15px; }
+.sidebar-title { font-size: 1.1em; font-weight: 800; color: #111827; margin-bottom: 15px; }
 
 .create-post-btn {
   width: 100%;
@@ -629,9 +629,9 @@
   gap: 12px;
 }
 
-.stat-item { text-align: center; padding: 12px; background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.15); border-radius: 10px; }
-.stat-number { font-size: 1.6em; font-weight: bold; color: var(--color-primary); }
-.stat-label { font-size: 0.8em; color: #374151; font-weight: 600; }
+.stat-item { text-align: center; padding: 12px; background: #fef9ee; border: 1px solid #fcd34d; border-radius: 10px; }
+.stat-number { font-size: 1.6em; font-weight: bold; color: #d97706; }
+.stat-label { font-size: 0.8em; color: #1f2937; font-weight: 600; }
 
 .top-contributors { display: flex; flex-direction: column; gap: 10px; }
 
@@ -1106,7 +1106,8 @@
 
 .discover-desc {
   font-size: 0.75rem;
-  color: #4b5563;
+  color: #374151;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
