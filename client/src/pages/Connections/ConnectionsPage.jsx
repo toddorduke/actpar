@@ -347,15 +347,15 @@ export default function ConnectionsPage() {
 
           {/* Status legend */}
           <div className="mn-legend">
-            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--connected" />Connected — accepted, can journey</span>
-            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--waiting" />Waiting — they haven't responded yet</span>
-            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--journey" />🚀 Journey — shared accountability goal</span>
+            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--connected" />Connected · you're linked up</span>
+            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--waiting" />Awaiting · ball's in their court</span>
+            <span className="mn-legend-item"><span className="mn-legend-dot mn-legend-dot--journey" />🚀 Journey · holding each other accountable</span>
           </div>
 
           {/* Incoming journey invites */}
           {incomingJourneys.length > 0 && (
             <div className="mn-section mn-journey-invites">
-              <h3 className="mn-section-title">🚀 Journey Invitations</h3>
+              <h3 className="mn-section-title">🚀 Someone wants to journey with you</h3>
               {incomingJourneys.map((p) => {
                 const requesterName = getDisplayName(p.requester, 'Someone');
                 return (
@@ -386,7 +386,7 @@ export default function ConnectionsPage() {
           {/* Incoming connection requests */}
           {(incomingConnects.length > 0 || incomingSparks.length > 0) && (
             <div className="mn-section">
-              <h3 className="mn-section-title">Pending — Incoming</h3>
+              <h3 className="mn-section-title">They Reached Out to You</h3>
               {incomingConnects.map((req) => {
                 const p = req.profiles;
                 const name = getDisplayName(p, 'Someone');
@@ -399,7 +399,7 @@ export default function ConnectionsPage() {
                       <button className="mn-name-btn" onClick={() => navigate(`/profile/${req.requester_id}`)}>
                         {name}
                       </button>
-                      <span className="mn-badge connect-badge">✓ Connection Request</span>
+                      <span className="mn-badge connect-badge">Wants to connect</span>
                     </div>
                     <div className="mn-actions">
                       <button className="mn-accept-btn" onClick={() => acceptSpark(req.requester_id)}>Accept</button>
@@ -416,7 +416,7 @@ export default function ConnectionsPage() {
                     <Avatar url={p?.avatar_url} name={name} size={40} />
                     <div className="mn-info">
                       <span className="mn-name">{name}</span>
-                      <span className="mn-badge spark-badge">⚡ Sparked you</span>
+                      <span className="mn-badge spark-badge">⚡ Sparked you — has a message</span>
                       {req.spark_message && <span className="mn-spark-msg">"{req.spark_message.slice(0, 60)}{req.spark_message.length > 60 ? '…' : ''}"</span>}
                     </div>
                     <button className="mn-accept-btn" onClick={() => acceptConnection(req.requester_id)}>Accept</button>
@@ -428,12 +428,12 @@ export default function ConnectionsPage() {
 
           {/* Accepted connections */}
           <div className="mn-section">
-            <h3 className="mn-section-title">Your Connections ({acceptedConnections.length})</h3>
+            <h3 className="mn-section-title">Connected ({acceptedConnections.length})</h3>
             {acceptedConnections.length === 0 && (
               <p className="mn-empty">
                 {(sentSparks.length + sentConnects.length) > 0
-                  ? 'No accepted connections yet — your requests are waiting below.'
-                  : 'No connections yet — go to Discover and send some sparks!'}
+                  ? 'Nobody has accepted yet — check back soon or try Discover to reach more people.'
+                  : 'No connections yet — head to Discover and send a spark to someone!'}
               </p>
             )}
             <div className="mn-connections-list">
@@ -480,15 +480,15 @@ export default function ConnectionsPage() {
                           <button
                             className="mn-conn-journey-btn"
                             onClick={() => { setJourneyGoalId(''); setJourneyModal({ partnerId: c.partnerId, partnerName: name, partnerAvatar: c.partnerProfile?.avatar_url }); }}
-                          >🚀 Journey</button>
+                          >🚀 Start Journey</button>
                         );
                         if (j.status === 'pending') return (
                           <span className="mn-conn-journey-pending">
-                            {j.requester_id === user?.id ? '⏳ Pending' : '🚀 Invited you'}
+                            {j.requester_id === user?.id ? '⏳ Invite Sent' : '🚀 Invited You'}
                           </span>
                         );
                         return (
-                          <span className="mn-conn-journey-active">🚀 Journeying</span>
+                          <span className="mn-conn-journey-active">🚀 On a Journey</span>
                         );
                       })()}
                       <button
@@ -514,8 +514,8 @@ export default function ConnectionsPage() {
           {/* Sent pending — sparks + connects merged */}
           {(sentSparks.length + sentConnects.length) > 0 && (
             <div className="mn-section">
-              <h3 className="mn-section-title">Waiting on Them ({sentSparks.length + sentConnects.length})</h3>
-              <p className="mn-section-hint">You reached out — once they accept you'll be connected.</p>
+              <h3 className="mn-section-title">You Reached Out ({sentSparks.length + sentConnects.length})</h3>
+              <p className="mn-section-hint">Ball's in their court — you'll be notified when they accept.</p>
               {[...sentSparks, ...sentConnects].map((req) => {
                 const p = req.profiles;
                 const name = getDisplayName(p, 'Someone');
@@ -530,7 +530,7 @@ export default function ConnectionsPage() {
                         {name}
                       </button>
                       <span className={`mn-badge ${isSpark ? 'spark-badge' : 'connect-badge'}`}>
-                        {isSpark ? '⚡ Spark sent' : '✓ Request sent'}
+                        {isSpark ? '⚡ Spark with message' : '✓ Connection request sent'}
                       </span>
                       {req.spark_message && (
                         <span className="mn-sent-msg">"{req.spark_message}"</span>
