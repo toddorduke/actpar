@@ -49,7 +49,7 @@ export default function CoachProfilePage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 16 }}>
           <div style={{ fontSize: '3rem' }}>🔍</div>
           <h2 style={{ color: '#111827', margin: 0 }}>Coach not found</h2>
-          <p style={{ color: '#6b7280', margin: 0 }}>That profile doesn't exist or has been removed.</p>
+          <p style={{ color: '#374151', margin: 0 }}>That profile doesn't exist or has been removed.</p>
           <button className="coach-book-btn" onClick={() => navigate('/coaches')}>Browse Coaches</button>
         </div>
       </div>

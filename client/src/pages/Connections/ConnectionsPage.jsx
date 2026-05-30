@@ -708,7 +708,7 @@ export default function ConnectionsPage() {
               Sparks include a personal message from the sender — they put extra effort in.
             </p>
             {incomingSparks.length === 0 ? (
-              <p className="spark-description" style={{ color: '#9ca3af' }}>No sparks yet</p>
+              <p className="spark-description" style={{ color: '#d1d5db' }}>No sparks yet</p>
             ) : (
               <div className="sparks-list">
                 {incomingSparks.slice(0, 3).map((spark) => {
@@ -968,7 +968,7 @@ export default function ConnectionsPage() {
             </h3>
             <div className="connections-list">
               {acceptedConnections.length === 0 && (
-                <p style={{ color: '#6b7280', fontSize: '0.9em', marginTop: 0 }}>No connections yet</p>
+                <p style={{ color: '#d1d5db', fontSize: '0.9em', marginTop: 0 }}>No connections yet</p>
               )}
               {acceptedConnections.slice(0, 5).map((c) => {
                 const name = c.partnerProfile
@@ -1114,7 +1114,7 @@ export default function ConnectionsPage() {
             Sparks include a personal message from the sender — they put extra effort in.
           </p>
           {incomingSparks.length === 0 ? (
-            <p className="spark-description" style={{ color: '#9ca3af' }}>No sparks yet</p>
+            <p className="spark-description" style={{ color: '#d1d5db' }}>No sparks yet</p>
           ) : (
             <div className="sparks-locked">
               {incomingSparks.slice(0, 3).map((spark) => (
@@ -1156,7 +1156,7 @@ export default function ConnectionsPage() {
           </h3>
           <div className="connections-list">
             {acceptedConnections.length === 0 && (
-              <p style={{ color: '#6b7280', fontSize: '0.9em', marginTop: 0 }}>No connections yet</p>
+              <p style={{ color: '#d1d5db', fontSize: '0.9em', marginTop: 0 }}>No connections yet</p>
             )}
             {acceptedConnections.slice(0, 5).map((c) => {
               const name = c.partnerProfile ? getDisplayName(c.partnerProfile) : 'Connected User';

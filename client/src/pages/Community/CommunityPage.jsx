@@ -734,7 +734,7 @@ export default function CommunityPage() {
   }
 
   if (!community) {
-    return <div style={{ padding: 40, color: '#6b7280' }}>Loading community...</div>;
+    return <div style={{ padding: 40, color: '#374151' }}>Loading community...</div>;
   }
 
   return (

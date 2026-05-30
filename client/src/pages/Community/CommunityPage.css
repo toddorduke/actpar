@@ -173,7 +173,7 @@
 .comm-empty {
   text-align: center;
   padding: 40px;
-  color: #9ca3af;
+  color: #4b5563;
   font-size: 0.95rem;
 }
 
@@ -344,7 +344,7 @@
 }
 
 .comm-post-author { font-weight: 700; font-size: 0.92rem; color: #1f2937; }
-.comm-post-time { font-size: 0.75rem; color: #9ca3af; }
+.comm-post-time { font-size: 0.75rem; color: #4b5563; }
 
 .pin-btn {
   margin-left: auto;
@@ -502,7 +502,7 @@
   white-space: nowrap;
 }
 .event-location { font-size: 0.82rem; color: #6b7280; }
-.event-time { font-size: 0.8rem; color: #9ca3af; }
+.event-time { font-size: 0.8rem; color: #4b5563; }
 .event-desc { font-size: 0.88rem; color: #4b5563; margin: 0; line-height: 1.5; }
 
 .event-rsvp-counts { display: flex; gap: 12px; font-size: 0.8rem; color: #6b7280; font-weight: 600; }
@@ -633,7 +633,7 @@
 .member-info { flex: 1; min-width: 0; }
 .member-name { font-weight: 700; font-size: 0.92rem; color: #1f2937; }
 .member-alter-ego { font-size: 0.78rem; color: #7c3aed; font-weight: 600; margin-top: 2px; }
-.member-city { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
+.member-city { font-size: 0.75rem; color: #4b5563; margin-top: 2px; }
 
 .member-role-badge {
   display: inline-block;
@@ -734,7 +734,7 @@
   border-bottom-left-radius: 18px;
 }
 
-.chat-time { font-size: 0.65rem; color: #9ca3af; padding: 0 4px; }
+.chat-time { font-size: 0.65rem; color: #4b5563; padding: 0 4px; }
 
 .chat-input-row {
   display: flex;
@@ -795,7 +795,7 @@
 }
 
 .challenge-title { font-weight: 800; font-size: 1.05rem; color: #1f2937; }
-.challenge-dates { font-size: 0.75rem; color: #9ca3af; }
+.challenge-dates { font-size: 0.75rem; color: #4b5563; }
 .challenge-desc { font-size: 0.88rem; color: #4b5563; margin: 0; line-height: 1.5; }
 
 .challenge-progress { display: flex; flex-direction: column; gap: 6px; }
@@ -841,7 +841,7 @@
   font-size: 0.85rem;
 }
 
-.challenge-leader-rank { font-weight: 700; color: #9ca3af; width: 24px; }
+.challenge-leader-rank { font-weight: 700; color: #4b5563; width: 24px; }
 .challenge-leader-name { flex: 1; font-weight: 600; color: #1f2937; }
 .challenge-leader-val { font-weight: 700; color: var(--color-primary); }
 
@@ -858,7 +858,7 @@
 
 .leaderboard-subtitle {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: #4b5563;
   margin: 0 0 8px;
 }
 
@@ -897,7 +897,7 @@
   color: var(--color-primary);
 }
 
-.lb-score span { font-size: 0.75rem; font-weight: 600; color: #9ca3af; margin-left: 2px; }
+.lb-score span { font-size: 0.75rem; font-weight: 600; color: #4b5563; margin-left: 2px; }
 
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 768px) {

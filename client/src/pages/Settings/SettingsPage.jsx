@@ -823,7 +823,7 @@ export default function SettingsPage() {
                 <div className="settings-push-row">
                   <div className="settings-toggle-info">
                     <div className="settings-toggle-title">Browser Push Notifications</div>
-                    <div className="settings-toggle-desc" style={{ color: '#9ca3af' }}>
+                    <div className="settings-toggle-desc" style={{ color: '#374151' }}>
                       Not supported on this browser. Try Chrome or Edge on desktop, or make sure you're on HTTPS.
                     </div>
                   </div>

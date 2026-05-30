@@ -48,7 +48,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  color: #6b7280;
+  color: #d1d5db;
   text-transform: capitalize;
 }
 
@@ -116,7 +116,7 @@
 .pact-stats { display: flex; gap: 40px; margin-bottom: 25px; }
 .stat { display: flex; flex-direction: column; }
 .stat-number { font-size: 2em; font-weight: bold; color: #fbbf24; }
-.stat-label { font-size: 0.9em; color: var(--color-muted); }
+.stat-label { font-size: 0.9em; color: #d1d5db; }
 
 .invite-btn {
   display: inline-flex;
@@ -260,7 +260,7 @@
 
 .member-name-btn:hover { color: #fbbf24; text-decoration: underline; }
 
-.member-role { font-size: 0.8em; color: var(--color-muted); }
+.member-role { font-size: 0.8em; color: #d1d5db; }
 
 .member-admin-btns {
   display: flex;
@@ -419,7 +419,7 @@
   font-family: inherit;
 }
 .post-author-btn:hover { opacity: 0.75; }
-.post-timestamp { font-size: 0.85em; color: var(--color-muted); }
+.post-timestamp { font-size: 0.85em; color: #d1d5db; }
 
 .post-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
 .badge-update { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
@@ -531,7 +531,7 @@
 }
 
 .progress-label { font-size: 0.9em; color: #9ca3af; text-align: center; margin-bottom: 12px; }
-.challenge-participants { text-align: center; font-size: 0.9em; color: var(--color-muted); padding: 10px; background: rgba(26, 26, 46, 0.3); border-radius: 8px; }
+.challenge-participants { text-align: center; font-size: 0.9em; color: #d1d5db; padding: 10px; background: rgba(26, 26, 46, 0.3); border-radius: 8px; }
 
 .leaderboard { display: flex; flex-direction: column; gap: 10px; }
 .leader-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: 10px; }
@@ -552,7 +552,7 @@
 
 .leader-info { flex: 1; }
 .leader-name { font-weight: 600; color: #e0e0e0; font-size: 0.9em; }
-.leader-points { font-size: 0.75em; color: var(--color-muted); }
+.leader-points { font-size: 0.75em; color: #d1d5db; }
 .leader-score { font-weight: bold; color: #fbbf24; }
 
 .resources-list { display: flex; flex-direction: column; gap: 10px; }
@@ -571,7 +571,7 @@
 .resource-item:hover { background: rgba(245, 158, 11, 0.1); }
 .resource-icon { font-size: 1.8em; }
 .resource-title { font-weight: 600; color: #e0e0e0; font-size: 0.9em; margin-bottom: 3px; }
-.resource-author { font-size: 0.8em; color: var(--color-muted); }
+.resource-author { font-size: 0.8em; color: #d1d5db; }
 
 /* Modals */
 .modal-overlay {
@@ -750,7 +750,7 @@
 
 .open-pact-info { flex: 1; min-width: 0; }
 .open-pact-name { font-weight: 700; color: #e0e0e0; font-size: 0.95rem; }
-.open-pact-desc { font-size: 0.82rem; color: #6b7280; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.open-pact-desc { font-size: 0.82rem; color: #d1d5db; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .open-pact-join-btn {
   padding: 8px 20px;
@@ -940,10 +940,10 @@
 
 .add-rule-btn:hover { background: rgba(245, 158, 11, 0.07); border-color: #f59e0b; }
 
-.rules-empty { color: #6b7280; font-size: 0.88rem; margin-bottom: 8px; }
+.rules-empty { color: #d1d5db; font-size: 0.88rem; margin-bottom: 8px; }
 
 /* ── Create pact draft rules ── */
-.label-hint { font-weight: 400; color: #6b7280; font-size: 0.82rem; }
+.label-hint { font-weight: 400; color: #d1d5db; font-size: 0.82rem; }
 
 .draft-rule-row {
   display: flex;
@@ -1025,13 +1025,13 @@
 }
 
 .contributor-name { font-weight: 600; color: #e0e0e0; font-size: 0.9rem; }
-.contributor-posts { font-size: 0.78rem; color: #6b7280; }
+.contributor-posts { font-size: 0.78rem; color: #d1d5db; }
 
 /* ── Feed empty ── */
 .feed-empty-pact {
   text-align: center;
   padding: 48px 24px;
-  color: #6b7280;
+  color: #d1d5db;
   background: rgba(26, 26, 46, 0.4);
   border-radius: 16px;
   border: 1px dashed rgba(245, 158, 11, 0.2);

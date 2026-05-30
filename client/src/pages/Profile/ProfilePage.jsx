@@ -602,7 +602,7 @@ const ProfilePage = () => {
   }
 
   if (profileLoading) {
-    return <div className="profile-page"><p style={{ padding: 32, color: '#6b7280' }}>Loading...</p></div>;
+    return <div className="profile-page"><p style={{ padding: 32, color: '#ffffff' }}>Loading...</p></div>;
   }
 
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Your Profile';
@@ -1158,7 +1158,7 @@ const ProfilePage = () => {
               </h3>
               <div className="active-members-list">
                 {connectionProfiles.length === 0 && (
-                  <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0 }}>
+                  <p style={{ fontSize: '0.85rem', color: '#ffffff', margin: 0 }}>
                     No connections yet — send a spark to someone!
                   </p>
                 )}

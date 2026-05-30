@@ -755,7 +755,7 @@ export default function PactPage() {
               <button className="close-modal" onClick={() => setConfirmDelete(false)}>×</button>
             </div>
             <div className="modal-body">
-              <p style={{ color: '#6b7280', marginBottom: 24 }}>
+              <p style={{ color: '#d1d5db', marginBottom: 24 }}>
                 This will permanently delete <strong>{pact?.name}</strong>, all its rules, and all posts. This cannot be undone.
               </p>
               <div style={{ display: 'flex', gap: 10 }}>

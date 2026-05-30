@@ -820,7 +820,7 @@ const HomePage = () => {
   }
 
   if (profileLoading) {
-    return <div className="profile-page"><p style={{ padding: 32, color: '#6b7280' }}>Loading...</p></div>;
+    return <div className="profile-page"><p style={{ padding: 32, color: '#374151' }}>Loading...</p></div>;
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -1658,7 +1658,7 @@ const HomePage = () => {
                 </h3>
                 <div className="active-members-list">
                   {connectionProfiles.length === 0 && (
-                    <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0 }}>No connections yet — send a spark to someone!</p>
+                    <p style={{ fontSize: '0.85rem', color: '#ffffff', margin: 0 }}>No connections yet — send a spark to someone!</p>
                   )}
                   {connectionProfiles.map((p) => {
                     const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'Member';
