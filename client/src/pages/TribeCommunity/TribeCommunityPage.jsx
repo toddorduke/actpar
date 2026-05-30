@@ -183,7 +183,7 @@ export default function TribeCommunityPage() {
             <h3 className="sidebar-title">My Communities</h3>
             <div className="community-list">
               {myCommunities.length === 0 && (
-                <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0 }}>
+                <p style={{ fontSize: '0.85rem', color: '#ffffff', margin: 0, fontWeight: 500 }}>
                   No communities yet — create or join one below!
                 </p>
               )}
@@ -535,7 +535,7 @@ export default function TribeCommunityPage() {
             </div>
             <div className="modal-body">
               {communities.length === 0 && (
-                <p style={{ color: '#6b7280', textAlign: 'center' }}>No communities yet — create the first one!</p>
+                <p style={{ color: '#ffffff', textAlign: 'center', fontWeight: 500 }}>No communities yet — create the first one!</p>
               )}
               <div className="browse-comm-list">
                 {communities.map((c) => {
