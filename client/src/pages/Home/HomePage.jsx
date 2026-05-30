@@ -287,7 +287,7 @@ const HomePage = () => {
   const { posts, loading: postsLoading, createPost } = useTribePosts();
   const { photos, videos, uploadFile, deleteMedia } = useMedia();
   const { acceptedConnections } = useConnections();
-  const { partnerships, partnerSide } = usePartnerships();
+  const { partnerships, partnerSide, linkGoal } = usePartnerships();
   const { activity, loading: activityLoading } = useConnectionActivity(acceptedConnections);
 
   // — Derived —
@@ -447,6 +447,45 @@ const HomePage = () => {
   const [affirmationText, setAffirmationText] = useState('');
   const [affirmationPublic, setAffirmationPublic] = useState(false);
   const [savingAffirmation, setSavingAffirmation] = useState(false);
+
+  // Journey goal picker
+  const [journeyGoalPicker, setJourneyGoalPicker] = useState(null); // { partnershipId }
+  const [journeyPickerGoalId, setJourneyPickerGoalId] = useState('');
+  const [journeyPickerShowNew, setJourneyPickerShowNew] = useState(false);
+  const [journeyPickerNewTitle, setJourneyPickerNewTitle] = useState('');
+  const [journeyPickerNewTier, setJourneyPickerNewTier] = useState(2);
+  const [journeyPickerSaving, setJourneyPickerSaving] = useState(false);
+
+  async function handleJourneyLinkGoal() {
+    if (!journeyPickerGoalId || journeyPickerSaving) return;
+    setJourneyPickerSaving(true);
+    await linkGoal(journeyGoalPicker.partnershipId, journeyPickerGoalId);
+    setJourneyPickerSaving(false);
+    setJourneyGoalPicker(null);
+    setJourneyPickerGoalId('');
+    setJourneyPickerShowNew(false);
+    setJourneyPickerNewTitle('');
+  }
+
+  async function handleJourneyCreateAndLink() {
+    if (!journeyPickerNewTitle.trim() || journeyPickerSaving) return;
+    setJourneyPickerSaving(true);
+    const { data } = await supabase.from('goals').insert({
+      user_id: user.id,
+      title: journeyPickerNewTitle.trim(),
+      tier: journeyPickerNewTier,
+      goal_type: 'habit',
+      is_active: true,
+    }).select('id').single();
+    if (data) {
+      await linkGoal(journeyGoalPicker.partnershipId, data.id);
+    }
+    setJourneyPickerSaving(false);
+    setJourneyGoalPicker(null);
+    setJourneyPickerGoalId('');
+    setJourneyPickerShowNew(false);
+    setJourneyPickerNewTitle('');
+  }
 
   // Add goal form
   const addGoalRef = useRef(null);
@@ -788,6 +827,58 @@ const HomePage = () => {
 
   return (
     <>
+      {/* Journey goal picker modal */}
+      {journeyGoalPicker && (
+        <div className="journey-modal-overlay" onClick={(e) => e.target === e.currentTarget && setJourneyGoalPicker(null)}>
+          <div className="journey-modal">
+            <button className="journey-modal-close" onClick={() => setJourneyGoalPicker(null)}>×</button>
+            <h2 className="journey-modal-title">Link a Goal to Your Journey</h2>
+            <p className="journey-modal-hint">Pick one of your habit goals or create a new one:</p>
+            <div className="journey-goal-list">
+              {habitGoals.map((g) => (
+                <button
+                  key={g.id}
+                  className={`journey-goal-item${journeyPickerGoalId === g.id ? ' selected' : ''}`}
+                  onClick={() => setJourneyPickerGoalId((prev) => prev === g.id ? '' : g.id)}
+                >
+                  <span className="journey-goal-title">{g.title}</span>
+                  <span className="journey-goal-tier">{{ 1: 'Top Priority', 2: 'Important', 3: 'Foundation' }[g.tier] ?? 'Foundation'}</span>
+                </button>
+              ))}
+            </div>
+            {!journeyPickerShowNew ? (
+              <button className="journey-add-goal-btn" onClick={() => setJourneyPickerShowNew(true)}>＋ Create a new goal</button>
+            ) : (
+              <div className="journey-new-goal-form">
+                <input
+                  className="journey-new-goal-input"
+                  placeholder="Goal title (e.g. Run every morning)"
+                  value={journeyPickerNewTitle}
+                  onChange={(e) => setJourneyPickerNewTitle(e.target.value)}
+                  autoFocus
+                />
+                <select className="journey-new-goal-tier" value={journeyPickerNewTier} onChange={(e) => setJourneyPickerNewTier(Number(e.target.value))}>
+                  <option value={1}>Top Priority</option>
+                  <option value={2}>Important</option>
+                  <option value={3}>Foundation</option>
+                </select>
+                <div className="journey-new-goal-actions">
+                  <button className="journey-new-goal-save" onClick={handleJourneyCreateAndLink} disabled={!journeyPickerNewTitle.trim() || journeyPickerSaving}>
+                    {journeyPickerSaving ? 'Saving...' : 'Save & Link'}
+                  </button>
+                  <button className="journey-new-goal-cancel" onClick={() => { setJourneyPickerShowNew(false); setJourneyPickerNewTitle(''); }}>Cancel</button>
+                </div>
+              </div>
+            )}
+            {!journeyPickerShowNew && (
+              <button className="journey-propose-btn" onClick={handleJourneyLinkGoal} disabled={!journeyPickerGoalId || journeyPickerSaving}>
+                {journeyPickerSaving ? 'Linking...' : 'Link Goal →'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="profile-page">
 
         {/* ── Profile header ── */}
@@ -1512,12 +1603,17 @@ const HomePage = () => {
                             </div>
                           </div>
                           <div className="journey-goals-row">
-                            {myGoal && (
+                            {myGoal ? (
                               <div className={`journey-goal-chip${myCheckedToday ? ' done' : ''}`}>
                                 <span className="journey-goal-who">You</span>
                                 <span className="journey-goal-title">{myGoal.title}</span>
                                 <span className="journey-goal-status">{myCheckedToday ? '✓' : '○'}</span>
                               </div>
+                            ) : (
+                              <button
+                                className="journey-link-goal-btn"
+                                onClick={() => { setJourneyGoalPicker({ partnershipId: p.id }); setJourneyPickerGoalId(''); setJourneyPickerShowNew(false); }}
+                              >＋ Link your goal</button>
                             )}
                             {partnerGoal && (
                               <div className={`journey-goal-chip${partnerCheckedToday ? ' done' : ''}`}>

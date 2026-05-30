@@ -101,11 +101,22 @@ export function usePartnerships() {
     return { error };
   }, []);
 
+  const linkGoal = useCallback(async (partnershipId, goalId) => {
+    if (!user) return { error: 'Not authenticated' };
+    const partnership = partnerships.find((p) => p.id === partnershipId);
+    if (!partnership) return { error: 'Partnership not found' };
+    const iAmRequester = partnership.requester_id === user.id;
+    const field = iAmRequester ? 'goal_id_1' : 'goal_id_2';
+    const { error } = await supabase.from('partnerships').update({ [field]: goalId }).eq('id', partnershipId);
+    if (!error) await fetchPartnerships();
+    return { error };
+  }, [user, partnerships, fetchPartnerships]);
+
   const endJourney = useCallback(async (partnershipId) => {
     const { error } = await supabase.from('partnerships').update({ status: 'ended' }).eq('id', partnershipId);
     if (!error) setPartnerships((prev) => prev.filter((p) => p.id !== partnershipId));
     return { error };
   }, []);
 
-  return { partnerships, loading, partnerSide, proposeJourney, acceptJourney, declineJourney, endJourney, refetch: fetchPartnerships };
+  return { partnerships, loading, partnerSide, proposeJourney, acceptJourney, declineJourney, endJourney, linkGoal, refetch: fetchPartnerships };
 }
