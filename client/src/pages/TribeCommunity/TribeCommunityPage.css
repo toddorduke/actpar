@@ -631,9 +631,9 @@
   gap: 12px;
 }
 
-.stat-item { text-align: center; padding: 14px 12px; background: rgba(0,0,0,0.25); border: 2px solid #f59e0b; border-radius: 12px; }
-.stat-number { font-size: 1.6em; font-weight: 900; color: #f59e0b; }
-.stat-label { font-size: 0.82em; color: #ffffff; font-weight: 700; margin-top: 2px; }
+.tribe-page .stat-item { text-align: center; padding: 14px 12px; background: rgba(0,0,0,0.25); border: 2px solid #f59e0b; border-radius: 12px; }
+.tribe-page .stat-number { font-size: 1.6em; font-weight: 900; color: #f59e0b !important; }
+.tribe-page .stat-label { font-size: 0.82em; color: #ffffff !important; font-weight: 700; margin-top: 2px; }
 
 .top-contributors { display: flex; flex-direction: column; gap: 10px; }
 
