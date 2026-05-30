@@ -1773,3 +1773,100 @@
   color: #10b981;
   font-weight: 500;
 }
+
+/* ── Journey modal: goal tier labels & new goal form ── */
+.journey-goal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.journey-goal-title { flex: 1; text-align: left; }
+.journey-goal-tier {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.journey-goal-item.selected .journey-goal-tier {
+  color: #c4b5fd;
+  background: rgba(124,58,237,0.15);
+}
+
+.journey-add-goal-btn {
+  width: 100%;
+  background: none;
+  border: 1.5px dashed rgba(124,58,237,0.4);
+  border-radius: 8px;
+  color: #a78bfa;
+  font-size: 0.88rem;
+  padding: 9px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.journey-add-goal-btn:hover {
+  background: rgba(124,58,237,0.08);
+  border-color: rgba(124,58,237,0.7);
+}
+
+.journey-new-goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+}
+.journey-new-goal-input {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+}
+.journey-new-goal-input:focus { border-color: #7c3aed; }
+.journey-new-goal-input::placeholder { color: #6b7280; }
+.journey-new-goal-tier {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e5e7eb;
+  font-size: 0.88rem;
+  outline: none;
+  cursor: pointer;
+}
+.journey-new-goal-tier:focus { border-color: #7c3aed; }
+.journey-new-goal-actions {
+  display: flex;
+  gap: 8px;
+}
+.journey-new-goal-save {
+  flex: 1;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.journey-new-goal-save:disabled { opacity: 0.5; cursor: not-allowed; }
+.journey-new-goal-cancel {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #9ca3af;
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}

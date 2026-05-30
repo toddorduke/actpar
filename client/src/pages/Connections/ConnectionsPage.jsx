@@ -20,6 +20,8 @@ const DEADLINE_OPTIONS = Array.from({ length: 18 }, (_, i) => i + 6).map((h) => 
   return { localHour: h, utcHour, display };
 });
 
+const TIER_LABELS = { 1: 'Top Priority', 2: 'Important', 3: 'Foundation' };
+
 const LF_CATEGORIES = [
   'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
   'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
@@ -51,11 +53,38 @@ export default function ConnectionsPage() {
 
   // My goals for the journey modals
   const [myGoals, setMyGoals] = useState([]);
-  useEffect(() => {
+  const fetchMyGoals = () => {
     if (!user) return;
-    supabase.from('goals').select('id, title, goal_type').eq('user_id', user.id).eq('is_active', true)
+    supabase.from('goals').select('id, title, goal_type, tier').eq('user_id', user.id).eq('is_active', true)
       .then(({ data }) => setMyGoals(data ?? []));
-  }, [user]);
+  };
+  useEffect(() => { fetchMyGoals(); }, [user]);
+
+  // Inline new-goal form state (shared by both modals)
+  const [showNewGoal, setShowNewGoal] = useState(false);
+  const [newGoalTitle, setNewGoalTitle] = useState('');
+  const [newGoalTier, setNewGoalTier] = useState(2);
+  const [savingGoal, setSavingGoal] = useState(false);
+
+  async function handleCreateGoal() {
+    if (!newGoalTitle.trim() || savingGoal) return;
+    setSavingGoal(true);
+    const { data } = await supabase.from('goals').insert({
+      user_id: user.id,
+      title: newGoalTitle.trim(),
+      tier: newGoalTier,
+      goal_type: 'habit',
+      is_active: true,
+    }).select('id, title, goal_type, tier').single();
+    if (data) {
+      setMyGoals((prev) => [...prev, data]);
+      setJourneyGoalId(data.id);
+      setShowNewGoal(false);
+      setNewGoalTitle('');
+      setNewGoalTier(2);
+    }
+    setSavingGoal(false);
+  }
 
   // Journey modal state
   const [journeyModal, setJourneyModal] = useState(null); // { partnerId, partnerName, partnerAvatar }
@@ -79,6 +108,8 @@ export default function ConnectionsPage() {
     setJourneyModal(null);
     setJourneyGoalId('');
     setJourneyDeadlineHour('');
+    setShowNewGoal(false);
+    setNewGoalTitle('');
   }
 
   async function handleAcceptJourney() {
@@ -89,6 +120,8 @@ export default function ConnectionsPage() {
     setAcceptModal(null);
     setJourneyGoalId('');
     setJourneyDeadlineHour('');
+    setShowNewGoal(false);
+    setNewGoalTitle('');
   }
 
   function journeyWithPartner(partnerId) {
@@ -236,14 +269,36 @@ export default function ConnectionsPage() {
                 className={`journey-goal-item${journeyGoalId === g.id ? ' selected' : ''}`}
                 onClick={() => setJourneyGoalId((prev) => prev === g.id ? '' : g.id)}
               >
-                {g.title}
+                <span className="journey-goal-title">{g.title}</span>
+                <span className="journey-goal-tier">{TIER_LABELS[g.tier] ?? 'Foundation'}</span>
               </button>
             ))}
-            {myGoals.filter((g) => g.goal_type !== 'numeric').length === 0 && (
-              <p className="journey-goal-empty">No habit goals yet — you can still start a journey and add one later.</p>
-            )}
           </div>
-          {!journeyGoalId && (
+          {!showNewGoal ? (
+            <button className="journey-add-goal-btn" onClick={() => setShowNewGoal(true)}>＋ Add a new goal</button>
+          ) : (
+            <div className="journey-new-goal-form">
+              <input
+                className="journey-new-goal-input"
+                placeholder="Goal title (e.g. Run every morning)"
+                value={newGoalTitle}
+                onChange={(e) => setNewGoalTitle(e.target.value)}
+                autoFocus
+              />
+              <select className="journey-new-goal-tier" value={newGoalTier} onChange={(e) => setNewGoalTier(Number(e.target.value))}>
+                <option value={1}>Top Priority</option>
+                <option value={2}>Important</option>
+                <option value={3}>Foundation</option>
+              </select>
+              <div className="journey-new-goal-actions">
+                <button className="journey-new-goal-save" onClick={handleCreateGoal} disabled={!newGoalTitle.trim() || savingGoal}>
+                  {savingGoal ? 'Saving...' : 'Save Goal'}
+                </button>
+                <button className="journey-new-goal-cancel" onClick={() => { setShowNewGoal(false); setNewGoalTitle(''); }}>Cancel</button>
+              </div>
+            </div>
+          )}
+          {!journeyGoalId && !showNewGoal && (
             <p className="journey-skip-hint">No goal selected — that's OK, you can add one later.</p>
           )}
           <div className="journey-deadline-section">
@@ -301,10 +356,35 @@ export default function ConnectionsPage() {
                 className={`journey-goal-item${journeyGoalId === g.id ? ' selected' : ''}`}
                 onClick={() => setJourneyGoalId((prev) => prev === g.id ? '' : g.id)}
               >
-                {g.title}
+                <span className="journey-goal-title">{g.title}</span>
+                <span className="journey-goal-tier">{TIER_LABELS[g.tier] ?? 'Foundation'}</span>
               </button>
             ))}
           </div>
+          {!showNewGoal ? (
+            <button className="journey-add-goal-btn" onClick={() => setShowNewGoal(true)}>＋ Add a new goal</button>
+          ) : (
+            <div className="journey-new-goal-form">
+              <input
+                className="journey-new-goal-input"
+                placeholder="Goal title (e.g. Run every morning)"
+                value={newGoalTitle}
+                onChange={(e) => setNewGoalTitle(e.target.value)}
+                autoFocus
+              />
+              <select className="journey-new-goal-tier" value={newGoalTier} onChange={(e) => setNewGoalTier(Number(e.target.value))}>
+                <option value={1}>Top Priority</option>
+                <option value={2}>Important</option>
+                <option value={3}>Foundation</option>
+              </select>
+              <div className="journey-new-goal-actions">
+                <button className="journey-new-goal-save" onClick={handleCreateGoal} disabled={!newGoalTitle.trim() || savingGoal}>
+                  {savingGoal ? 'Saving...' : 'Save Goal'}
+                </button>
+                <button className="journey-new-goal-cancel" onClick={() => { setShowNewGoal(false); setNewGoalTitle(''); }}>Cancel</button>
+              </div>
+            </div>
+          )}
           <div className="journey-accept-actions">
             <button className="journey-propose-btn" onClick={handleAcceptJourney} disabled={accepting}>
               {accepting ? 'Accepting...' : 'Accept Journey 🚀'}
