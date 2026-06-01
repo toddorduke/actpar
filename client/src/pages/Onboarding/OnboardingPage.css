@@ -656,6 +656,15 @@
   padding: 0 8px;
 }
 
+.onboarding-subsection-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
+}
+
 .category-grid--compact {
   gap: 6px;
 }

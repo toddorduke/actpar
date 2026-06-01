@@ -112,9 +112,9 @@ export default function OnboardingPage() {
 
   const firstName = profile?.first_name || user?.user_metadata?.first_name || 'there';
 
-  const peopleStep = mode === 'quick' ? 4 : 7;
-  const doneStep   = mode === 'quick' ? 5 : 8;
-  const totalSteps = mode === 'quick' ? 3 : 6;
+  const peopleStep = mode === 'quick' ? 4 : 6;
+  const doneStep   = mode === 'quick' ? 5 : 7;
+  const totalSteps = mode === 'quick' ? 3 : 5;
 
   function progressPct() {
     if (step <= 1 || step >= doneStep) return 0;
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
     if (goalsToSave.length > 0) {
       await Promise.all(goalsToSave.map((g) => addGoal(g.title, g.category, { tier: g.tier })));
     }
-    setStep(mode === 'quick' ? peopleStep : 5);
+    setStep(mode === 'quick' ? peopleStep : 4);
   }
 
   async function handleFinish() {
@@ -264,8 +264,8 @@ export default function OnboardingPage() {
     setFinishing(true);
   }
 
-  const goalStepNumber = mode === 'quick' ? 3 : 4;
-  const goalDisplayStep = mode === 'quick' ? 2 : 3;
+  const goalStepNumber = 3;
+  const goalDisplayStep = 2;
 
   return (
     <div className="onboarding-page">
@@ -392,46 +392,17 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* ── Step 3 (thorough only): Looking For ── */}
-      {step === 3 && mode === 'thorough' && (
-        <div className="onboarding-step">
-          <div className="step-header">
-            <div className="step-number">Step 2 of {totalSteps}</div>
-            <h2 className="step-title">What are you looking for?</h2>
-            <p className="step-subtitle">This helps us match you with the right accountability partners.</p>
-          </div>
-          <div className="step-body">
-            <div className="motivations-grid">
-              {LF_CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  className={`motivation-chip${lookingFor.includes(cat) ? ' selected' : ''}`}
-                  onClick={() => setLookingFor((prev) => prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat])}
-                >
-                  {cat}{lookingFor.includes(cat) && <span className="chip-check">✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(4)}>
-              {lookingFor.length > 0 ? 'Continue' : 'Skip for Now'}
-            </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(2)}>Back</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Goals step (step 3 quick / step 4 thorough) ── */}
+      {/* ── Step 3: Goals (+ partner interests for thorough) ── */}
       {step === goalStepNumber && (
         <div className="onboarding-step">
           <div className="step-header">
             <div className="step-number">Step {goalDisplayStep} of {totalSteps}</div>
-            <h2 className="step-title">Set your 3 goals</h2>
-            <p className="step-subtitle">Rank them by priority — these build your pyramid on your profile.</p>
+            <h2 className="step-title">Set your intentions</h2>
+            <p className="step-subtitle">Your goals and what you're looking for help us match you with the right people.</p>
           </div>
           <div className="step-body">
+            {/* Goals */}
+            <p className="onboarding-subsection-label">Your goals</p>
             {TIER_META.map((meta, i) => (
               <div key={meta.tier} className="tier-goal-card">
                 <div className="tier-goal-header">
@@ -461,24 +432,43 @@ export default function OnboardingPage() {
                 </div>
               </div>
             ))}
+
+            {/* Partner interests — thorough only */}
+            {mode === 'thorough' && (
+              <>
+                <p className="onboarding-subsection-label" style={{ marginTop: 24 }}>What are you looking for in a partner?</p>
+                <div className="motivations-grid">
+                  {LF_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      className={`motivation-chip${lookingFor.includes(cat) ? ' selected' : ''}`}
+                      onClick={() => setLookingFor((prev) => prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat])}
+                    >
+                      {cat}{lookingFor.includes(cat) && <span className="chip-check">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
           {!tierGoals.some((g) => g.title.trim()) && (
             <p className="goals-skip-hint">You can add goals later from your Profile — but setting them now builds your pyramid right away.</p>
           )}
           <div className="step-actions">
             <button className="onboarding-btn primary" onClick={handleGoalsStep}>
-              {tierGoals.some((g) => g.title.trim()) ? 'Save My Goals & Continue' : 'Skip for Now'}
+              {tierGoals.some((g) => g.title.trim()) ? 'Save & Continue' : 'Skip for Now'}
             </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(mode === 'quick' ? 2 : 3)}>Back</button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(2)}>Back</button>
           </div>
         </div>
       )}
 
-      {/* ── Step 5 (thorough only): What's holding you back ── */}
-      {step === 5 && mode === 'thorough' && (
+      {/* ── Step 4 (thorough only): What's holding you back ── */}
+      {step === 4 && mode === 'thorough' && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 4 of {totalSteps}</div>
+            <div className="step-number">Step 3 of {totalSteps}</div>
             <h2 className="step-title">What's holding you back?</h2>
             <p className="step-subtitle">Be honest with yourself. This is just between you and your goals.</p>
           </div>
@@ -497,19 +487,19 @@ export default function OnboardingPage() {
             </div>
           </div>
           <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(6)}>
+            <button className="onboarding-btn primary" onClick={() => setStep(5)}>
               {workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
             </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(4)}>Back</button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(3)}>Back</button>
           </div>
         </div>
       )}
 
-      {/* ── Step 6 (thorough only): Know yourself ── */}
-      {step === 6 && mode === 'thorough' && (
+      {/* ── Step 5 (thorough only): Know yourself ── */}
+      {step === 5 && mode === 'thorough' && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step 5 of {totalSteps}</div>
+            <div className="step-number">Step 4 of {totalSteps}</div>
             <h2 className="step-title">Know yourself, grow yourself.</h2>
             <p className="step-subtitle">Own your strengths and acknowledge what you're still building.</p>
           </div>
@@ -549,7 +539,7 @@ export default function OnboardingPage() {
             <button className="onboarding-btn primary" onClick={() => setStep(peopleStep)}>
               {strengths.length > 0 || weaknesses.length > 0 ? 'Continue' : 'Skip for Now'}
             </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(5)}>Back</button>
+            <button className="onboarding-btn ghost" onClick={() => setStep(4)}>Back</button>
           </div>
         </div>
       )}
@@ -558,7 +548,7 @@ export default function OnboardingPage() {
       {step === peopleStep && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step {mode === 'quick' ? 3 : 6} of {totalSteps}</div>
+            <div className="step-number">Step {mode === 'quick' ? 3 : 5} of {totalSteps}</div>
             <h2 className="step-title">Find your people</h2>
             <p className="step-subtitle">
               {workingOn.length > 0
