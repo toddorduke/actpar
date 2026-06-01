@@ -208,6 +208,17 @@ export default function AppGuide() {
   const isLast = slide === slides.length - 1;
   const isMobile = window.innerWidth <= 540;
 
+  const touchStartX = useRef(null);
+  function handleTouchStart(e) { touchStartX.current = e.touches[0].clientX; }
+  function handleTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) < 50) return;
+    if (diff > 0 && !isLast) setSlide((s) => s + 1);
+    if (diff < 0 && slide > 0) setSlide((s) => s - 1);
+    touchStartX.current = null;
+  }
+
   // On mobile: no spotlight, tooltip anchors to bottom via CSS.
   // On desktop: position tooltip relative to the spotlight target.
   const tooltipStyle = (() => {
@@ -244,7 +255,7 @@ export default function AppGuide() {
       {(isMobile || !spotlight) && <div className="guide-dim" />}
 
       {/* Floating tooltip */}
-      <div className="guide-tooltip" style={tooltipStyle}>
+      <div className="guide-tooltip" style={tooltipStyle} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <div className="guide-tooltip-header">
           <span className="guide-slide-counter">{slide + 1} / {slides.length}</span>
           <button className="guide-skip-btn" onClick={dismiss}>✕ Skip</button>

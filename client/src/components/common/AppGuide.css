@@ -122,7 +122,7 @@
   position: fixed;
   inset: 0;
   z-index: 9991;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.2);
   pointer-events: none;
 }
 
@@ -131,7 +131,7 @@
   position: fixed;
   z-index: 9992;
   border-radius: 10px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.2);
   outline: 2.5px solid #f59e0b;
   outline-offset: 0px;
   pointer-events: none;
