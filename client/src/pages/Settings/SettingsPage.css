@@ -785,3 +785,62 @@
   font-size: 0.8rem;
   color: #6b7280;
 }
+
+/* ── Referral tab ── */
+.referral-link-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.referral-link-text {
+  flex: 1;
+  font-size: 0.88rem;
+  color: #374151;
+  font-weight: 500;
+  word-break: break-all;
+}
+.referral-copy-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.referral-copy-btn:hover { opacity: 0.88; }
+.referral-share-row {
+  display: flex;
+  gap: 12px;
+}
+.referral-share-btn {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.referral-share-btn:hover {
+  border-color: #f59e0b;
+  background: rgba(245,158,11,0.06);
+  color: #92400e;
+}

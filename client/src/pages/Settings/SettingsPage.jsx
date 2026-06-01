@@ -49,6 +49,7 @@ const SECTIONS = [
   { id: 'profile', label: 'My Profile', icon: '✨' },
   { id: 'password', label: 'Password', icon: '🔒' },
   { id: 'notifications', label: 'Notifications', icon: '🔔' },
+  { id: 'referral', label: 'Refer a Friend', icon: '🎁' },
   { id: 'tour', label: 'App Tour', icon: '🗺️' },
   { id: 'about', label: 'About ActPar', icon: 'ℹ️' },
   { id: 'danger', label: 'Delete Account', icon: '⚠️' },
@@ -959,6 +960,39 @@ export default function SettingsPage() {
               </div>
               <div className="settings-about-version">
                 Version 1.0.0 &nbsp;·&nbsp; © {new Date().getFullYear()} ActPar
+              </div>
+            </section>
+          )}
+
+          {/* Refer a Friend */}
+          {activeSection === 'referral' && (
+            <section className="settings-section">
+              <h3 className="settings-section-title">Refer a Friend</h3>
+              <p className="settings-desc">
+                Share ActPar with someone who needs accountability. Send them your personal link and grow your circle.
+              </p>
+              <div className="referral-link-box">
+                <span className="referral-link-text">{`https://actpar.com/join?ref=${user?.id?.slice(0, 8)}`}</span>
+                <button
+                  className="referral-copy-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://actpar.com/join?ref=${user?.id?.slice(0, 8)}`);
+                  }}
+                >
+                  Copy Link
+                </button>
+              </div>
+              <div className="referral-share-row">
+                <button className="referral-share-btn" onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: 'Join me on ActPar', text: 'I\'ve been using ActPar to stay accountable to my goals. Join me!', url: `https://actpar.com/join?ref=${user?.id?.slice(0, 8)}` });
+                  }
+                }}>
+                  🔗 Share
+                </button>
+                <a className="referral-share-btn" href={`sms:?body=Hey! I've been using ActPar to stay accountable to my goals. Join me here: https://actpar.com/join?ref=${user?.id?.slice(0, 8)}`}>
+                  💬 Text a Friend
+                </a>
               </div>
             </section>
           )}
