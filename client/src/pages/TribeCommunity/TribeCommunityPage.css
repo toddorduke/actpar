@@ -9,7 +9,7 @@
 
 .community-grid {
   display: grid;
-  grid-template-columns: 280px 1fr 320px;
+  grid-template-columns: 280px 1fr;
   gap: 25px;
   max-width: 1600px;
   width: 100%;

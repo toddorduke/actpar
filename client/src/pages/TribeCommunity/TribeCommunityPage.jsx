@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
-import { useCommunities } from '../../hooks/useCommunities.js';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
@@ -30,7 +29,6 @@ export default function TribeCommunityPage() {
   const navigate = useNavigate();
   const { profile } = useProfile();
   const { acceptedConnections } = useConnections();
-  const { myCommunities, communities, myMemberships, createCommunity, joinCommunity, leaveCommunity } = useCommunities();
   const { posts, loading: postsLoading, createPost } = useTribePosts(null);
   const toast = useToast();
   const commentState = useCommentState(posts);
@@ -41,12 +39,6 @@ export default function TribeCommunityPage() {
     const today = new Date().toISOString().split('T')[0];
     return posts.filter((p) => p.created_at?.startsWith(today)).length;
   }, [posts]);
-  const [memberCount, setMemberCount] = useState(null);
-  useEffect(() => {
-    supabase.from('profiles').select('id', { count: 'exact', head: true }).then(({ count }) => {
-      if (count != null) setMemberCount(count);
-    });
-  }, []);
   const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
 
@@ -72,19 +64,6 @@ export default function TribeCommunityPage() {
       .map(([tag, score]) => ({ tag, posts: score }));
   }, [posts]);
 
-  // Communities the user hasn't joined yet, sorted by relevance to their looking_for
-  const discoverCommunities = useMemo(() => {
-    const lookingFor = (profile?.looking_for ?? []).map((s) => s.toLowerCase());
-    const unjoined = communities.filter((c) => !myMemberships.includes(c.id));
-    if (!lookingFor.length) return unjoined;
-    return unjoined.sort((a, b) => {
-      const score = (c) => lookingFor.reduce((n, kw) =>
-        n + ((c.name ?? '').toLowerCase().includes(kw) || (c.description ?? '').toLowerCase().includes(kw) ? 1 : 0), 0
-      );
-      return score(b) - score(a);
-    });
-  }, [communities, myMemberships, profile]);
-
   const [feedTab, setFeedTab] = useState('circle');
   const [filter, setFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(10);
@@ -93,11 +72,6 @@ export default function TribeCommunityPage() {
   const [content, setContent] = useState('');
   const [milestone, setMilestone] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [showCreateComm, setShowCreateComm] = useState(false);
-  const [commName, setCommName] = useState('');
-  const [commDesc, setCommDesc] = useState('');
-  const [creatingComm, setCreatingComm] = useState(false);
-  const [showBrowse, setShowBrowse] = useState(false);
   const [reportPost, setReportPost] = useState(null);
 
   const connectedUserIds = useMemo(() => {
@@ -142,19 +116,6 @@ export default function TribeCommunityPage() {
     setPostType('general');
   }
 
-  async function submitCreateCommunity() {
-    if (!commName.trim()) return;
-    setCreatingComm(true);
-    const { data, error } = await createCommunity({ name: commName, description: commDesc });
-    setCreatingComm(false);
-    if (error) { toast(`Error: ${error.message}`, 'error'); return; }
-    setShowCreateComm(false);
-    setCommName('');
-    setCommDesc('');
-    toast('Community created! 🎉', 'success');
-    if (data) navigate(`/community/${data.id}`);
-  }
-
   const emptyMessage = feedTab === 'sparks'
     ? connectedUserIds.size <= 1
       ? 'Send sparks to people on the Connections page to see their posts here.'
@@ -177,39 +138,6 @@ export default function TribeCommunityPage() {
             </svg>
             Create Post
           </button>
-
-          {/* My Communities */}
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">My Communities</h3>
-            <div className="community-list">
-              {myCommunities.length === 0 && (
-                <p style={{ fontSize: '0.85rem', color: '#ffffff', margin: 0, fontWeight: 500 }}>
-                  No communities yet — create or join one below!
-                </p>
-              )}
-              {myCommunities.map((c) => (
-                <button
-                  key={c.id}
-                  className="community-list-item"
-                  onClick={() => navigate(`/community/${c.id}`)}
-                >
-                  <div className="community-list-avatar">
-                    {c.avatar_url
-                      ? <img src={c.avatar_url} alt={c.name} />
-                      : c.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="community-list-info">
-                    <div className="community-list-name">{c.name}</div>
-                    <div className="community-list-meta">Tap to open →</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="community-actions">
-              <button className="comm-action-btn" onClick={() => setShowCreateComm(true)}>+ Create</button>
-              <button className="comm-action-btn" onClick={() => setShowBrowse(true)}>Browse</button>
-            </div>
-          </div>
 
           <div className="sidebar-card">
             <h3 className="sidebar-title">Filter Posts</h3>
@@ -240,15 +168,6 @@ export default function TribeCommunityPage() {
         {/* Mobile toolbar — visible only on small screens */}
         <div className="mobile-tribe-toolbar">
           <button className="mobile-post-btn" onClick={() => setShowModal(true)}>+ Post</button>
-          <div className="mobile-comm-scroll">
-            <button className="mobile-comm-chip mobile-comm-chip--browse" onClick={() => setShowBrowse(true)}>Browse</button>
-            {myCommunities.map((c) => (
-              <button key={c.id} className="mobile-comm-chip" onClick={() => navigate(`/community/${c.id}`)}>
-                {c.name}
-              </button>
-            ))}
-            <button className="mobile-comm-chip mobile-comm-chip--add" onClick={() => setShowCreateComm(true)}>+ New</button>
-          </div>
         </div>
 
         {/* Main Feed */}
@@ -406,51 +325,6 @@ export default function TribeCommunityPage() {
           )}
         </main>
 
-        {/* Right Sidebar */}
-        <aside className="right-sidebar">
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">📊 Community Stats</h3>
-            <div className="stats-grid">
-              <div className="stat-item"><div className="stat-number">{memberCount ?? '—'}</div><div className="stat-label">Members</div></div>
-              <div className="stat-item"><div className="stat-number">{postsToday}</div><div className="stat-label">Posts Today</div></div>
-              <div className="stat-item"><div className="stat-number">{connectedUserIds.size > 1 ? connectedUserIds.size - 1 : 0}</div><div className="stat-label">My Sparks</div></div>
-              <div className="stat-item"><div className="stat-number">{posts.length}</div><div className="stat-label">Posts</div></div>
-            </div>
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">✨ Discover Communities</h3>
-            {discoverCommunities.length === 0 ? (
-              <p className="discover-empty">You've joined all available communities!</p>
-            ) : (
-              <div className="discover-list">
-                {discoverCommunities.slice(0, 5).map((c) => (
-                  <div key={c.id} className="discover-item">
-                    <div className="discover-avatar">{c.name.charAt(0).toUpperCase()}</div>
-                    <div className="discover-info">
-                      <div className="discover-name">{c.name}</div>
-                      {c.description && <div className="discover-desc">{c.description}</div>}
-                    </div>
-                    <button
-                      className="discover-join-btn"
-                      onClick={async () => {
-                        await joinCommunity(c.id);
-                        navigate(`/community/${c.id}`);
-                      }}
-                    >
-                      Join
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {discoverCommunities.length > 5 && (
-              <button className="discover-more-btn" onClick={() => setShowBrowse(true)}>
-                See all {discoverCommunities.length} communities →
-              </button>
-            )}
-          </div>
-        </aside>
       </div>
 
       {/* Create Post Modal */}
@@ -487,83 +361,6 @@ export default function TribeCommunityPage() {
               <button className="submit-post-btn" onClick={submitPost} disabled={submitting}>
                 {submitting ? 'Posting...' : 'Post to Community'}
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Community Modal */}
-      {showCreateComm && (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowCreateComm(false)}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">Create a Community</h2>
-              <button className="close-modal" onClick={() => setShowCreateComm(false)}>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Community Name</label>
-                <input type="text" className="input-field" placeholder="e.g., Morning Run Club" value={commName} onChange={(e) => setCommName(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Description (optional)</label>
-                <textarea className="post-textarea" rows="3" placeholder="What is this community about?" value={commDesc} onChange={(e) => setCommDesc(e.target.value)} />
-              </div>
-              <button className="submit-post-btn" onClick={submitCreateCommunity} disabled={creatingComm || !commName.trim()}>
-                {creatingComm ? 'Creating...' : 'Create Community'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Browse Communities Modal */}
-      {showBrowse && (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowBrowse(false)}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">Browse Communities</h2>
-              <button className="close-modal" onClick={() => setShowBrowse(false)}>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="modal-body">
-              {communities.length === 0 && (
-                <p style={{ color: '#ffffff', textAlign: 'center', fontWeight: 500 }}>No communities yet — create the first one!</p>
-              )}
-              <div className="browse-comm-list">
-                {communities.map((c) => {
-                  const isMember = myMemberships.includes(c.id);
-                  return (
-                    <div key={c.id} className="browse-comm-item">
-                      <div className="browse-comm-avatar">{c.name.charAt(0).toUpperCase()}</div>
-                      <div className="browse-comm-info">
-                        <div className="browse-comm-name">{c.name}</div>
-                        {c.description && <div className="browse-comm-desc">{c.description}</div>}
-                      </div>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          className={isMember ? 'leave-comm-btn' : 'join-comm-btn'}
-                          onClick={() => isMember ? leaveCommunity(c.id) : joinCommunity(c.id)}
-                        >
-                          {isMember ? 'Leave' : 'Join'}
-                        </button>
-                        {isMember && (
-                          <button className="join-comm-btn" onClick={() => { setShowBrowse(false); navigate(`/community/${c.id}`); }}>
-                            Open
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
