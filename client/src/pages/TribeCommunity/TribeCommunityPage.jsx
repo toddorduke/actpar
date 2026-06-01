@@ -164,7 +164,7 @@ export default function TribeCommunityPage() {
   return (
     <div className="tribe-page">
       <section className="page-header">
-        <h1 className="page-title">Tribe</h1>
+        <h1 className="page-title">Feed</h1>
         <p className="page-subtitle">Share your wins, support your people</p>
       </section>
 
