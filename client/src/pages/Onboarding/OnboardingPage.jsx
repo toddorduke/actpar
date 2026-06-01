@@ -112,9 +112,9 @@ export default function OnboardingPage() {
 
   const firstName = profile?.first_name || user?.user_metadata?.first_name || 'there';
 
-  const peopleStep = mode === 'quick' ? 4 : 6;
-  const doneStep   = mode === 'quick' ? 5 : 7;
-  const totalSteps = mode === 'quick' ? 3 : 5;
+  const peopleStep = mode === 'quick' ? 4 : 5;
+  const doneStep   = mode === 'quick' ? 5 : 6;
+  const totalSteps = mode === 'quick' ? 3 : 4;
 
   function progressPct() {
     if (step <= 1 || step >= doneStep) return 0;
@@ -487,59 +487,10 @@ export default function OnboardingPage() {
             </div>
           </div>
           <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(5)}>
+            <button className="onboarding-btn primary" onClick={() => setStep(peopleStep)}>
               {workingOn.length > 0 ? 'Continue' : 'Skip for Now'}
             </button>
             <button className="onboarding-btn ghost" onClick={() => setStep(3)}>Back</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 5 (thorough only): Know yourself ── */}
-      {step === 5 && mode === 'thorough' && (
-        <div className="onboarding-step">
-          <div className="step-header">
-            <div className="step-number">Step 4 of {totalSteps}</div>
-            <h2 className="step-title">Know yourself, grow yourself.</h2>
-            <p className="step-subtitle">Own your strengths and acknowledge what you're still building.</p>
-          </div>
-          <div className="step-body">
-            <div className="form-group">
-              <label className="form-label">What are your superpowers?</label>
-              <div className="motivations-grid">
-                {STRENGTHS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className={`motivation-chip${strengths.includes(s) ? ' selected' : ''}`}
-                    onClick={() => setStrengths((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s])}
-                  >
-                    {s}{strengths.includes(s) && <span className="chip-check">✓</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="form-group" style={{ marginTop: '1.5rem' }}>
-              <label className="form-label">What are you still working on inside?</label>
-              <div className="motivations-grid">
-                {WEAKNESSES.map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    className={`motivation-chip${weaknesses.includes(w) ? ' selected' : ''}`}
-                    onClick={() => setWeaknesses((prev) => prev.includes(w) ? prev.filter((x) => x !== w) : [...prev, w])}
-                  >
-                    {w}{weaknesses.includes(w) && <span className="chip-check">✓</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="step-actions">
-            <button className="onboarding-btn primary" onClick={() => setStep(peopleStep)}>
-              {strengths.length > 0 || weaknesses.length > 0 ? 'Continue' : 'Skip for Now'}
-            </button>
-            <button className="onboarding-btn ghost" onClick={() => setStep(4)}>Back</button>
           </div>
         </div>
       )}
@@ -548,7 +499,7 @@ export default function OnboardingPage() {
       {step === peopleStep && (
         <div className="onboarding-step">
           <div className="step-header">
-            <div className="step-number">Step {mode === 'quick' ? 3 : 5} of {totalSteps}</div>
+            <div className="step-number">Step {mode === 'quick' ? 3 : 4} of {totalSteps}</div>
             <h2 className="step-title">Find your people</h2>
             <p className="step-subtitle">
               {workingOn.length > 0
