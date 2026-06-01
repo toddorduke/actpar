@@ -2,13 +2,14 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useProfile } from '../../hooks/useProfile.js';
+import { useGoals } from '../../hooks/useGoals.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './ProfileSetupPage.css';
 
 const CATEGORIES = [
-  { value: 'Faith / Church', label: '✝️ Faith / Church' },
+  { value: 'Faith / Church', label: '✝️ Faith' },
   { value: 'Fitness',        label: '💪 Fitness' },
   { value: 'Nutrition',      label: '🥗 Nutrition' },
   { value: 'Mental Health',  label: '🧠 Mental Health' },
@@ -22,32 +23,34 @@ const CATEGORIES = [
   { value: 'Education',      label: '🎓 Education' },
 ];
 
-const US_STATES = [
-  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
-  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
-  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
-  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire',
-  'New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio',
-  'Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota',
-  'Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia',
-  'Wisconsin','Wyoming',
+const STEPS = [
+  { number: 1, label: 'Your Identity' },
+  { number: 2, label: 'Your Photo' },
+  { number: 3, label: 'Your First Goal' },
 ];
 
 export default function ProfileSetupPage() {
   const { user } = useContext(AuthContext);
   const { profile, updateProfile } = useProfile();
+  const { addGoal } = useGoals();
   const navigate = useNavigate();
   const toast = useToast();
   const avatarInputRef = useRef(null);
 
+  const [step, setStep] = useState(1);
+
+  // Step 1
   const [alterEgo, setAlterEgo] = useState('');
   const [tagline, setTagline] = useState('');
-  const [bio, setBio] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [lookingFor, setLookingFor] = useState([]);
+
+  // Step 2
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // Step 3
+  const [goalTitle, setGoalTitle] = useState('');
+  const [goalCategory, setGoalCategory] = useState('');
+
   const [saving, setSaving] = useState(false);
 
   const firstName = profile?.first_name || user?.user_metadata?.first_name || '';
@@ -58,10 +61,6 @@ export default function ProfileSetupPage() {
     if (profile) {
       setAlterEgo(profile.alter_ego_name ?? user?.user_metadata?.alter_ego_name ?? '');
       setTagline(profile.tagline ?? '');
-      setBio(profile.bio ?? '');
-      setCity(profile.city ?? user?.user_metadata?.city ?? '');
-      setState(profile.state ?? user?.user_metadata?.state ?? '');
-      setLookingFor(profile.looking_for ?? []);
       setAvatarUrl(profile.avatar_url ?? null);
     }
   }, [profile, user]);
@@ -84,181 +83,205 @@ export default function ProfileSetupPage() {
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
     setAvatarUrl(urlData.publicUrl);
     setUploadingAvatar(false);
+    toast('Photo uploaded!', 'success');
+  }
+
+  async function handleStep1() {
+    if (!alterEgo.trim()) {
+      toast('Please enter your Alter Ego name.', 'error');
+      return;
+    }
+    await updateProfile({ alter_ego_name: alterEgo.trim(), tagline: tagline.trim() || null });
+    setStep(2);
+  }
+
+  function handleStep2() {
+    if (!avatarUrl) {
+      toast('Please upload a profile photo to continue.', 'error');
+      return;
+    }
+    setStep(3);
   }
 
   async function handleFinish() {
-    if (!bio.trim()) {
-      toast('Please add a short bio so others know who you are.', 'error');
+    if (!goalTitle.trim()) {
+      toast('Please enter at least one goal to continue.', 'error');
       return;
     }
-
     setSaving(true);
-
-    await updateProfile({
-      alter_ego_name: alterEgo.trim() || null,
-      tagline: tagline.trim() || null,
-      bio: bio.trim(),
-      city: city.trim() || null,
-      state: state || null,
-      looking_for: lookingFor,
-      avatar_url: avatarUrl ?? undefined,
-      profile_setup_complete: true,
-    });
-
+    await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1 });
+    await updateProfile({ avatar_url: avatarUrl, profile_setup_complete: true });
     await supabase.auth.updateUser({ data: { profile_setup_complete: true } });
-
     navigate('/', { replace: true });
   }
-
-  const canFinish = bio.trim().length >= 10;
 
   return (
     <div className="profile-setup-page">
       <div className="profile-setup-container">
 
-        <div className="profile-setup-header">
-          <div className="profile-setup-step">Almost there!</div>
-          <h1 className="profile-setup-title">Set up your profile</h1>
-          <p className="profile-setup-subtitle">
-            This is how other members will find and connect with you.
-          </p>
+        {/* Progress */}
+        <div className="psu-progress-row">
+          {STEPS.map((s) => (
+            <div key={s.number} className={`psu-progress-step${step === s.number ? ' active' : step > s.number ? ' done' : ''}`}>
+              <div className="psu-progress-dot">{step > s.number ? '✓' : s.number}</div>
+              <span className="psu-progress-label">{s.label}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Avatar */}
-        <div className="profile-setup-avatar-section">
-          <button
-            className="profile-setup-avatar-btn"
-            onClick={() => avatarInputRef.current?.click()}
-            disabled={uploadingAvatar}
-            type="button"
-          >
-            <Avatar url={avatarUrl} name={displayName} size={96} />
-            <div className="profile-setup-avatar-overlay">
-              {uploadingAvatar ? '...' : '📷'}
+        {/* ── Step 1: Identity ── */}
+        {step === 1 && (
+          <div className="psu-step">
+            <div className="profile-setup-header">
+              <div className="profile-setup-step">Step 1 of 3</div>
+              <h1 className="profile-setup-title">Who are you becoming?</h1>
+              <p className="profile-setup-subtitle">
+                Your Alter Ego is the version of you that shows up no matter what. Name it and own it.
+              </p>
             </div>
-          </button>
-          <span className="profile-setup-avatar-hint">
-            {uploadingAvatar ? 'Uploading…' : 'Tap to add a photo'}
-          </span>
-          <input
-            ref={avatarInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleAvatarChange}
-          />
-        </div>
 
-        {/* Fields */}
-        <div className="profile-setup-fields">
-
-          <div className="profile-setup-group">
-            <label className="profile-setup-label">Tagline</label>
-            <input
-              className="profile-setup-input"
-              type="text"
-              placeholder="e.g. Building better habits, one day at a time"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              maxLength={100}
-            />
-            <span className="profile-setup-hint">Short line shown under your name.</span>
-          </div>
-
-          <div className="profile-setup-group">
-            <label className="profile-setup-label">
-              About Me <span className="profile-setup-required">*</span>
-            </label>
-            <textarea
-              className="profile-setup-textarea"
-              placeholder="Tell people about yourself — your story, what you're working on, what drives you…"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              maxLength={500}
-              rows={4}
-            />
-            <span className="profile-setup-char-count">{bio.length}/500</span>
-          </div>
-
-          <div className="profile-setup-group">
-            <label className="profile-setup-label">
-              What are you focused on?
-              <span className="profile-setup-cat-count"> {lookingFor.length}/3</span>
-            </label>
-            <span className="profile-setup-hint" style={{ marginBottom: 8 }}>Pick up to 3 categories.</span>
-            <div className="profile-setup-cats">
-              {CATEGORIES.map(({ value, label }) => {
-                const selected = lookingFor.includes(value);
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`profile-setup-cat${selected ? ' selected' : ''}`}
-                    onClick={() => {
-                      if (selected) {
-                        setLookingFor((prev) => prev.filter((v) => v !== value));
-                      } else if (lookingFor.length < 3) {
-                        setLookingFor((prev) => [...prev, value]);
-                      }
-                    }}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
+            <div className="psu-name-display">
+              <span className="psu-name-label">Your name</span>
+              <span className="psu-name-value">{displayName}</span>
             </div>
-          </div>
 
-          <div className="profile-setup-group">
-            <label className="profile-setup-label">Alter Ego Name</label>
-            <input
-              className="profile-setup-input"
-              type="text"
-              placeholder="e.g. The Iron Version"
-              value={alterEgo}
-              onChange={(e) => setAlterEgo(e.target.value)}
-              maxLength={60}
-            />
-            <span className="profile-setup-hint">Your accountability persona — who you're becoming.</span>
-          </div>
+            <div className="profile-setup-fields">
+              <div className="profile-setup-group">
+                <label className="profile-setup-label">
+                  Alter Ego Name <span className="profile-setup-required">*</span>
+                </label>
+                <input
+                  className="profile-setup-input"
+                  type="text"
+                  placeholder="e.g. IronMike, FaithFirst, The Comeback Kid"
+                  value={alterEgo}
+                  onChange={(e) => setAlterEgo(e.target.value)}
+                  maxLength={60}
+                  autoFocus
+                />
+                <span className="profile-setup-hint">This is your accountability persona — who you're becoming.</span>
+              </div>
 
-          <div className="profile-setup-row">
-            <div className="profile-setup-group">
-              <label className="profile-setup-label">City</label>
+              <div className="profile-setup-group">
+                <label className="profile-setup-label">Tagline <span className="psu-optional">optional</span></label>
+                <input
+                  className="profile-setup-input"
+                  type="text"
+                  placeholder="e.g. Building better habits, one day at a time"
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  maxLength={100}
+                />
+                <span className="profile-setup-hint">Short line shown under your name on your profile.</span>
+              </div>
+            </div>
+
+            <button className="profile-setup-btn" onClick={handleStep1} disabled={!alterEgo.trim()}>
+              Next: Add Your Photo →
+            </button>
+          </div>
+        )}
+
+        {/* ── Step 2: Photo ── */}
+        {step === 2 && (
+          <div className="psu-step">
+            <div className="profile-setup-header">
+              <div className="profile-setup-step">Step 2 of 3</div>
+              <h1 className="profile-setup-title">Put a face to the name.</h1>
+              <p className="profile-setup-subtitle">
+                A real photo builds trust with your accountability partners. This is required.
+              </p>
+            </div>
+
+            <div className="psu-avatar-center">
+              <button
+                className="profile-setup-avatar-btn"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                type="button"
+              >
+                <Avatar url={avatarUrl} name={displayName} size={120} />
+                <div className="profile-setup-avatar-overlay">
+                  {uploadingAvatar ? '⏳' : avatarUrl ? '✏️' : '📷'}
+                </div>
+              </button>
+              <span className="profile-setup-avatar-hint">
+                {uploadingAvatar ? 'Uploading…' : avatarUrl ? 'Tap to change your photo' : 'Tap to upload a photo'}
+              </span>
               <input
-                className="profile-setup-input"
-                type="text"
-                placeholder="e.g. Atlanta"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
               />
             </div>
-            <div className="profile-setup-group">
-              <label className="profile-setup-label">State</label>
-              <select
-                className="profile-setup-input"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-              >
-                <option value="">Select state</option>
-                {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+
+            {!avatarUrl && (
+              <p className="psu-required-note">A profile photo is required to continue.</p>
+            )}
+
+            <div className="psu-btn-row">
+              <button className="profile-setup-btn ghost" onClick={() => setStep(1)}>← Back</button>
+              <button className="profile-setup-btn" onClick={handleStep2} disabled={!avatarUrl || uploadingAvatar}>
+                Next: Set Your Goal →
+              </button>
             </div>
           </div>
+        )}
 
-        </div>
+        {/* ── Step 3: First Goal ── */}
+        {step === 3 && (
+          <div className="psu-step">
+            <div className="profile-setup-header">
+              <div className="profile-setup-step">Step 3 of 3</div>
+              <h1 className="profile-setup-title">What are you working toward?</h1>
+              <p className="profile-setup-subtitle">
+                Set your first goal. This is what your accountability is built around.
+              </p>
+            </div>
 
-        <button
-          className="profile-setup-btn"
-          onClick={handleFinish}
-          disabled={!canFinish || saving}
-        >
-          {saving ? 'Saving…' : 'Complete My Profile →'}
-        </button>
+            <div className="profile-setup-fields">
+              <div className="profile-setup-group">
+                <label className="profile-setup-label">
+                  Your Goal <span className="profile-setup-required">*</span>
+                </label>
+                <input
+                  className="profile-setup-input"
+                  type="text"
+                  placeholder="e.g. Run 3x a week, Read 20 minutes daily…"
+                  value={goalTitle}
+                  onChange={(e) => setGoalTitle(e.target.value)}
+                  maxLength={120}
+                  autoFocus
+                />
+              </div>
 
-        <p className="profile-setup-required-note">
-          * Bio is required — everything else you can update later in Settings.
-        </p>
+              <div className="profile-setup-group">
+                <label className="profile-setup-label">Category <span className="psu-optional">optional</span></label>
+                <div className="profile-setup-cats">
+                  {CATEGORIES.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`profile-setup-cat${goalCategory === value ? ' selected' : ''}`}
+                      onClick={() => setGoalCategory((prev) => prev === value ? '' : value)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="psu-btn-row">
+              <button className="profile-setup-btn ghost" onClick={() => setStep(2)}>← Back</button>
+              <button className="profile-setup-btn" onClick={handleFinish} disabled={!goalTitle.trim() || saving}>
+                {saving ? 'Setting up…' : "Let's Go 🚀"}
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

@@ -215,8 +215,141 @@
   margin: 0;
 }
 
+/* ── Step progress bar ── */
+.psu-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 8px;
+}
+
+.psu-progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  position: relative;
+}
+
+.psu-progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 60%;
+  width: 80%;
+  height: 2px;
+  background: #e5e7eb;
+  z-index: 0;
+}
+
+.psu-progress-step.done:not(:last-child)::after {
+  background: #f59e0b;
+}
+
+.psu-progress-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+}
+
+.psu-progress-step.active .psu-progress-dot {
+  background: #f59e0b;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(245,158,11,0.2);
+}
+
+.psu-progress-step.done .psu-progress-dot {
+  background: #10b981;
+  color: #fff;
+}
+
+.psu-progress-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.psu-progress-step.active .psu-progress-label { color: #f59e0b; }
+.psu-progress-step.done .psu-progress-label { color: #10b981; }
+
+/* Step wrapper */
+.psu-step { display: flex; flex-direction: column; gap: 24px; }
+
+/* Name display */
+.psu-name-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.psu-name-label { font-size: 0.8rem; color: #6b7280; font-weight: 500; }
+.psu-name-value { font-size: 1rem; font-weight: 700; color: #111827; }
+
+/* Optional tag */
+.psu-optional { font-size: 0.75rem; color: #9ca3af; font-weight: 400; margin-left: 4px; }
+
+/* Avatar centered */
+.psu-avatar-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Required note */
+.psu-required-note {
+  font-size: 0.82rem;
+  color: #ef4444;
+  text-align: center;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Back + Next row */
+.psu-btn-row {
+  display: flex;
+  gap: 12px;
+}
+
+.profile-setup-btn.ghost {
+  background: none;
+  border: 1.5px solid #d1d5db;
+  color: #374151;
+  flex-shrink: 0;
+  width: auto;
+  padding: 14px 20px;
+}
+
+.profile-setup-btn.ghost:hover:not(:disabled) {
+  background: #f9fafb;
+  opacity: 1;
+  transform: none;
+}
+
+/* Make primary button amber instead of purple */
+.profile-setup-btn:not(.ghost) {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  flex: 1;
+}
+
 @media (max-width: 480px) {
-  .profile-setup-row {
-    flex-direction: column;
-  }
+  .profile-setup-row { flex-direction: column; }
+  .psu-progress-label { font-size: 0.6rem; }
 }
