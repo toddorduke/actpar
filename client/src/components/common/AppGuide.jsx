@@ -8,33 +8,33 @@ import './AppGuide.css';
 const QUICK_SLIDES = [
   {
     emoji: '🎯',
-    title: 'Your Goals',
-    body: 'This is your home base. Set goals, log daily progress, and build streaks. Your Alter Ego is the version of you that shows up no matter what — name it and own it.',
-    tip: 'Tap your profile to add your first goal right now.',
+    title: 'This is where it starts.',
+    body: 'Every big change begins with a clear intention. Set your goals, check in daily, and build streaks that prove — to yourself — that you can do this. Name your Alter Ego: the version of you that doesn\'t quit.',
+    tip: 'Add your first goal. Even one sentence changes everything.',
     route: '/',
     target: '.home-card',
   },
   {
     emoji: '⚡',
-    title: 'Sparks & Connections',
-    body: 'Browse people chasing goals like yours. Send a Spark to show interest — if they spark back you\'re connected and can message each other. One real accountability partner can change everything.',
-    tip: 'Head to Connections and send your first Spark.',
+    title: 'Find your person.',
+    body: 'Accountability is the shortcut most people ignore. Browse people chasing similar goals, send a Spark to connect — and suddenly you\'ve got someone genuinely in your corner. One real partner changes the whole game.',
+    tip: 'Send your first Spark to someone on a similar journey.',
     route: '/connections',
     target: 'a[href="/connections"]',
   },
   {
     emoji: '🌍',
-    title: 'The Tribe',
-    body: 'ActPar\'s community feed. Post wins, share struggles, encourage others. No highlight reels — just real people doing the work every single day.',
-    tip: 'Post your first update in Tribe and introduce yourself.',
+    title: 'Real people. Real work.',
+    body: 'No highlight reels here. Post your wins, share your struggles, and cheer others on. The Tribe is your daily reminder that you\'re not doing this alone — and neither is anyone else.',
+    tip: 'Drop your first post and introduce yourself to the Tribe.',
     route: '/tribe-community',
     target: 'a[href="/tribe-community"]',
   },
   {
     emoji: '🚀',
-    title: "You're Ready",
-    body: 'That\'s the core of ActPar. Your goals are waiting, and a community of people on the same journey is right here. Start with one connection, one goal, one post.',
-    tip: 'The rest follows. Let\'s go.',
+    title: "You've got everything you need.",
+    body: 'A goal. A community. People who get it. Most people never start — you already did. Now it\'s about showing up, one day at a time. Your streak starts today.',
+    tip: 'Let\'s go. Everything you need is right here.',
     route: '/',
     target: '.home-welcome',
   },
@@ -44,17 +44,17 @@ const FULL_SLIDES = [
   ...QUICK_SLIDES.slice(0, 3),
   {
     emoji: '💬',
-    title: 'Direct Messages',
-    body: 'Real one-on-one conversations with your connections. Check in on each other, share wins, call each other out — no noise, just accountability.',
-    tip: 'Message a connection and set up your first check-in.',
+    title: 'Keep it between you two.',
+    body: 'Real accountability happens in the DMs. Check in on your partner, celebrate wins, call each other out when it\'s needed. No noise — just the people who matter most to your growth.',
+    tip: 'Message a connection. Ask how their goal is going.',
     route: '/messages',
     target: 'a[href="/messages"]',
   },
   {
     emoji: '🔔',
-    title: 'Stay Accountable',
-    body: 'Turn on notifications so you never miss a Spark or a message from your connections. Accountability only works if you show up — let ActPar remind you.',
-    tip: 'Go to Settings → Notifications to customize your alerts.',
+    title: 'Don\'t miss a thing.',
+    body: 'Momentum is fragile. Turn on notifications so you never miss a Spark, a message, or a check-in from someone counting on you. Showing up consistently — even when it\'s hard — is the whole point.',
+    tip: 'Enable notifications in Settings so nothing slips through.',
     route: '/',
     target: '.nav-icon-btn',
   },
@@ -161,31 +161,31 @@ export default function AppGuide() {
     return (
       <div className="guide-overlay">
         <div className="guide-modal guide-choice-modal">
-          <div className="guide-choice-emoji">👋</div>
-          <h2 className="guide-choice-title">Welcome to ActPar</h2>
+          <div className="guide-choice-emoji">🔥</div>
+          <h2 className="guide-choice-title">You made it.</h2>
           <p className="guide-choice-sub">
-            Before you dive in, would you like a quick tour of how everything works?
+            ActPar works best when you know how to use it. Want a quick look around before you dive in?
           </p>
           <div className="guide-choice-options">
             <button className="guide-choice-btn primary" onClick={() => startGuide('quick')}>
               <span className="guide-choice-btn-icon">⚡</span>
               <div>
                 <div className="guide-choice-btn-label">Quick Tour</div>
-                <div className="guide-choice-btn-desc">The basics — 4 slides, 2 min</div>
+                <div className="guide-choice-btn-desc">The essentials — 4 slides, under 2 min</div>
               </div>
             </button>
             <button className="guide-choice-btn secondary" onClick={() => startGuide('full')}>
-              <span className="guide-choice-btn-icon">📖</span>
+              <span className="guide-choice-btn-icon">🗺️</span>
               <div>
                 <div className="guide-choice-btn-label">Full Tour</div>
-                <div className="guide-choice-btn-desc">Every feature — 6 slides, 4 min</div>
+                <div className="guide-choice-btn-desc">Every feature — 6 slides, ~4 min</div>
               </div>
             </button>
             <button className="guide-choice-btn ghost" onClick={dismiss}>
-              <span className="guide-choice-btn-icon">🗺️</span>
+              <span className="guide-choice-btn-icon">🚀</span>
               <div>
-                <div className="guide-choice-btn-label">I'll explore on my own</div>
-                <div className="guide-choice-btn-desc">You can always find this in Settings → About</div>
+                <div className="guide-choice-btn-label">Jump right in</div>
+                <div className="guide-choice-btn-desc">You can always revisit this in Settings</div>
               </div>
             </button>
           </div>
