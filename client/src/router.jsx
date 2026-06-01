@@ -25,6 +25,7 @@ import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage.jsx';
 import CheckEmailPage from './pages/CheckEmail/CheckEmailPage.jsx';
 import AdminPage from './pages/Admin/AdminPage.jsx';
 import FeedPage from './pages/Feed/FeedPage.jsx';
+import TribePage from './pages/Tribe/TribePage.jsx';
 import NotificationsPage from './pages/Notifications/NotificationsPage.jsx';
 import PostPage from './pages/Post/PostPage.jsx';
 import NotFoundPage from './pages/NotFound/NotFoundPage.jsx';
@@ -68,6 +69,7 @@ export const AppRoutes = () => (
     <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
     <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
     <Route path="/post/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
+    <Route path="/tribe" element={<ProtectedRoute><TribePage /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
     <Route path="*" element={<NotFoundPage />} />
   </Routes>
