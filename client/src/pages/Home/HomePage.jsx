@@ -14,6 +14,7 @@ import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
 import { shouldShowRecap, dismissRecap, computeRecap } from '../../hooks/useWeeklyRecap.js';
 import WeeklyRecapModal from '../../components/common/WeeklyRecapModal.jsx';
+import MilestoneShareModal from '../../components/common/MilestoneShareModal.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { supabase } from '../../lib/supabase.js';
@@ -456,6 +457,7 @@ const HomePage = () => {
   const [savingAffirmation, setSavingAffirmation] = useState(false);
 
   // Journey goal picker
+  const [milestoneModal, setMilestoneModal] = useState(null); // { milestone, goalTitle }
   const [journeyGoalPicker, setJourneyGoalPicker] = useState(null); // { partnershipId }
   const [journeyPickerGoalId, setJourneyPickerGoalId] = useState('');
   const [journeyPickerShowNew, setJourneyPickerShowNew] = useState(false);
@@ -592,7 +594,7 @@ const HomePage = () => {
     });
     notifyJourneyPartner(goalId);
     if (result?.milestone) {
-      toast(`🔥 ${result.milestone}-day streak on "${result.goalTitle}"!`, 'success', 4000);
+      setMilestoneModal({ milestone: result.milestone, goalTitle: result.goalTitle });
     }
     return result;
   }
@@ -839,6 +841,15 @@ const HomePage = () => {
   return (
     <>
       {/* Journey goal picker modal */}
+      {milestoneModal && (
+        <MilestoneShareModal
+          milestone={milestoneModal.milestone}
+          goalTitle={milestoneModal.goalTitle}
+          displayName={profile?.alter_ego_name || profile?.first_name || 'You'}
+          onClose={() => setMilestoneModal(null)}
+        />
+      )}
+
       {journeyGoalPicker && (
         <div className="journey-modal-overlay" onClick={(e) => e.target === e.currentTarget && setJourneyGoalPicker(null)}>
           <div className="journey-modal">
