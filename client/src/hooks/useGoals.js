@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
 import { track, Events } from '../lib/analytics.js';
+import { awardXP, XP_VALUES, milestoneXP } from '../lib/xp.js';
 
 const STREAK_MILESTONES = [7, 30, 60, 90];
 
@@ -49,6 +50,7 @@ export const useGoals = () => {
     if (!error) {
       setGoals((prev) => [...prev, data]);
       track(Events.GOAL_CREATED, { tier: tier ?? null, category, goal_type });
+      awardXP(user.id, XP_VALUES.GOAL_CREATED);
     }
     return { data, error };
   }, [user]);
@@ -75,6 +77,19 @@ export const useGoals = () => {
     const milestone = STREAK_MILESTONES.includes(newCount) ? newCount : null;
     if (!error) {
       track(Events.GOAL_CHECKED_IN, { day_count: newCount, is_milestone: !!milestone });
+      awardXP(user.id, XP_VALUES.CHECKIN);
+      if (milestone) {
+        awardXP(user.id, milestoneXP(milestone));
+        supabase.from('profiles')
+          .select('milestones_count')
+          .eq('id', user.id)
+          .single()
+          .then(({ data: p }) =>
+            supabase.from('profiles')
+              .update({ milestones_count: (p?.milestones_count ?? 0) + 1 })
+              .eq('id', user.id)
+          );
+      }
       setGoals((prev) =>
         prev.map((g) =>
           g.id === goalId ? { ...g, day_count: newCount, last_checked_in: today } : g

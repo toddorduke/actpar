@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
 
       const { data: goalData } = await supabase
         .from('goals')
-        .select('user_id, day_count, goal_type, category, title, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city)')
+        .select('user_id, day_count, goal_type, category, title, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city, total_xp, milestones_count)')
         .eq('is_active', true);
 
       const userMap = {};
@@ -74,7 +74,8 @@ export default function LeaderboardPage() {
             bestStreakCategory: null,
             bestStreakTitle: null,
             totalGoals: 0,
-            // per-category best streaks for category filter mode
+            totalXP: p.total_xp ?? 0,
+            milestonesCount: p.milestones_count ?? 0,
             categoryBest: {},
           };
         }
@@ -115,6 +116,8 @@ export default function LeaderboardPage() {
         return bVal - aVal;
       }
       if (metric === 'goals') return b.totalGoals - a.totalGoals;
+      if (metric === 'xp') return b.totalXP - a.totalXP;
+      if (metric === 'milestones') return b.milestonesCount - a.milestonesCount;
       return 0;
     });
   }
@@ -148,6 +151,8 @@ export default function LeaderboardPage() {
       return { value: val, unit: 'day streak' };
     }
     if (metric === 'goals') return { value: person.totalGoals, unit: 'active goals' };
+    if (metric === 'xp') return { value: person.totalXP.toLocaleString(), unit: 'XP' };
+    if (metric === 'milestones') return { value: person.milestonesCount, unit: 'milestones' };
     return { value: 0, unit: '' };
   }
 
@@ -191,6 +196,7 @@ export default function LeaderboardPage() {
                 <div className="lb-my-rank-score"><span className="lb-my-rank-num">#{globalRank}</span><span className="lb-my-rank-unit"> global</span></div>
                 <div className="lb-my-rank-score"><span className="lb-my-rank-num">{myEntry.bestStreak}</span><span className="lb-my-rank-unit"> day streak</span></div>
                 <div className="lb-my-rank-score"><span className="lb-my-rank-num">{myEntry.totalGoals}</span><span className="lb-my-rank-unit"> goals</span></div>
+                <div className="lb-my-rank-score"><span className="lb-my-rank-num">{(myEntry.totalXP ?? 0).toLocaleString()}</span><span className="lb-my-rank-unit"> XP</span></div>
               </div>
             </div>
           </div>
@@ -229,6 +235,8 @@ export default function LeaderboardPage() {
           <div className="lb-control-group">
             <button className={`lb-ctrl-btn${metric === 'streak' ? ' active' : ''}`} onClick={() => { setMetric('streak'); }}>🔥 Streak</button>
             <button className={`lb-ctrl-btn${metric === 'goals' ? ' active' : ''}`} onClick={() => { setMetric('goals'); setCategory('all'); }}>🎯 Goals</button>
+            <button className={`lb-ctrl-btn${metric === 'xp' ? ' active' : ''}`} onClick={() => { setMetric('xp'); setCategory('all'); }}>⚡ XP</button>
+            <button className={`lb-ctrl-btn${metric === 'milestones' ? ' active' : ''}`} onClick={() => { setMetric('milestones'); setCategory('all'); }}>🏆 Milestones</button>
           </div>
 
           {/* Category filter — only meaningful for streak */}

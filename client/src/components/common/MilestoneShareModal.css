@@ -45,6 +45,22 @@
 }
 .ms-close:hover { background: rgba(255,255,255,0.2); }
 
+.ms-xp-badge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 10px 24px;
+  border-radius: 999px;
+  text-align: center;
+  animation: msXpPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes msXpPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
 .ms-card-wrap {
   width: 100%;
   border-radius: 16px;

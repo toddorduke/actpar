@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
+import { awardXP, XP_VALUES } from '../lib/xp.js';
 
 export function usePartnerships() {
   const { user } = useContext(AuthContext);
@@ -57,6 +58,7 @@ export function usePartnerships() {
       .select()
       .single();
     if (!error && data) {
+      awardXP(user.id, XP_VALUES.JOURNEY_STARTED);
       setPartnerships((prev) => [data, ...prev]);
       const goalTitle = goalId
         ? (await supabase.from('goals').select('title').eq('id', goalId).single()).data?.title

@@ -15,6 +15,7 @@ import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionAct
 import { shouldShowRecap, dismissRecap, computeRecap } from '../../hooks/useWeeklyRecap.js';
 import WeeklyRecapModal from '../../components/common/WeeklyRecapModal.jsx';
 import MilestoneShareModal from '../../components/common/MilestoneShareModal.jsx';
+import { milestoneXP, XP_VALUES } from '../../lib/xp.js';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { supabase } from '../../lib/supabase.js';
@@ -594,7 +595,11 @@ const HomePage = () => {
     });
     notifyJourneyPartner(goalId);
     if (result?.milestone) {
-      setMilestoneModal({ milestone: result.milestone, goalTitle: result.goalTitle });
+      setMilestoneModal({
+        milestone: result.milestone,
+        goalTitle: result.goalTitle,
+        xpEarned: XP_VALUES.CHECKIN + milestoneXP(result.milestone),
+      });
     }
     return result;
   }
@@ -846,6 +851,7 @@ const HomePage = () => {
           milestone={milestoneModal.milestone}
           goalTitle={milestoneModal.goalTitle}
           displayName={profile?.alter_ego_name || profile?.first_name || 'You'}
+          xpEarned={milestoneModal.xpEarned}
           onClose={() => setMilestoneModal(null)}
         />
       )}

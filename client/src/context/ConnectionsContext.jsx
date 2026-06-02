@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js';
 import { createNotification } from '../hooks/useNotifications.js';
 import { getDisplayName } from '../utils/displayName.js';
 import { track, Events } from '../lib/analytics.js';
+import { awardXP, XP_VALUES } from '../lib/xp.js';
 import { playSparkSound } from '../utils/sounds.js';
 
 export const ConnectionsContext = createContext(null);
@@ -135,6 +136,7 @@ export const ConnectionsProvider = ({ children }) => {
     const { error } = await supabase.from('connections').insert(row);
     if (!error) {
       track(Events.SPARK_SENT, { has_message: !!sparkMessage });
+      awardXP(user.id, XP_VALUES.SPARK_SENT);
       playSparkSound();
       setBrowseProfiles((prev) => prev.filter((p) => p.id !== receiverId));
       const { data: sender } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();

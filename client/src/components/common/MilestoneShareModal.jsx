@@ -103,7 +103,7 @@ function drawCard(canvas, { milestone, goalTitle, displayName, dateStr }) {
   ctx.fillText(dateStr, W / 2, 1055);
 }
 
-export default function MilestoneShareModal({ milestone, goalTitle, displayName, onClose }) {
+export default function MilestoneShareModal({ milestone, goalTitle, displayName, xpEarned = 0, onClose }) {
   const canvasRef = useRef(null);
   const [sharing, setSharing] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -143,6 +143,10 @@ export default function MilestoneShareModal({ milestone, goalTitle, displayName,
     <div className="ms-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="ms-modal">
         <button className="ms-close" onClick={onClose}>✕</button>
+
+        {xpEarned > 0 && (
+          <div className="ms-xp-badge">+{xpEarned.toLocaleString()} XP earned 🏆</div>
+        )}
 
         <div className="ms-card-wrap">
           <canvas ref={canvasRef} className="ms-canvas" />
