@@ -63,6 +63,13 @@ const LOOKING_FOR_CATEGORIES = [
   'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
 ];
 
+function localTimeToUtcHour(timeStr) {
+  const [hours] = timeStr.split(':').map(Number);
+  const d = new Date();
+  d.setHours(hours, 0, 0, 0);
+  return d.getUTCHours();
+}
+
 function roundNum(n) {
   return Number.isInteger(n) ? n : Math.round(n * 10) / 10;
 }
@@ -495,6 +502,7 @@ const HomePage = () => {
   const [newGoalUnit, setNewGoalUnit] = useState('');
   const [newGoalTarget, setNewGoalTarget] = useState('');
   const [newGoalPeriod, setNewGoalPeriod] = useState('weekly');
+  const [newGoalReminder, setNewGoalReminder] = useState('');
   const [addingGoal, setAddingGoal] = useState(false);
 
   // Looking For
@@ -644,11 +652,13 @@ const HomePage = () => {
     if (!newGoalTitle.trim()) return;
     if (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget)) return;
     setAddingGoal(true);
+    const reminderUtcHour = newGoalReminder ? localTimeToUtcHour(newGoalReminder) : null;
     await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
       goal_type: newGoalType,
       target_value: newGoalType === 'numeric' ? parseFloat(newGoalTarget) : null,
       target_unit: newGoalType === 'numeric' ? newGoalUnit.trim() : null,
       target_period: newGoalType === 'numeric' ? newGoalPeriod : null,
+      reminder_utc_hour: reminderUtcHour,
     });
     setNewGoalTitle('');
     setNewGoalCategory('');
@@ -656,6 +666,7 @@ const HomePage = () => {
     setNewGoalTarget('');
     setNewGoalPeriod('weekly');
     setNewGoalType('habit');
+    setNewGoalReminder('');
     setAddingGoal(false);
   };
 
@@ -1464,6 +1475,22 @@ const HomePage = () => {
                         {cat.label}
                       </button>
                     ))}
+                  </div>
+                  <div className="add-goal-reminder">
+                    <span className="add-goal-reminder-label">🔔 Daily reminder</span>
+                    <select
+                      className="add-goal-reminder-select"
+                      value={newGoalReminder}
+                      onChange={(e) => setNewGoalReminder(e.target.value)}
+                    >
+                      <option value="">No reminder</option>
+                      {Array.from({ length: 24 }, (_, i) => {
+                        const h = i % 12 === 0 ? 12 : i % 12;
+                        const ampm = i < 12 ? 'AM' : 'PM';
+                        const val = `${String(i).padStart(2, '0')}:00`;
+                        return <option key={i} value={val}>{h}:00 {ampm}</option>;
+                      })}
+                    </select>
                   </div>
                 </form>
               </div>

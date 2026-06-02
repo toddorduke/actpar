@@ -50,6 +50,7 @@ export default function ProfileSetupPage() {
   // Step 3
   const [goalTitle, setGoalTitle] = useState('');
   const [goalCategory, setGoalCategory] = useState('');
+  const [goalReminder, setGoalReminder] = useState('');
 
   const [saving, setSaving] = useState(false);
 
@@ -103,13 +104,21 @@ export default function ProfileSetupPage() {
     setStep(3);
   }
 
+  function localTimeToUtcHour(timeStr) {
+    const [hours] = timeStr.split(':').map(Number);
+    const d = new Date();
+    d.setHours(hours, 0, 0, 0);
+    return d.getUTCHours();
+  }
+
   async function handleFinish() {
     if (!goalTitle.trim()) {
       toast('Please enter at least one goal to continue.', 'error');
       return;
     }
     setSaving(true);
-    await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1 });
+    const reminderUtcHour = goalReminder ? localTimeToUtcHour(goalReminder) : null;
+    await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1, reminder_utc_hour: reminderUtcHour });
     await updateProfile({ avatar_url: avatarUrl, profile_setup_complete: true });
     await supabase.auth.updateUser({ data: { profile_setup_complete: true } });
     navigate('/', { replace: true });
@@ -271,6 +280,24 @@ export default function ProfileSetupPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="profile-setup-group">
+                <label className="profile-setup-label">Daily Reminder <span className="psu-optional">optional</span></label>
+                <select
+                  className="profile-setup-input"
+                  value={goalReminder}
+                  onChange={(e) => setGoalReminder(e.target.value)}
+                >
+                  <option value="">No reminder</option>
+                  {Array.from({ length: 24 }, (_, i) => {
+                    const h = i % 12 === 0 ? 12 : i % 12;
+                    const ampm = i < 12 ? 'AM' : 'PM';
+                    const val = `${String(i).padStart(2, '0')}:00`;
+                    return <option key={i} value={val}>{h}:00 {ampm}</option>;
+                  })}
+                </select>
+                <span className="profile-setup-hint">We'll remind you to check in every day at this time.</span>
               </div>
             </div>
 

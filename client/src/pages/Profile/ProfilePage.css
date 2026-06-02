@@ -688,6 +688,32 @@
   gap: 5px;
 }
 
+.add-goal-reminder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.add-goal-reminder-label {
+  font-size: 0.78rem;
+  color: #d1d5db;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.add-goal-reminder-select {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 0.82rem;
+  cursor: pointer;
+  outline: none;
+}
+.add-goal-reminder-select:focus { border-color: #f59e0b; }
+.add-goal-reminder-select option { background: #1f2937; color: #fff; }
+
 .goal-cat-chip {
   padding: 4px 9px;
   border-radius: 999px;
