@@ -172,6 +172,19 @@ export default function TribeCommunityPage() {
 
         {/* Main Feed */}
         <main className="main-feed">
+          {/* Mobile filter chips — desktop shows these in sidebar */}
+          <div className="mobile-filter-chips">
+            {[['all', 'All Posts'], ['achievements', '🏆 Achievements'], ['meetups', '📅 Meetups'], ['general', '💬 General']].map(([val, lbl]) => (
+              <button
+                key={val}
+                className={`mobile-filter-chip${filter === val ? ' active' : ''}`}
+                onClick={() => setFilter(val)}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+
           <div className="feed-tabs">
             <button
               className={`feed-tab${feedTab === 'circle' ? ' active' : ''}`}

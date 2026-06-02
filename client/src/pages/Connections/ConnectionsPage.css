@@ -1082,7 +1082,7 @@
   }
 
   .mob-search-input::placeholder { color: #9ca3af; }
-  .mob-search-input:focus { border-color: #7c3aed; }
+  .mob-search-input:focus { border-color: #f59e0b; }
 
   .mob-filter-chip {
     padding: 6px 10px;
@@ -1099,8 +1099,8 @@
   }
 
   .mob-filter-chip.active {
-    background: #7c3aed;
-    border-color: #7c3aed;
+    background: #f59e0b;
+    border-color: #f59e0b;
     color: white;
   }
 
