@@ -2585,45 +2585,191 @@
   outline-offset: 1px;
 }
 
-/* ── Journey sidebar card ──────────────────────────────── */
-.journey-card { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.06)); border-color: rgba(124,58,237,0.25) !important; }
-
-.journey-list { display: flex; flex-direction: column; gap: 16px; }
-
-.journey-item {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 14px; border-radius: 14px;
-  background: rgba(255,255,255,0.5);
-  border: 1px solid rgba(124,58,237,0.15);
+/* ── Journey hero section ──────────────────────────────── */
+.journey-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.journey-item-header { display: flex; align-items: center; gap: 10px; }
-.journey-avatar-btn { background: none; border: none; cursor: pointer; padding: 0; border-radius: 50%; }
-
-.journey-item-info { display: flex; flex-direction: column; gap: 2px; }
-.journey-partner-name {
-  background: none; border: none; cursor: pointer; padding: 0;
-  font-size: 0.92rem; font-weight: 700; color: #1f2937; text-align: left;
+.journey-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.journey-partner-name:hover { text-decoration: underline; }
-.journey-day-count { font-size: 0.75rem; color: #7c3aed; font-weight: 700; }
 
-.journey-goals-row { display: flex; flex-direction: column; gap: 6px; }
-.journey-goal-chip {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 10px; border-radius: 8px;
-  background: #f3f4f6; border: 1px solid #e5e7eb;
+.journey-section-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.journey-section-count {
   font-size: 0.78rem;
+  color: #9ca3af;
+  font-weight: 500;
 }
-.journey-goal-chip.done { background: #f0fdf4; border-color: #bbf7d0; }
-.journey-goal-who { font-weight: 700; color: #6b7280; flex-shrink: 0; min-width: 28px; }
-.journey-goal-chip.done .journey-goal-who { color: #16a34a; }
-.journey-goal-title { flex: 1; color: #374151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.journey-goal-status { font-size: 0.85rem; flex-shrink: 0; color: #d1d5db; }
-.journey-goal-chip.done .journey-goal-status { color: #16a34a; }
 
-.journey-action-row { display: flex; gap: 6px; }
+.journey-hero-card {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.06));
+  border: 1.5px solid rgba(245,158,11,0.3);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.2s;
+}
 
+.journey-hero-card.both-done {
+  border-color: rgba(16,185,129,0.5);
+  background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.06));
+}
+
+.journey-both-banner {
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #10b981;
+  text-align: center;
+}
+
+.journey-hero-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.journey-hero-avatar {
+  background: none;
+  border: 2px solid rgba(245,158,11,0.4);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.journey-hero-avatar:hover { border-color: #f59e0b; }
+
+.journey-hero-info { flex: 1; min-width: 0; }
+
+.journey-hero-name {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: left;
+  display: block;
+}
+.journey-hero-name:hover { color: #f59e0b; }
+
+.journey-hero-days {
+  font-size: 0.82rem;
+  color: #f59e0b;
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+.journey-hero-msg {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.journey-hero-msg:hover { background: rgba(255,255,255,0.15); }
+
+.journey-hero-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.journey-hero-goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.journey-hero-goal.done {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.25);
+}
+
+.journey-hero-goal-who {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  min-width: 36px;
+}
+
+.journey-hero-goal.done .journey-hero-goal-who { color: #10b981; }
+
+.journey-hero-goal-title {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.journey-hero-goal-status {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.journey-hero-link-btn {
+  width: 100%;
+  background: none;
+  border: 1.5px dashed rgba(245,158,11,0.35);
+  border-radius: 10px;
+  color: #f59e0b;
+  font-size: 0.88rem;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.journey-hero-link-btn:hover { background: rgba(245,158,11,0.08); }
+
+.journey-hero-nudge {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(245,158,11,0.4);
+  background: rgba(245,158,11,0.08);
+  color: #f59e0b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.journey-hero-nudge:hover:not(:disabled) { background: rgba(245,158,11,0.18); }
+.journey-hero-nudge.sent {
+  border-color: rgba(16,185,129,0.4);
+  background: rgba(16,185,129,0.08);
+  color: #10b981;
+  cursor: default;
+}
+
+/* Keep old classes for any remaining references */
 .journey-nudge-btn {
   flex: 1; padding: 6px 0; border-radius: 8px;
   border: 1px solid rgba(245,158,11,0.4);
