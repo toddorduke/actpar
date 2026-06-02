@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { checkText } from '../utils/contentModeration.js';
+import { track, Events } from '../lib/analytics.js';
 
 export const useTribePosts = (communityId = null) => {
   const { user } = useContext(AuthContext);
@@ -47,7 +48,10 @@ export const useTribePosts = (communityId = null) => {
       })
       .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .single();
-    if (!error) setPosts((prev) => [data, ...prev]);
+    if (!error) {
+      setPosts((prev) => [data, ...prev]);
+      track(Events.POST_CREATED, { post_type });
+    }
     return { data, error };
   }, [user]);
 

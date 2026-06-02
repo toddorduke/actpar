@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { track, Events } from '../../lib/analytics.js';
 import './AppGuide.css';
 
 // Each slide: route to navigate to, CSS selector to spotlight
@@ -105,7 +106,9 @@ export default function AppGuide() {
     return () => window.removeEventListener('actpar:start-tour', handleStartTour);
   }, []);
 
-  const dismiss = useCallback(async () => {
+  const dismiss = useCallback(async (isComplete = false) => {
+    if (isComplete) track(Events.TOUR_COMPLETED);
+    else track(Events.TOUR_SKIPPED, { slide });
     setSpotlight(null);
     setPhase(null);
     if (!user) return;
@@ -121,6 +124,7 @@ export default function AppGuide() {
   function startGuide(type) {
     setSlide(0);
     setPhase(type);
+    track(Events.TOUR_STARTED, { type });
   }
 
   // Navigate + spotlight on each slide
@@ -281,7 +285,7 @@ export default function AppGuide() {
             <button className="guide-back-btn" onClick={() => setSlide((s) => s - 1)}>← Back</button>
           )}
           {isLast ? (
-            <button className="guide-next-btn" onClick={dismiss}>Let's Go! 🚀</button>
+            <button className="guide-next-btn" onClick={() => dismiss(true)}>Let's Go! 🚀</button>
           ) : (
             <button className="guide-next-btn" onClick={() => setSlide((s) => s + 1)}>Next →</button>
           )}

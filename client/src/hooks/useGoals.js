@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
+import { track, Events } from '../lib/analytics.js';
 
 const STREAK_MILESTONES = [7, 30, 60, 90];
 
@@ -44,7 +45,10 @@ export const useGoals = () => {
       })
       .select()
       .single();
-    if (!error) setGoals((prev) => [...prev, data]);
+    if (!error) {
+      setGoals((prev) => [...prev, data]);
+      track(Events.GOAL_CREATED, { tier: tier ?? null, category, goal_type });
+    }
     return { data, error };
   }, [user]);
 
@@ -69,6 +73,7 @@ export const useGoals = () => {
 
     const milestone = STREAK_MILESTONES.includes(newCount) ? newCount : null;
     if (!error) {
+      track(Events.GOAL_CHECKED_IN, { day_count: newCount, is_milestone: !!milestone });
       setGoals((prev) =>
         prev.map((g) =>
           g.id === goalId ? { ...g, day_count: newCount, last_checked_in: today } : g

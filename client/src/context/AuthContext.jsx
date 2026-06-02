@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { identifyUser, resetUser } from '../lib/analytics.js';
 
 export const AuthContext = createContext(null);
 
@@ -28,7 +29,11 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       } else if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          identifyUser(session.user.id, { email: session.user.email });
+        }
       } else if (event === 'SIGNED_OUT') {
+        resetUser();
         setUser(null);
       } else {
         // USER_UPDATED and any other events
