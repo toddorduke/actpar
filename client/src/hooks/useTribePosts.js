@@ -67,5 +67,11 @@ export const useTribePosts = (communityId = null) => {
     }
   }, []);
 
-  return { posts, loading, createPost, likePost, refetch: fetchPosts };
+  const deletePost = useCallback(async (postId) => {
+    const { error } = await supabase.from('tribe_posts').delete().eq('id', postId);
+    if (!error) setPosts((prev) => prev.filter((p) => p.id !== postId));
+    return { error };
+  }, []);
+
+  return { posts, loading, createPost, likePost, deletePost, refetch: fetchPosts };
 };

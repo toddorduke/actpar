@@ -2897,3 +2897,67 @@
 }
 .journey-propose-btn:hover:not(:disabled) { opacity: 0.9; }
 .journey-propose-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Home main-column Journey rows ── */
+.home-journeys-card { padding: 16px 20px; }
+.home-journeys-count {
+  font-size: 0.8rem; font-weight: 700; color: #f59e0b;
+  background: rgba(245,158,11,0.15); border-radius: 20px;
+  padding: 2px 10px;
+}
+.home-journeys-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.home-journey-row {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: border-color 0.15s;
+}
+.home-journey-row.both-done {
+  border-color: rgba(245,158,11,0.4);
+  background: rgba(245,158,11,0.06);
+}
+.home-journey-both-banner {
+  font-size: 0.78rem; font-weight: 700; color: #f59e0b;
+  margin-bottom: 8px; letter-spacing: 0.01em;
+}
+.home-journey-row-main {
+  display: flex; align-items: center; gap: 12px;
+}
+.home-journey-avatar-btn {
+  background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0;
+}
+.home-journey-info { flex: 1; min-width: 0; }
+.home-journey-name {
+  display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
+}
+.home-journey-name-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: 0.95rem; font-weight: 700; color: #f1f5f9;
+}
+.home-journey-name-btn:hover { color: #f59e0b; }
+.home-journey-days {
+  font-size: 0.75rem; color: #94a3b8; white-space: nowrap;
+}
+.home-journey-goals { display: flex; flex-direction: column; gap: 4px; }
+.home-journey-goal-pill {
+  font-size: 0.8rem; color: #94a3b8;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.home-journey-goal-pill.done { color: #10b981; }
+.home-journey-link-btn {
+  background: none; border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  font-size: 0.8rem; color: #94a3b8;
+}
+.home-journey-link-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+.home-journey-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.home-journey-msg-btn, .home-journey-nudge-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  font-size: 0.85rem; transition: background 0.15s;
+}
+.home-journey-msg-btn:hover { background: rgba(255,255,255,0.12); }
+.home-journey-nudge-btn:hover:not(:disabled) { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); }
+.home-journey-nudge-btn.sent { color: #10b981; border-color: rgba(16,185,129,0.3); }
+.home-journey-nudge-btn:disabled { opacity: 0.6; cursor: default; }

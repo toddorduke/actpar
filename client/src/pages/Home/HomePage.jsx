@@ -12,7 +12,7 @@ import { useConnections } from '../../hooks/useConnections.js';
 import { useGoalProgress } from '../../hooks/useGoalProgress.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
-import { shouldShowRecap, dismissRecap, computeRecap } from '../../hooks/useWeeklyRecap.js';
+import { shouldShowRecap, dismissRecap, computeRecap, getPrevGrade } from '../../hooks/useWeeklyRecap.js';
 import WeeklyRecapModal from '../../components/common/WeeklyRecapModal.jsx';
 import MilestoneShareModal from '../../components/common/MilestoneShareModal.jsx';
 import { milestoneXP, XP_VALUES } from '../../lib/xp.js';
@@ -600,6 +600,8 @@ const HomePage = () => {
         goalTitle: result.goalTitle,
         xpEarned: XP_VALUES.CHECKIN + milestoneXP(result.milestone),
       });
+    } else {
+      toast(`+${XP_VALUES.CHECKIN} XP`, 'success', 2000);
     }
     return result;
   }
@@ -1145,6 +1147,78 @@ const HomePage = () => {
                 </div>
               )}
 
+              {/* Active Journeys — surfaced prominently in main column */}
+              {partnerships.filter((p) => p.status === 'active').length > 0 && (
+                <div className="home-card home-journeys-card">
+                  <div className="home-card-header">
+                    <h2 className="home-card-title">
+                      🚀 My Journeys
+                    </h2>
+                    <span className="home-journeys-count">{partnerships.filter((p) => p.status === 'active').length} active</span>
+                  </div>
+                  <div className="home-journeys-list">
+                    {partnerships.filter((p) => p.status === 'active').map((p) => {
+                      const { partnerProfile, partnerId, myGoal, partnerGoal } = partnerSide(p);
+                      const partnerName = getDisplayName(partnerProfile, 'Partner');
+                      const daysTogether = p.started_at
+                        ? Math.floor((Date.now() - new Date(p.started_at)) / 86400000) + 1
+                        : 1;
+                      const myCheckedToday = myGoal?.last_checked_in === todayStr;
+                      const partnerCheckedToday = partnerGoal?.last_checked_in === todayStr;
+                      const bothCheckedIn = myCheckedToday && partnerCheckedToday;
+                      return (
+                        <div key={p.id} className={`home-journey-row${bothCheckedIn ? ' both-done' : ''}`}>
+                          {bothCheckedIn && (
+                            <div className="home-journey-both-banner">🔥 Both showed up today!</div>
+                          )}
+                          <div className="home-journey-row-main">
+                            <button className="home-journey-avatar-btn" onClick={() => navigate(`/profile/${partnerId}`)}>
+                              <Avatar url={partnerProfile?.avatar_url} name={partnerName} size={44} />
+                            </button>
+                            <div className="home-journey-info">
+                              <div className="home-journey-name">
+                                <button className="home-journey-name-btn" onClick={() => navigate(`/profile/${partnerId}`)}>{partnerName}</button>
+                                <span className="home-journey-days">· Day {daysTogether}</span>
+                              </div>
+                              <div className="home-journey-goals">
+                                {myGoal ? (
+                                  <span className={`home-journey-goal-pill${myCheckedToday ? ' done' : ''}`}>
+                                    {myCheckedToday ? '✅' : '⬜'} You: {myGoal.title}
+                                  </span>
+                                ) : (
+                                  <button
+                                    className="home-journey-link-btn"
+                                    onClick={() => { setJourneyGoalPicker({ partnershipId: p.id }); setJourneyPickerGoalId(''); setJourneyPickerShowNew(false); }}
+                                  >＋ Link your goal</button>
+                                )}
+                                {partnerGoal && (
+                                  <span className={`home-journey-goal-pill${partnerCheckedToday ? ' done' : ''}`}>
+                                    {partnerCheckedToday ? '✅' : '⬜'} {partnerName.split(' ')[0]}: {partnerGoal.title}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="home-journey-actions">
+                              <button className="home-journey-msg-btn" onClick={() => navigate(`/messages?with=${partnerId}`)} title="Message">💬</button>
+                              {partnerGoal && !partnerCheckedToday && (
+                                <button
+                                  className={`home-journey-nudge-btn${nudgeSent.has(partnerId) ? ' sent' : ''}`}
+                                  onClick={() => !nudgeSent.has(partnerId) && handleNudge(partnerId, partnerGoal.title)}
+                                  disabled={nudgeSent.has(partnerId)}
+                                  title="Nudge"
+                                >
+                                  {nudgeSent.has(partnerId) ? '✓' : '👋'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Goal Pyramid */}
               <section className="profile-section">
                 <div className="section-header">
@@ -1617,79 +1691,6 @@ const HomePage = () => {
                 )}
               </div>
 
-              {/* My Journeys */}
-              {partnerships.filter((p) => p.status === 'active').length > 0 && (
-                <div className="journey-section">
-                  <div className="journey-section-header">
-                    <span className="journey-section-title">🚀 My Journeys</span>
-                    <span className="journey-section-count">{partnerships.filter(p => p.status === 'active').length} active</span>
-                  </div>
-                  {partnerships.filter((p) => p.status === 'active').map((p) => {
-                    const { partnerProfile, partnerId, myGoal, partnerGoal } = partnerSide(p);
-                    const partnerName = getDisplayName(partnerProfile, 'Partner');
-                    const daysTogether = p.started_at
-                      ? Math.floor((Date.now() - new Date(p.started_at)) / 86400000) + 1
-                      : 1;
-                    const todayDateStr = getTodayStr();
-                    const myCheckedToday = myGoal?.last_checked_in === todayDateStr;
-                    const partnerCheckedToday = partnerGoal?.last_checked_in === todayDateStr;
-                    const bothCheckedIn = myCheckedToday && partnerCheckedToday;
-                    return (
-                      <div key={p.id} className={`journey-hero-card${bothCheckedIn ? ' both-done' : ''}`}>
-                        {bothCheckedIn && (
-                          <div className="journey-both-banner">🔥 Both showed up today — that's accountability!</div>
-                        )}
-                        <div className="journey-hero-top">
-                          <button className="journey-hero-avatar" onClick={() => navigate(`/profile/${partnerId}`)}>
-                            <Avatar url={partnerProfile?.avatar_url} name={partnerName} size={56} />
-                          </button>
-                          <div className="journey-hero-info">
-                            <button className="journey-hero-name" onClick={() => navigate(`/profile/${partnerId}`)}>
-                              {partnerName}
-                            </button>
-                            <div className="journey-hero-days">🚀 Day {daysTogether} together</div>
-                          </div>
-                          <button className="journey-hero-msg" onClick={() => navigate(`/messages?with=${partnerId}`)}>
-                            💬
-                          </button>
-                        </div>
-
-                        <div className="journey-hero-goals">
-                          {myGoal ? (
-                            <div className={`journey-hero-goal${myCheckedToday ? ' done' : ''}`}>
-                              <div className="journey-hero-goal-who">You</div>
-                              <div className="journey-hero-goal-title">{myGoal.title}</div>
-                              <div className="journey-hero-goal-status">{myCheckedToday ? '✅' : '⬜'}</div>
-                            </div>
-                          ) : (
-                            <button
-                              className="journey-hero-link-btn"
-                              onClick={() => { setJourneyGoalPicker({ partnershipId: p.id }); setJourneyPickerGoalId(''); setJourneyPickerShowNew(false); }}
-                            >＋ Link your goal</button>
-                          )}
-                          {partnerGoal && (
-                            <div className={`journey-hero-goal${partnerCheckedToday ? ' done' : ''}`}>
-                              <div className="journey-hero-goal-who">{partnerName.split(' ')[0]}</div>
-                              <div className="journey-hero-goal-title">{partnerGoal.title}</div>
-                              <div className="journey-hero-goal-status">{partnerCheckedToday ? '✅' : '⬜'}</div>
-                            </div>
-                          )}
-                        </div>
-
-                        {partnerGoal && !partnerCheckedToday && (
-                          <button
-                            className={`journey-hero-nudge${nudgeSent.has(partnerId) ? ' sent' : ''}`}
-                            onClick={() => !nudgeSent.has(partnerId) && handleNudge(partnerId, partnerGoal.title)}
-                            disabled={nudgeSent.has(partnerId)}
-                          >
-                            {nudgeSent.has(partnerId) ? '✓ Nudge sent!' : `👋 Nudge ${partnerName.split(' ')[0]} to check in`}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
 
               {/* Active Now */}
               <div className="profile-sidebar-card">
@@ -1981,7 +1982,8 @@ const HomePage = () => {
       {showRecap && recap && (
         <WeeklyRecapModal
           recap={recap}
-          onClose={() => { dismissRecap(); setShowRecap(false); }}
+          prevGrade={getPrevGrade()}
+          onClose={() => { dismissRecap(recap.grade); setShowRecap(false); }}
         />
       )}
     </>

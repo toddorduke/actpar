@@ -2,12 +2,24 @@ import React from 'react';
 import Avatar from './Avatar.jsx';
 import './WeeklyRecapModal.css';
 
-export default function WeeklyRecapModal({ recap, onClose }) {
+const GRADE_ORDER = ['Missed', 'Rough', 'Decent', 'Strong', 'Flawless'];
+
+function gradeDelta(current, prev) {
+  if (!prev) return null;
+  const ci = GRADE_ORDER.indexOf(current);
+  const pi = GRADE_ORDER.indexOf(prev);
+  if (ci === -1 || pi === -1 || ci === pi) return null;
+  return ci > pi ? 'up' : 'down';
+}
+
+export default function WeeklyRecapModal({ recap, prevGrade, onClose }) {
   const {
     dateRange, habitGoals, activeThisWeek, totalStreakDays,
     bestStreak, goalsWithMilestone, activeConnections,
     grade, gradeColor, message,
   } = recap;
+
+  const delta = gradeDelta(grade, prevGrade);
 
   const activeIds = new Set(activeThisWeek.map((g) => g.id));
 
@@ -27,7 +39,17 @@ export default function WeeklyRecapModal({ recap, onClose }) {
 
           {/* Grade */}
           <div className="wr-grade-row">
-            <div className="wr-grade" style={{ color: gradeColor }}>{grade}</div>
+            <div className="wr-grade-block">
+              <div className="wr-grade" style={{ color: gradeColor }}>{grade}</div>
+              {delta && (
+                <span className={`wr-grade-delta wr-grade-delta--${delta}`}>
+                  {delta === 'up' ? '▲' : '▼'} vs last week
+                </span>
+              )}
+              {!delta && prevGrade && (
+                <span className="wr-grade-delta wr-grade-delta--same">= same as last week</span>
+              )}
+            </div>
             <p className="wr-message">{message}</p>
           </div>
 

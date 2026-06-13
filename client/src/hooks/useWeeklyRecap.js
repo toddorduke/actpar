@@ -40,8 +40,13 @@ export function shouldShowRecap() {
   return !localStorage.getItem(weekKey());
 }
 
-export function dismissRecap() {
+export function dismissRecap(grade) {
   localStorage.setItem(weekKey(), '1');
+  if (grade) localStorage.setItem('actpar_recap_prev_grade', grade);
+}
+
+export function getPrevGrade() {
+  return localStorage.getItem('actpar_recap_prev_grade') ?? null;
 }
 
 export function computeRecap(goals, acceptedConnections, activity) {

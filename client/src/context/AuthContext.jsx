@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
-import { identifyUser, resetUser } from '../lib/analytics.js';
+import { identifyUser, resetUser, track, Events } from '../lib/analytics.js';
 
 export const AuthContext = createContext(null);
 
@@ -31,6 +31,29 @@ export const AuthProvider = ({ children }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           identifyUser(session.user.id, { email: session.user.email });
+          // Apply referral attribution on first sign-in
+          const ref = localStorage.getItem('actpar_referral');
+          if (ref) {
+            supabase.from('profiles')
+              .select('referred_by')
+              .eq('id', session.user.id)
+              .single()
+              .then(({ data: p }) => {
+                if (!p?.referred_by) {
+                  // Find referrer by full UUID
+                  supabase.from('profiles').select('id').eq('id', ref).single()
+                    .then(({ data: referrer }) => {
+                      if (referrer) {
+                        supabase.from('profiles')
+                          .update({ referred_by: ref })
+                          .eq('id', session.user.id);
+                        track('referral_signup', { referrer_id: ref });
+                      }
+                    });
+                }
+                localStorage.removeItem('actpar_referral');
+              });
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         resetUser();

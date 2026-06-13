@@ -121,6 +121,14 @@ export default function SettingsPage() {
 
   // Delete account
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [referralCount, setReferralCount] = useState(null);
+
+  React.useEffect(() => {
+    if (!user || activeSection !== 'referral') return;
+    supabase.from('profiles').select('id', { count: 'exact', head: true })
+      .eq('referred_by', user.id)
+      .then(({ count }) => setReferralCount(count ?? 0));
+  }, [user, activeSection]);
   const [deleteInput, setDeleteInput] = useState('');
   const [deleting, setDeleting] = useState(false);
 
@@ -969,14 +977,25 @@ export default function SettingsPage() {
             <section className="settings-section">
               <h3 className="settings-section-title">Refer a Friend</h3>
               <p className="settings-desc">
-                Share ActPar with someone who needs accountability. Send them your personal link and grow your circle.
+                Share ActPar with someone who needs accountability. When they sign up through your link, they're automatically connected to you.
               </p>
+
+              {referralCount !== null && (
+                <div className="referral-stat-box">
+                  <span className="referral-stat-number">{referralCount}</span>
+                  <span className="referral-stat-label">
+                    {referralCount === 1 ? 'person joined through your link' : 'people joined through your link'}
+                  </span>
+                </div>
+              )}
+
               <div className="referral-link-box">
-                <span className="referral-link-text">{`https://actpar.com/join?ref=${user?.id?.slice(0, 8)}`}</span>
+                <span className="referral-link-text">{`https://actpar.com/signup?ref=${user?.id}`}</span>
                 <button
                   className="referral-copy-btn"
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://actpar.com/join?ref=${user?.id?.slice(0, 8)}`);
+                    navigator.clipboard.writeText(`https://actpar.com/signup?ref=${user?.id}`);
+                    track(Events.REFERRAL_LINK_COPIED);
                   }}
                 >
                   Copy Link
@@ -984,13 +1003,22 @@ export default function SettingsPage() {
               </div>
               <div className="referral-share-row">
                 <button className="referral-share-btn" onClick={() => {
+                  track(Events.REFERRAL_SHARED, { method: 'native' });
                   if (navigator.share) {
-                    navigator.share({ title: 'Join me on ActPar', text: 'I\'ve been using ActPar to stay accountable to my goals. Join me!', url: `https://actpar.com/join?ref=${user?.id?.slice(0, 8)}` });
+                    navigator.share({
+                      title: 'Join me on ActPar',
+                      text: 'I\'ve been using ActPar to stay accountable to my goals. Join me!',
+                      url: `https://actpar.com/signup?ref=${user?.id}`,
+                    });
                   }
                 }}>
                   🔗 Share
                 </button>
-                <a className="referral-share-btn" href={`sms:?body=Hey! I've been using ActPar to stay accountable to my goals. Join me here: https://actpar.com/join?ref=${user?.id?.slice(0, 8)}`}>
+                <a
+                  className="referral-share-btn"
+                  href={`sms:?body=Hey! I've been using ActPar to stay accountable to my goals. Join me here: https://actpar.com/signup?ref=${user?.id}`}
+                  onClick={() => track(Events.REFERRAL_SHARED, { method: 'sms' })}
+                >
                   💬 Text a Friend
                 </a>
               </div>
