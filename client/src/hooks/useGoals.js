@@ -188,6 +188,7 @@ export const useGoals = () => {
       .update({ is_active: false, completed_at: now })
       .eq('id', goalId);
     if (!error) {
+      track(Events.GOAL_COMPLETED, { day_count: goal.day_count ?? 0, category: goal.category });
       setGoals((prev) => prev.filter((g) => g.id !== goalId));
       setCompletedGoals((prev) => [{ ...goal, is_active: false, completed_at: now }, ...prev]);
     }

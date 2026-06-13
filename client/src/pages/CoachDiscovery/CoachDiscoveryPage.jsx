@@ -280,6 +280,9 @@ export default function CoachDiscoveryPage() {
 
   return (
     <div className="discovery-page">
+      <div className="coaches-coming-soon-banner">
+        🚧 <strong>Coming Soon</strong> — Live coach booking is in development. Browse profiles and apply to be a coach now.
+      </div>
       <section className="discovery-header">
         <div className="discovery-header-text">
           <h1 className="discovery-title">Find Your Coach</h1>

@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { track, Events } from '../lib/analytics.js';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -78,6 +79,7 @@ export const usePushNotifications = () => {
       }, { onConflict: 'endpoint' });
 
       if (error) throw error;
+      track(Events.PUSH_ENABLED);
       setSubscribed(true);
     } catch (err) {
       console.error('Push subscribe error:', err);
@@ -98,6 +100,7 @@ export const usePushNotifications = () => {
         await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
         await sub.unsubscribe();
       }
+      track(Events.PUSH_DISABLED);
       setSubscribed(false);
     } catch (err) {
       console.error('Push unsubscribe error:', err);

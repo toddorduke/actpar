@@ -343,3 +343,14 @@
   border-color: var(--color-primary);
   color: white;
 }
+
+.signup-referral-banner {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  color: #f59e0b;
+  margin-bottom: 16px;
+  text-align: center;
+}

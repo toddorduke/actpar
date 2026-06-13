@@ -844,3 +844,21 @@
   background: rgba(245,158,11,0.06);
   color: #92400e;
 }
+
+/* ── Pro section ── */
+.pro-perks-list { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.pro-perk-row { display: flex; align-items: flex-start; gap: 14px; }
+.pro-perk-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+.pro-perk-label { font-size: 0.95rem; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
+.pro-perk-desc { font-size: 0.82rem; color: #94a3b8; line-height: 1.4; }
+.pro-price-row { display: flex; align-items: baseline; gap: 4px; margin: 24px 0 12px; }
+.pro-price-amount { font-size: 2.5rem; font-weight: 900; color: #f59e0b; }
+.pro-price-period { font-size: 1rem; color: #94a3b8; }
+.pro-upgrade-btn {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000; font-size: 1rem; font-weight: 800; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.pro-upgrade-btn:hover { opacity: 0.9; }
+.pro-guarantee { font-size: 0.78rem; color: #64748b; text-align: center; margin-top: 10px; }

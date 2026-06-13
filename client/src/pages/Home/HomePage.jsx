@@ -296,7 +296,7 @@ const HomePage = () => {
   const { posts, loading: postsLoading, createPost } = useTribePosts();
   const { photos, videos, uploadFile, deleteMedia } = useMedia();
   const { acceptedConnections } = useConnections();
-  const { partnerships, partnerSide, linkGoal } = usePartnerships();
+  const { partnerships, partnerSide, linkGoal, endJourney } = usePartnerships();
   const { activity, loading: activityLoading } = useConnectionActivity(acceptedConnections);
 
   // — Derived —
@@ -1166,8 +1166,26 @@ const HomePage = () => {
                       const myCheckedToday = myGoal?.last_checked_in === todayStr;
                       const partnerCheckedToday = partnerGoal?.last_checked_in === todayStr;
                       const bothCheckedIn = myCheckedToday && partnerCheckedToday;
+
+                      const daysSinceMyCheckin = myGoal?.last_checked_in
+                        ? Math.floor((Date.now() - new Date(myGoal.last_checked_in)) / 86400000)
+                        : 999;
+                      const daysSincePartnerCheckin = partnerGoal?.last_checked_in
+                        ? Math.floor((Date.now() - new Date(partnerGoal.last_checked_in)) / 86400000)
+                        : 999;
+                      const isInactive = daysTogether > 7 && daysSinceMyCheckin >= 7 && daysSincePartnerCheckin >= 7;
+
                       return (
-                        <div key={p.id} className={`home-journey-row${bothCheckedIn ? ' both-done' : ''}`}>
+                        <div key={p.id} className={`home-journey-row${bothCheckedIn ? ' both-done' : ''}${isInactive ? ' inactive' : ''}`}>
+                          {isInactive && (
+                            <div className="home-journey-inactive">
+                              <span className="home-journey-inactive-text">😴 No activity for 7+ days. Is this Journey still active?</span>
+                              <div className="home-journey-inactive-actions">
+                                <button className="home-journey-inactive-keep" onClick={() => handleGoalCheckIn(myGoal?.id)}>Check in now</button>
+                                <button className="home-journey-inactive-end" onClick={() => endJourney(p.id)}>End Journey</button>
+                              </div>
+                            </div>
+                          )}
                           {bothCheckedIn && (
                             <div className="home-journey-both-banner">🔥 Both showed up today!</div>
                           )}

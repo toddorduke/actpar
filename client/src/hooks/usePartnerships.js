@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
 import { awardXP, XP_VALUES } from '../lib/xp.js';
+import { track, Events } from '../lib/analytics.js';
 
 export function usePartnerships() {
   const { user } = useContext(AuthContext);
@@ -59,6 +60,7 @@ export function usePartnerships() {
       .single();
     if (!error && data) {
       awardXP(user.id, XP_VALUES.JOURNEY_STARTED);
+      track(Events.JOURNEY_PROPOSED, { has_goal: !!goalId });
       setPartnerships((prev) => [data, ...prev]);
       const goalTitle = goalId
         ? (await supabase.from('goals').select('title').eq('id', goalId).single()).data?.title
@@ -83,6 +85,7 @@ export function usePartnerships() {
       .update({ goal_id_2: goalId || null, status: 'active', started_at: now })
       .eq('id', partnershipId);
     if (!error) {
+      track(Events.JOURNEY_ACCEPTED);
       await fetchPartnerships();
       if (partnership?.requester_id) {
         createNotification({
@@ -110,7 +113,7 @@ export function usePartnerships() {
     const iAmRequester = partnership.requester_id === user.id;
     const field = iAmRequester ? 'goal_id_1' : 'goal_id_2';
     const { error } = await supabase.from('partnerships').update({ [field]: goalId }).eq('id', partnershipId);
-    if (!error) await fetchPartnerships();
+    if (!error) { track(Events.JOURNEY_GOAL_LINKED); await fetchPartnerships(); }
     return { error };
   }, [user, partnerships, fetchPartnerships]);
 

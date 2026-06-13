@@ -591,3 +591,12 @@
   .coach-apply-modal { border-radius: 16px 16px 0 0; max-height: 95vh; }
   .apply-options-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+.coaches-coming-soon-banner {
+  background: rgba(245, 158, 11, 0.1);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 12px 20px;
+  font-size: 0.88rem;
+  color: #f59e0b;
+  text-align: center;
+}

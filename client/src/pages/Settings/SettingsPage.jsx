@@ -6,6 +6,7 @@ import { useToast } from '../../components/common/Toast.jsx';
 import { usePushNotifications } from '../../hooks/usePushNotifications.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import Avatar from '../../components/common/Avatar.jsx';
+import PremiumModal from '../../components/common/PremiumModal.jsx';
 import { supabase } from '../../lib/supabase.js';
 import './SettingsPage.css';
 
@@ -49,10 +50,19 @@ const SECTIONS = [
   { id: 'profile', label: 'My Profile', icon: '✨' },
   { id: 'password', label: 'Password', icon: '🔒' },
   { id: 'notifications', label: 'Notifications', icon: '🔔' },
+  { id: 'pro', label: 'Go Pro', icon: '⚡' },
   { id: 'referral', label: 'Refer a Friend', icon: '🎁' },
   { id: 'tour', label: 'App Tour', icon: '🗺️' },
   { id: 'about', label: 'About ActPar', icon: 'ℹ️' },
   { id: 'danger', label: 'Delete Account', icon: '⚠️' },
+];
+
+const PRO_PERKS = [
+  { icon: '📊', label: 'Advanced Analytics', desc: 'Deep insights into your streaks, patterns, and progress over time.' },
+  { icon: '🔔', label: 'Smart Nudge Scheduling', desc: 'AI-timed reminders that fire when you\'re most likely to skip.' },
+  { icon: '🤝', label: 'Verified Coach Badge', desc: 'Stand out as a trusted accountability partner or coach.' },
+  { icon: '🚀', label: 'Unlimited Pacts', desc: 'Create and join as many accountability groups as you want.' },
+  { icon: '💬', label: 'Unlimited Direct Messages', desc: 'No daily message limits with your accountability partners.' },
 ];
 
 export default function SettingsPage() {
@@ -63,6 +73,7 @@ export default function SettingsPage() {
   const avatarInputRef = useRef(null);
 
   const [activeSection, setActiveSection] = useState('account');
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush, permission: pushPermission, pushError } = usePushNotifications();
 
   // Account
@@ -403,6 +414,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <>
     <div className="settings-page">
       <div className="settings-container">
         <aside className="settings-sidebar">
@@ -973,6 +985,32 @@ export default function SettingsPage() {
           )}
 
           {/* Refer a Friend */}
+          {activeSection === 'pro' && (
+            <section className="settings-section">
+              <h3 className="settings-section-title">⚡ ActPar Pro</h3>
+              <p className="settings-desc">Everything you need to stay consistent, hold others accountable, and lead by example.</p>
+              <div className="pro-perks-list">
+                {PRO_PERKS.map(({ icon, label, desc }) => (
+                  <div key={label} className="pro-perk-row">
+                    <span className="pro-perk-icon">{icon}</span>
+                    <div className="pro-perk-info">
+                      <div className="pro-perk-label">{label}</div>
+                      <div className="pro-perk-desc">{desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="pro-price-row">
+                <span className="pro-price-amount">$9</span>
+                <span className="pro-price-period">/ month</span>
+              </div>
+              <button className="pro-upgrade-btn" onClick={() => setShowPremiumModal(true)}>
+                Upgrade to Pro →
+              </button>
+              <p className="pro-guarantee">Cancel any time. No questions asked.</p>
+            </section>
+          )}
+
           {activeSection === 'referral' && (
             <section className="settings-section">
               <h3 className="settings-section-title">Refer a Friend</h3>
@@ -1069,5 +1107,8 @@ export default function SettingsPage() {
         </main>
       </div>
     </div>
+
+    {showPremiumModal && <PremiumModal onClose={() => setShowPremiumModal(false)} />}
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { useProfile } from '../../hooks/useProfile.js';
 import { useGoals } from '../../hooks/useGoals.js';
 import { supabase } from '../../lib/supabase.js';
 import { getDisplayName } from '../../utils/displayName.js';
+import { track, Events } from '../../lib/analytics.js';
 import './OnboardingPage.css';
 
 const CATEGORIES = [
@@ -216,6 +217,7 @@ export default function OnboardingPage() {
   }
 
   function chooseMode(chosen) {
+    track(Events.ONBOARDING_STARTED, { mode: chosen });
     setMode(chosen);
     setStep(2);
   }
@@ -231,6 +233,7 @@ export default function OnboardingPage() {
   }
 
   async function handleFinish() {
+    track(Events.ONBOARDING_COMPLETED, { mode, goals_set: tierGoals.filter((g) => g.title.trim()).length });
     setSaving(true);
     const profileUpdate = {
       onboarding_complete: true,

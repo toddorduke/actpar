@@ -2961,3 +2961,27 @@
 .home-journey-nudge-btn:hover:not(:disabled) { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); }
 .home-journey-nudge-btn.sent { color: #10b981; border-color: rgba(16,185,129,0.3); }
 .home-journey-nudge-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* Journey inactivity prompt */
+.home-journey-row.inactive { border-color: rgba(148,163,184,0.2); }
+.home-journey-inactive {
+  padding: 10px 0 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 10px;
+}
+.home-journey-inactive-text {
+  font-size: 0.82rem; color: #94a3b8; display: block; margin-bottom: 8px;
+}
+.home-journey-inactive-actions { display: flex; gap: 8px; }
+.home-journey-inactive-keep {
+  flex: 1; padding: 7px 12px; border-radius: 8px; border: none;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+}
+.home-journey-inactive-end {
+  padding: 7px 12px; border-radius: 8px;
+  border: 1px solid rgba(239,68,68,0.3);
+  background: transparent; color: #ef4444;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+}
+.home-journey-inactive-end:hover { background: rgba(239,68,68,0.1); }

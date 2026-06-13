@@ -11,11 +11,21 @@ const SignUpPage = () => {
   const toast = useToast();
   const [searchParams] = useSearchParams();
 
-  // Capture referral code from URL and persist it through the signup flow
+  const [referrerName, setReferrerName] = useState(null);
+
+  // Capture referral code from URL, persist it, and look up referrer name
   useEffect(() => {
     const ref = searchParams.get('ref');
-    if (ref) localStorage.setItem('actpar_referral', ref);
+    if (!ref) return;
+    localStorage.setItem('actpar_referral', ref);
+    supabase
+      .from('profiles')
+      .select('first_name')
+      .eq('id', ref)
+      .single()
+      .then(({ data }) => { if (data?.first_name) setReferrerName(data.first_name); });
   }, [searchParams]);
+
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
   const [submitting, setSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -129,6 +139,11 @@ const SignUpPage = () => {
               <div className="signup-brand-logo">ActPar</div>
               <p className="signup-brand-tagline">The accountability platform for real goals, real people.</p>
             </div>
+            {referrerName && (
+              <div className="signup-referral-banner">
+                🎁 <strong>{referrerName}</strong> invited you to ActPar!
+              </div>
+            )}
             <h2>Create Your Account</h2>
             <p className="signup-sub">Just the basics — you'll set up your profile next.</p>
 

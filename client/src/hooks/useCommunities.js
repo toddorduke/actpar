@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { checkText } from '../utils/contentModeration.js';
+import { track, Events } from '../lib/analytics.js';
 
 export const useCommunities = () => {
   const { user } = useContext(AuthContext);
@@ -47,6 +48,7 @@ export const useCommunities = () => {
       .select()
       .single();
     if (!error) {
+      track(Events.COMMUNITY_CREATED);
       // Auto-join as admin
       await supabase
         .from('community_memberships')
@@ -62,7 +64,10 @@ export const useCommunities = () => {
     const { error } = await supabase
       .from('community_memberships')
       .insert({ community_id: communityId, user_id: user.id, role: 'member' });
-    if (!error) setMyMemberships((prev) => [...prev, communityId]);
+    if (!error) {
+      track(Events.COMMUNITY_JOINED);
+      setMyMemberships((prev) => [...prev, communityId]);
+    }
     return { error };
   }, [user]);
 

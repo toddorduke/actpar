@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { playDingSound } from '../utils/sounds.js';
 import { checkText } from '../utils/contentModeration.js';
+import { track, Events } from '../lib/analytics.js';
 
 export const useDirectMessages = (otherUserId) => {
   const { user } = useContext(AuthContext);
@@ -89,7 +90,10 @@ export const useDirectMessages = (otherUserId) => {
       .insert({ sender_id: user.id, receiver_id: otherUserId, content: content.trim() })
       .select('*, sender:profiles!direct_messages_sender_id_fkey(id, first_name, last_name, avatar_url)')
       .single();
-    if (!error && data) setMessages((prev) => [...prev, data]);
+    if (!error && data) {
+      track(Events.MESSAGE_SENT);
+      setMessages((prev) => [...prev, data]);
+    }
     return { error };
   }, [user, otherUserId]);
 
