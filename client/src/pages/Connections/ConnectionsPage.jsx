@@ -805,29 +805,31 @@ export default function ConnectionsPage() {
                               <div className="card-avatar" />
                             </div>
                           )}
+                          <div className="card-photo-overlay">
+                            <div className="card-name-row">
+                              <div className="profile-name">
+                                {getDisplayName(profile, 'Unknown')}
+                              </div>
+                              <span className="card-type-badge">{profile.account_type ?? 'Personal'}</span>
+                            </div>
+                            <div className="card-meta-row">
+                              {profile.alter_ego_name && (
+                                <span className="profile-alter-ego">⚡ {profile.alter_ego_name}</span>
+                              )}
+                              {profile.age && (
+                                <span className="card-age">{profile.age} yrs</span>
+                              )}
+                            </div>
+                            {profile.city && (
+                              <div className="profile-city">📍 {profile.city}</div>
+                            )}
+                          </div>
                         </div>
                         <div className="card-content">
-                          <div className="card-name-row">
-                            <div className="profile-name">
-                              {getDisplayName(profile, 'Unknown')}
-                            </div>
-                            <span className="card-type-badge">{profile.account_type ?? 'Personal'}</span>
-                          </div>
-                          <div className="card-meta-row">
-                            {profile.alter_ego_name && (
-                              <span className="profile-alter-ego">⚡ {profile.alter_ego_name}</span>
-                            )}
-                            {profile.age && (
-                              <span className="card-age">{profile.age} yrs</span>
-                            )}
-                          </div>
                           {profile.matchReason && (
                             <div className="card-match-reason">
                               ✨ {profile.matchReason}
                             </div>
-                          )}
-                          {profile.city && (
-                            <div className="profile-city">📍 {profile.city}</div>
                           )}
                           {profile.tagline && (
                             <div className="card-section">

@@ -384,10 +384,11 @@
 
 .profile-card-top {
   cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18), 0 20px 60px rgba(0, 0, 0, 0.2);
 }
 
 .profile-card-top:hover {
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3), 0 24px 70px rgba(0, 0, 0, 0.28);
   transform: translateY(-2px) !important;
 }
 
@@ -423,6 +424,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 22%;
   display: block;
 }
 
@@ -430,6 +432,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 22%;
   display: block;
 }
 
@@ -452,17 +455,25 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
-/* Gradient overlay so name text pops if we ever overlay it */
+/* Gradient overlay so the name/badges overlaid on the photo stay legible */
 .card-header::after {
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 80px;
-  background: linear-gradient(to top, rgba(0,0,0,0.35), transparent);
+  height: 55%;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 55%, transparent 100%);
   pointer-events: none;
+  z-index: 1;
 }
 
-.card-content { padding: 20px 22px 22px; }
+.card-photo-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  padding: 18px 20px 14px;
+}
+
+.card-content { padding: 16px 22px 22px; }
 
 .card-name-row {
   display: flex;
@@ -474,6 +485,11 @@
 
 .profile-name { font-size: 1.5em; font-weight: 700; color: #1f2937; }
 
+.card-photo-overlay .profile-name {
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
 .card-type-badge {
   padding: 4px 12px;
   background: #1f2937;
@@ -484,6 +500,12 @@
   white-space: nowrap;
   text-transform: capitalize;
   flex-shrink: 0;
+}
+
+.card-photo-overlay .card-type-badge {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(6px);
 }
 
 .card-meta-row {
@@ -500,6 +522,11 @@
   font-weight: 600;
 }
 
+.card-photo-overlay .profile-alter-ego {
+  color: #d8b4fe;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+
 .card-age {
   font-size: 0.85em;
   color: #6b7280;
@@ -509,24 +536,37 @@
   border-radius: 10px;
 }
 
+.card-photo-overlay .card-age {
+  color: #fff;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(6px);
+}
+
 .card-match-reason {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 0.78em;
-  font-weight: 600;
-  color: #7c3aed;
-  background: rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  border: none;
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 5px 12px;
   margin-bottom: 10px;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.35);
 }
 
 .profile-city {
   font-size: 0.85em;
   color: var(--color-muted);
   margin-bottom: 14px;
+}
+
+.card-photo-overlay .profile-city {
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  margin-bottom: 0;
 }
 
 .card-section {
