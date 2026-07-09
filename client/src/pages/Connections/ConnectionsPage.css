@@ -324,13 +324,13 @@
 .stat-item {
   text-align: center;
   padding: 12px;
-  background: rgba(255,255,255,0.05);
+  background: #f9fafb;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid #e5e7eb;
 }
 
-.stat-number { font-size: 1.6em; font-weight: bold; color: #f9fafb; }
-.stat-label { font-size: 0.8em; color: #9ca3af; }
+.stat-number { font-size: 1.6em; font-weight: bold; color: #111827; }
+.stat-label { font-size: 0.8em; color: #6b7280; }
 
 .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
 
