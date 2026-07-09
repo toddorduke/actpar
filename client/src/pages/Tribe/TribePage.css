@@ -204,6 +204,30 @@
 }
 
 /* ── Discover list ── */
+.tribe-hub-discover-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  color: #9ca3af;
+}
+
+.tribe-hub-discover-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 0.9rem;
+  color: #111827;
+  font-family: inherit;
+}
+
+.tribe-hub-discover-search input::placeholder { color: #9ca3af; }
+
 .tribe-hub-discover-list {
   display: flex;
   flex-direction: column;
@@ -270,18 +294,6 @@
   transition: all 0.15s;
 }
 .tribe-hub-join-btn:hover { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border-color: transparent; }
-
-.tribe-hub-see-all {
-  background: none;
-  border: none;
-  color: #d97706;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 4px 0;
-  text-align: left;
-}
-.tribe-hub-see-all:hover { text-decoration: underline; }
 
 /* ── Modals ── */
 .tribe-modal-overlay {

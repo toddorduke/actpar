@@ -22,6 +22,7 @@ export default function TribePage() {
   const [commDesc, setCommDesc] = useState('');
   const [creatingComm, setCreatingComm] = useState(false);
   const [browseSearch, setBrowseSearch] = useState('');
+  const [discoverQuery, setDiscoverQuery] = useState('');
 
   useEffect(() => {
     supabase.from('profiles').select('id', { count: 'exact', head: true }).then(({ count }) => {
@@ -48,6 +49,14 @@ export default function TribePage() {
       (c.name ?? '').toLowerCase().includes(q) || (c.description ?? '').toLowerCase().includes(q)
     );
   }, [communities, browseSearch]);
+
+  const discoverSearchResults = useMemo(() => {
+    if (!discoverQuery.trim()) return null;
+    const q = discoverQuery.toLowerCase();
+    return discoverCommunities.filter((c) =>
+      (c.name ?? '').toLowerCase().includes(q) || (c.description ?? '').toLowerCase().includes(q)
+    );
+  }, [discoverCommunities, discoverQuery]);
 
   async function submitCreateCommunity() {
     if (!commName.trim()) return;
@@ -132,8 +141,18 @@ export default function TribePage() {
       {discoverCommunities.length > 0 && (
         <section className="tribe-hub-section">
           <h2 className="tribe-hub-section-title">✨ Discover Communities</h2>
+          <div className="tribe-hub-discover-search">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              placeholder="Search communities..."
+              value={discoverQuery}
+              onChange={(e) => setDiscoverQuery(e.target.value)}
+            />
+          </div>
           <div className="tribe-hub-discover-list">
-            {discoverCommunities.slice(0, 6).map((c) => (
+            {(discoverSearchResults ?? discoverCommunities.slice(0, 3)).map((c) => (
               <div key={c.id} className="tribe-hub-discover-item">
                 <div className="tribe-hub-discover-avatar">
                   {c.avatar_url
@@ -155,12 +174,10 @@ export default function TribePage() {
                 </button>
               </div>
             ))}
+            {discoverSearchResults?.length === 0 && (
+              <p className="tribe-browse-empty">No communities found.</p>
+            )}
           </div>
-          {discoverCommunities.length > 6 && (
-            <button className="tribe-hub-see-all" onClick={() => setShowBrowse(true)}>
-              See all {discoverCommunities.length} communities →
-            </button>
-          )}
         </section>
       )}
 
