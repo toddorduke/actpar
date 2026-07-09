@@ -118,7 +118,7 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={BUBBLE_PATH} />
           </svg>
-          <span className="feed-action-count">{commentCount || ''}</span>
+          <span className="feed-action-count">{commentCount ?? 0}</span>
         </button>
 
         <button
