@@ -508,7 +508,7 @@ export default function ConnectionsPage() {
                       <span className="mn-status-line">⚡ Sparked you with a personal message</span>
                       {req.spark_message && <span className="mn-spark-msg">"{req.spark_message.slice(0, 60)}{req.spark_message.length > 60 ? '…' : ''}"</span>}
                     </div>
-                    <button className="mn-accept-btn" onClick={() => acceptConnection(req.requester_id)}>Accept</button>
+                    <button className="mn-accept-btn" onClick={() => acceptSpark(req.requester_id)}>Accept</button>
                   </div>
                 );
               })}
@@ -726,7 +726,7 @@ export default function ConnectionsPage() {
                         <div className="spark-name">{spName}</div>
                         {sp?.alter_ego_name && <div className="spark-alter">⚡ {sp.alter_ego_name}</div>}
                       </div>
-                      <button className="spark-accept-btn" onClick={() => acceptConnection(spark.requester_id)}>Accept</button>
+                      <button className="spark-accept-btn" onClick={() => acceptSpark(spark.requester_id)}>Accept</button>
                     </div>
                   );
                 })}
