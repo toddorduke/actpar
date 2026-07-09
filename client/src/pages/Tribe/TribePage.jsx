@@ -61,8 +61,9 @@ export default function TribePage() {
   async function submitCreateCommunity() {
     if (!commName.trim()) return;
     setCreatingComm(true);
-    const { data, error } = await createCommunity({ name: commName, description: commDesc });
+    const { data, error, moderation } = await createCommunity({ name: commName, description: commDesc });
     setCreatingComm(false);
+    if (moderation) { toast(moderation.message, 'error'); return; }
     if (error) { toast(`Error: ${error.message}`, 'error'); return; }
     setShowCreateComm(false);
     setCommName('');

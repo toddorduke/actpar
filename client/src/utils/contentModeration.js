@@ -10,7 +10,8 @@ const BLOCKED_WORDS = [
   // Profanity
   'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'cunt', 'dick', 'pussy',
   'cock', 'whore', 'slut', 'fag', 'faggot', 'nigger', 'nigga', 'spic',
-  'chink', 'kike', 'wetback', 'retard', 'tranny',
+  'chink', 'kike', 'wetback', 'retard', 'tranny', 'bullshit', 'goddamn',
+  'douche', 'douchebag', 'prick', 'twat', 'wanker', 'motherfucker',
   // Bullying / threats
   'kill yourself', 'kys', 'go die', 'you should die', 'i will kill',
   'i will hurt', 'you are worthless', 'nobody likes you', 'kill u',
@@ -47,6 +48,7 @@ const WARNING_WORDS = [
   'freak', 'weirdo', 'pathetic', 'useless',
   'trash', 'garbage', 'clown', 'dumbass', 'dumb ass', 'shut up',
   'go away', 'nobody wants you', 'you suck',
+  'damn', 'hell', 'ass', 'piss', 'pissed', 'crap',
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,8 +72,12 @@ function containsPhrase(text, phrase) {
   // Check for phrase anywhere in text (with word boundaries for single words)
   const words = phrase.trim().split(' ');
   if (words.length === 1) {
-    // Single word — use word boundary
-    const re = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'i');
+    // Single word — match the bare word, or the word plus a short common
+    // suffix (shit -> shits, fuck -> fucking/fucker), optionally with the
+    // final consonant doubled (shit -> shitty/shitting), so simple
+    // inflections can't slip past a bare word-boundary match.
+    const lastChar = escapeRegex(phrase.slice(-1));
+    const re = new RegExp(`\\b${escapeRegex(phrase)}${lastChar}?(?:s|es|ed|ing|y|er|ers)?\\b`, 'i');
     return re.test(text);
   }
   // Multi-word phrase

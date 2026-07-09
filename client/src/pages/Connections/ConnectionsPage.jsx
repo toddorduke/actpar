@@ -9,6 +9,8 @@ import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
 import { getDisplayName } from '../../utils/displayName.js';
+import { checkText } from '../../utils/contentModeration.js';
+import { useToast } from '../../components/common/Toast.jsx';
 import './ConnectionsPage.css';
 
 // Local hours 6 AM–11 PM converted to UTC for the deadline picker
@@ -30,6 +32,7 @@ const LF_CATEGORIES = [
 export default function ConnectionsPage() {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const toast = useToast();
   const {
     browseProfiles,
     incomingSparks,
@@ -68,6 +71,8 @@ export default function ConnectionsPage() {
 
   async function handleCreateGoal() {
     if (!newGoalTitle.trim() || savingGoal) return;
+    const titleCheck = checkText(newGoalTitle.trim());
+    if (!titleCheck.ok) { toast(titleCheck.message, 'error'); return; }
     setSavingGoal(true);
     const { data } = await supabase.from('goals').insert({
       user_id: user.id,

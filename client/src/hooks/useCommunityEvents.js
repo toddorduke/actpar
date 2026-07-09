@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const useCommunityEvents = (communityId) => {
   const { user } = useContext(AuthContext);
@@ -32,6 +33,16 @@ export const useCommunityEvents = (communityId) => {
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
   const createEvent = useCallback(async ({ title, description, location, event_date, price, stripe_payment_link, max_attendees }) => {
+    const titleCheck = checkText(title);
+    if (!titleCheck.ok) return { data: null, error: null, moderation: titleCheck };
+    if (description) {
+      const descCheck = checkText(description);
+      if (!descCheck.ok) return { data: null, error: null, moderation: descCheck };
+    }
+    if (location) {
+      const locationCheck = checkText(location);
+      if (!locationCheck.ok) return { data: null, error: null, moderation: locationCheck };
+    }
     const { data, error } = await supabase
       .from('community_events')
       .insert({ community_id: communityId, created_by: user.id, title, description, location, event_date, price: price || 0, stripe_payment_link: stripe_payment_link || null, max_attendees: max_attendees || null })

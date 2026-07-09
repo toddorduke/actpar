@@ -6,6 +6,7 @@ import { getDisplayName } from '../utils/displayName.js';
 import { track, Events } from '../lib/analytics.js';
 import { awardXP, XP_VALUES } from '../lib/xp.js';
 import { playSparkSound } from '../utils/sounds.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export const ConnectionsContext = createContext(null);
 
@@ -131,6 +132,10 @@ export const ConnectionsProvider = ({ children }) => {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const sendSpark = useCallback(async (receiverId, sparkMessage = null) => {
+    if (sparkMessage) {
+      const messageCheck = checkText(sparkMessage);
+      if (!messageCheck.ok) return { error: null, moderation: messageCheck };
+    }
     const row = { requester_id: user.id, receiver_id: receiverId, status: 'pending' };
     if (sparkMessage) row.spark_message = sparkMessage;
     const { error } = await supabase.from('connections').insert(row);

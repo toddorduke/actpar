@@ -17,6 +17,7 @@ function incrementSparksUsed() {
 export default function SparkModal({ profile, onSend, onClose }) {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const used = getSparksUsedToday();
   const remaining = Math.max(0, DAILY_LIMIT - used);
   const name = getDisplayName(profile, 'this person');
@@ -25,8 +26,13 @@ export default function SparkModal({ profile, onSend, onClose }) {
   async function handleSend() {
     if (!canSend) return;
     setSending(true);
-    const { error } = await onSend(message.trim());
-    if (!error) {
+    setSendError('');
+    const { error, moderation } = await onSend(message.trim());
+    if (moderation) {
+      setSendError(moderation.message);
+    } else if (error) {
+      setSendError('Something went wrong sending your spark. Please try again.');
+    } else {
       incrementSparksUsed();
       onClose();
     }
@@ -73,6 +79,7 @@ export default function SparkModal({ profile, onSend, onClose }) {
                 autoFocus
               />
               <div className="spark-char-count">{message.length}/200 {message.length < 10 && message.length > 0 && <span className="spark-char-warn">— at least 10 characters</span>}</div>
+              {sendError && <p className="spark-send-error">{sendError}</p>}
             </>
           )}
         </div>

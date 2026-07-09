@@ -22,6 +22,7 @@ import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
+import { checkText } from '../../utils/contentModeration.js';
 import '../Profile/ProfilePage.css';
 import './HomePage.css';
 
@@ -479,6 +480,8 @@ const HomePage = () => {
 
   async function handleJourneyCreateAndLink() {
     if (!journeyPickerNewTitle.trim() || journeyPickerSaving) return;
+    const titleCheck = checkText(journeyPickerNewTitle.trim());
+    if (!titleCheck.ok) { toast(titleCheck.message, 'error'); return; }
     setJourneyPickerSaving(true);
     const { data } = await supabase.from('goals').insert({
       user_id: user.id,
@@ -662,13 +665,14 @@ const HomePage = () => {
     if (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget)) return;
     setAddingGoal(true);
     const reminderUtcHour = newGoalReminder ? localTimeToUtcHour(newGoalReminder) : null;
-    await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
+    const { moderation } = await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
       goal_type: newGoalType,
       target_value: newGoalType === 'numeric' ? parseFloat(newGoalTarget) : null,
       target_unit: newGoalType === 'numeric' ? newGoalUnit.trim() : null,
       target_period: newGoalType === 'numeric' ? newGoalPeriod : null,
       reminder_utc_hour: reminderUtcHour,
     });
+    if (moderation) { toast(moderation.message, 'error'); setAddingGoal(false); return; }
     setNewGoalTitle('');
     setNewGoalCategory('');
     setNewGoalUnit('');

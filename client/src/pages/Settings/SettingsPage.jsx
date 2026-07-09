@@ -8,6 +8,7 @@ import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import PremiumModal from '../../components/common/PremiumModal.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { checkText } from '../../utils/contentModeration.js';
 import './SettingsPage.css';
 
 const LF_CATEGORIES = [
@@ -271,6 +272,13 @@ export default function SettingsPage() {
     const trimmedEgo = alterEgo.trim() || null;
     const egoChanged = trimmedEgo !== (profile?.alter_ego_name ?? null);
 
+    const taglineCheck = checkText(tagline);
+    if (!taglineCheck.ok) { toast(taglineCheck.message, 'error'); setSavingProfile(false); return; }
+    if (trimmedEgo) {
+      const egoCheck = checkText(trimmedEgo);
+      if (!egoCheck.ok) { toast(egoCheck.message, 'error'); setSavingProfile(false); return; }
+    }
+
     if (egoChanged && egoStatus === 'taken') {
       toast('That Alter Ego Name is already taken — try a different one.', 'error');
       setSavingProfile(false);
@@ -383,6 +391,10 @@ export default function SettingsPage() {
 
   async function handleSaveCoach(e) {
     e.preventDefault();
+    const taglineCheck = checkText(coachTagline);
+    if (!taglineCheck.ok) { toast(taglineCheck.message, 'error'); return; }
+    const bioCheck = checkText(coachBio);
+    if (!bioCheck.ok) { toast(bioCheck.message, 'error'); return; }
     setSavingCoach(true);
     const bioArray = coachBio.split(/\n\n+/).map(s => s.trim()).filter(Boolean);
     await updateProfile({

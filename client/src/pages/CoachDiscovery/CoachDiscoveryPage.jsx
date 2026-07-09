@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase.js';
 import { COACHES, SPECIALTIES, PRICE_RANGES } from '../../data/coaches.js';
 import { useCoaches } from '../../hooks/useCoaches.js';
 import Avatar from '../../components/common/Avatar.jsx';
+import { checkText } from '../../utils/contentModeration.js';
 import './CoachDiscoveryPage.css';
 
 const EXPERIENCE_OPTIONS = ['Under 1 year', '1–2 years', '3–5 years', '5–10 years', '10+ years'];
@@ -39,6 +40,14 @@ function BecomeCoachModal({ onClose, userId }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!step3Valid) return;
+    const bioCheck = checkText(form.bio);
+    if (!bioCheck.ok) { toast(bioCheck.message, 'error'); return; }
+    const whyCheck = checkText(form.why_coach);
+    if (!whyCheck.ok) { toast(whyCheck.message, 'error'); return; }
+    if (form.certifications.trim()) {
+      const certCheck = checkText(form.certifications);
+      if (!certCheck.ok) { toast(certCheck.message, 'error'); return; }
+    }
     setSubmitting(true);
     const { error } = await supabase.from('coach_applications').insert({
       user_id: userId,

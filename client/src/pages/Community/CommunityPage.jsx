@@ -194,12 +194,13 @@ function EventsTab({ communityId, isAdmin }) {
       toast('Add your Stripe Payment Link for paid events', 'warning'); return;
     }
     setSaving(true);
-    const { error } = await createEvent({
+    const { error, moderation } = await createEvent({
       ...form,
       price: Number(form.price) || 0,
       max_attendees: form.max_attendees ? Number(form.max_attendees) : null,
     });
     setSaving(false);
+    if (moderation) { toast(moderation.message, 'error'); return; }
     if (error) { toast('Failed to create event', 'error'); return; }
     setShowForm(false);
     setForm({ title: '', description: '', location: '', event_date: '', price: '', stripe_payment_link: '', max_attendees: '' });

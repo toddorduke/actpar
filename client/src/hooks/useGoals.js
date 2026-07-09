@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
 import { track, Events } from '../lib/analytics.js';
 import { awardXP, XP_VALUES, milestoneXP } from '../lib/xp.js';
+import { checkText } from '../utils/contentModeration.js';
 
 const STREAK_MILESTONES = [7, 30, 60, 90];
 
@@ -31,6 +32,8 @@ export const useGoals = () => {
 
   const addGoal = useCallback(async (title, category = null, options = {}) => {
     if (!user) return { error: 'Not authenticated' };
+    const titleCheck = checkText(title);
+    if (!titleCheck.ok) return { data: null, error: null, moderation: titleCheck };
     const { goal_type = 'habit', target_value, target_unit, target_period, tier, reminder_utc_hour } = options;
     const { data, error } = await supabase
       .from('goals')

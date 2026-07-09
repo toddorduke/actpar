@@ -138,6 +138,17 @@
 
 .spark-char-warn { color: #f97316; }
 
+.spark-send-error {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .spark-out {
   text-align: center;
   padding: 16px 0;

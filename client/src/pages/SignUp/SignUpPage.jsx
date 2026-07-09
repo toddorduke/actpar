@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
+import { checkText } from '../../utils/contentModeration.js';
 import './SignUpPage.css';
 
 const BUBBLE_COUNT = 7;
@@ -86,6 +87,10 @@ const SignUpPage = () => {
     if (!agreedToTerms) {
       toast('Please agree to the Terms of Service and Privacy Policy.', 'error'); return;
     }
+    const firstNameCheck = checkText(formData.firstName);
+    if (!firstNameCheck.ok) { toast(firstNameCheck.message, 'error'); return; }
+    const lastNameCheck = checkText(formData.lastName);
+    if (!lastNameCheck.ok) { toast(lastNameCheck.message, 'error'); return; }
 
     setSubmitting(true);
 

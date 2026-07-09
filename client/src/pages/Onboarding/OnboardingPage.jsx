@@ -6,6 +6,8 @@ import { useGoals } from '../../hooks/useGoals.js';
 import { supabase } from '../../lib/supabase.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import { track, Events } from '../../lib/analytics.js';
+import { checkText } from '../../utils/contentModeration.js';
+import { useToast } from '../../components/common/Toast.jsx';
 import './OnboardingPage.css';
 
 const CATEGORIES = [
@@ -69,6 +71,7 @@ export default function OnboardingPage() {
   const { profile } = useProfile();
   const { addGoal } = useGoals();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [mode, setMode] = useState(null);
   const [step, setStep] = useState(1);
@@ -227,12 +230,18 @@ export default function OnboardingPage() {
       .map((g, i) => g.title.trim() ? { title: g.title.trim(), category: g.category || null, tier: i + 1 } : null)
       .filter(Boolean);
     if (goalsToSave.length > 0) {
-      await Promise.all(goalsToSave.map((g) => addGoal(g.title, g.category, { tier: g.tier })));
+      const results = await Promise.all(goalsToSave.map((g) => addGoal(g.title, g.category, { tier: g.tier })));
+      const blocked = results.find((r) => r.moderation);
+      if (blocked) { toast(blocked.moderation.message, 'error'); return; }
     }
     setStep(mode === 'quick' ? peopleStep : 4);
   }
 
   async function handleFinish() {
+    if (alterEgoName.trim()) {
+      const egoCheck = checkText(alterEgoName.trim());
+      if (!egoCheck.ok) { toast(egoCheck.message, 'error'); return; }
+    }
     track(Events.ONBOARDING_COMPLETED, { mode, goals_set: tierGoals.filter((g) => g.title.trim()).length });
     setSaving(true);
     const profileUpdate = {

@@ -118,7 +118,8 @@ export default function ProfileSetupPage() {
     }
     setSaving(true);
     const reminderUtcHour = goalReminder ? localTimeToUtcHour(goalReminder) : null;
-    await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1, reminder_utc_hour: reminderUtcHour });
+    const { moderation } = await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1, reminder_utc_hour: reminderUtcHour });
+    if (moderation) { toast(moderation.message, 'error'); setSaving(false); return; }
     await updateProfile({ avatar_url: avatarUrl, profile_setup_complete: true });
     await supabase.auth.updateUser({ data: { profile_setup_complete: true } });
     navigate('/', { replace: true });

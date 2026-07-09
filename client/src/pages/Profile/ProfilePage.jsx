@@ -487,12 +487,13 @@ const ProfilePage = () => {
     if (!newGoalTitle.trim()) return;
     if (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget)) return;
     setAddingGoal(true);
-    await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
+    const { moderation } = await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
       goal_type: newGoalType,
       target_value: newGoalType === 'numeric' ? parseFloat(newGoalTarget) : null,
       target_unit: newGoalType === 'numeric' ? newGoalUnit.trim() : null,
       target_period: newGoalType === 'numeric' ? newGoalPeriod : null,
     });
+    if (moderation) { toast(moderation.message, 'error'); setAddingGoal(false); return; }
     setNewGoalTitle('');
     setNewGoalCategory('');
     setNewGoalUnit('');
