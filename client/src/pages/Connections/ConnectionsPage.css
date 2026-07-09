@@ -82,7 +82,7 @@
 .sent-count-label {
   font-size: 0.88rem;
   font-weight: 600;
-  color: #f9fafb;
+  color: #374151;
 }
 
 .sent-count-num {
@@ -875,7 +875,7 @@
   background: none;
   border: none;
   font-weight: 600;
-  color: #f9fafb;
+  color: #111827;
   font-size: 0.9em;
   cursor: pointer;
   padding: 0;
