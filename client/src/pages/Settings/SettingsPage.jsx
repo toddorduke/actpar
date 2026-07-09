@@ -7,6 +7,7 @@ import { usePushNotifications } from '../../hooks/usePushNotifications.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import PremiumModal from '../../components/common/PremiumModal.jsx';
+import ReportIssueModal from '../../components/common/ReportIssueModal.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { checkText } from '../../utils/contentModeration.js';
 import './SettingsPage.css';
@@ -75,6 +76,7 @@ export default function SettingsPage() {
 
   const [activeSection, setActiveSection] = useState('account');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showReportIssue, setShowReportIssue] = useState(false);
   const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush, permission: pushPermission, pushError } = usePushNotifications();
 
   // Account
@@ -989,6 +991,13 @@ export default function SettingsPage() {
                 <a href="mailto:safety@actpar.com" className="settings-about-link">
                   <span>🚨</span> Report a Safety Issue
                 </a>
+                <button
+                  className="settings-about-link"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}
+                  onClick={() => setShowReportIssue(true)}
+                >
+                  <span>🐞</span> Report a Bug or Issue
+                </button>
               </div>
               <div className="settings-about-version">
                 Version 1.0.0 &nbsp;·&nbsp; © {new Date().getFullYear()} ActPar
@@ -1121,6 +1130,7 @@ export default function SettingsPage() {
     </div>
 
     {showPremiumModal && <PremiumModal onClose={() => setShowPremiumModal(false)} />}
+    {showReportIssue && <ReportIssueModal onClose={() => setShowReportIssue(false)} />}
     </>
   );
 }

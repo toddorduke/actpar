@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import Navigation from './Navigation.jsx';
 import AppGuide from './AppGuide.jsx';
+import ReportIssueButton from './ReportIssueButton.jsx';
 
 const AUTH_ROUTES = ['/login', '/signup', '/onboarding', '/forgot-password', '/reset-password', '/about'];
 
@@ -16,6 +17,7 @@ const Layout = ({ children }) => {
         {children}
       </main>
       {!isAuthPage && <AppGuide />}
+      {!isAuthPage && <ReportIssueButton />}
     </div>
   );
 };
