@@ -534,8 +534,8 @@
 /* ── Floating create button ── */
 .feed-fab {
   position: fixed;
-  left: 20px;
-  right: auto;
+  left: auto;
+  right: 14px;
   bottom: calc(72px + env(safe-area-inset-bottom));
   width: 52px;
   height: 52px;
@@ -822,10 +822,10 @@
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.8);
   }
 
-  /* FAB sits at the left edge of the column */
+  /* FAB sits at the right edge of the column, under the action buttons */
   .feed-fab {
-    left: calc(50% - 215px - 20px);
-    right: auto;
+    left: auto;
+    right: calc(50% - 215px + 14px);
     bottom: 20px;
   }
 
