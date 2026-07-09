@@ -75,6 +75,77 @@ export function playSparkSound() {
   }
 }
 
+// Lightning strike + triumphant chord — plays when a connection match celebration opens
+export function playConnectedSound() {
+  try {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+
+    // Thunder crack: low rumble + bright crackle, bigger than the spark zap
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.22, now);
+    master.connect(ctx.destination);
+
+    const bufferSize = ctx.sampleRate * 0.3;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(3000, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(150, now + 0.3);
+    noiseFilter.Q.value = 0.9;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(1, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(master);
+    noise.start(now);
+
+    const rumble = ctx.createOscillator();
+    rumble.type = 'sine';
+    rumble.frequency.setValueAtTime(70, now);
+    rumble.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+    const rumbleGain = ctx.createGain();
+    rumbleGain.gain.setValueAtTime(0.6, now);
+    rumbleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    rumble.connect(rumbleGain);
+    rumbleGain.connect(master);
+    rumble.start(now);
+    rumble.stop(now + 0.4);
+
+    // Triumphant ascending major chord, arriving as the reveal happens
+    const chordStart = now + 0.55;
+    const chordGain = ctx.createGain();
+    chordGain.gain.setValueAtTime(0.16, chordStart);
+    chordGain.connect(ctx.destination);
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => { // C5 E5 G5 C6
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      const gain = ctx.createGain();
+      const t = chordStart + i * 0.08;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.7, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+      osc.connect(gain);
+      gain.connect(chordGain);
+      osc.start(t);
+      osc.stop(t + 0.9);
+    });
+  } catch (_) {
+    // AudioContext blocked or unavailable — silently skip
+  }
+}
+
 // Soft two-tone ding — plays for messages, likes, milestones
 export function playDingSound() {
   try {

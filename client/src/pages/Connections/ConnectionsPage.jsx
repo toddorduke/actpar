@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
+import { useProfile } from '../../hooks/useProfile.js';
 import { useBlock } from '../../hooks/useBlock.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import SparkModal, { getSparksUsedToday } from '../../components/common/SparkModal.jsx';
+import ConnectedModal from '../../components/common/ConnectedModal.jsx';
 import { getDisplayName } from '../../utils/displayName.js';
 import { checkText } from '../../utils/contentModeration.js';
 import { useToast } from '../../components/common/Toast.jsx';
@@ -31,8 +33,29 @@ const LF_CATEGORIES = [
 
 export default function ConnectionsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(AuthContext);
+  const { profile: myProfile } = useProfile();
   const toast = useToast();
+  const [celebrate, setCelebrate] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.celebrate) {
+      setCelebrate(location.state.celebrate);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []);
+
+  async function handleAccept(req) {
+    const { error } = await acceptSpark(req.requester_id);
+    if (!error) {
+      setCelebrate({
+        id: req.requester_id,
+        name: getDisplayName(req.profiles, 'Someone'),
+        avatarUrl: req.profiles?.avatar_url,
+      });
+    }
+  }
   const {
     browseProfiles,
     incomingSparks,
@@ -253,6 +276,17 @@ export default function ConnectionsPage() {
         onClose={() => setSparkModalOpen(false)}
       />
     )}
+
+    <ConnectedModal
+      open={!!celebrate}
+      myAvatarUrl={myProfile?.avatar_url}
+      myName={getDisplayName(myProfile, 'You')}
+      otherAvatarUrl={celebrate?.avatarUrl}
+      otherName={celebrate?.name}
+      onMessage={() => { const id = celebrate?.id; setCelebrate(null); navigate(`/messages?with=${id}`); }}
+      onViewProfile={() => { const id = celebrate?.id; setCelebrate(null); navigate(`/profile/${id}`); }}
+      onClose={() => setCelebrate(null)}
+    />
 
     {/* Propose journey modal */}
     {journeyModal && (
@@ -487,7 +521,7 @@ export default function ConnectionsPage() {
                       <span className="mn-status-line">Sent you a connection request — accept to link up</span>
                     </div>
                     <div className="mn-actions">
-                      <button className="mn-accept-btn" onClick={() => acceptSpark(req.requester_id)}>Accept</button>
+                      <button className="mn-accept-btn" onClick={() => handleAccept(req)}>Accept</button>
                       <button className="mn-decline-btn" onClick={() => declineSpark(req.requester_id)}>Decline</button>
                     </div>
                   </div>
@@ -508,7 +542,7 @@ export default function ConnectionsPage() {
                       <span className="mn-status-line">⚡ Sparked you with a personal message</span>
                       {req.spark_message && <span className="mn-spark-msg">"{req.spark_message.slice(0, 60)}{req.spark_message.length > 60 ? '…' : ''}"</span>}
                     </div>
-                    <button className="mn-accept-btn" onClick={() => acceptSpark(req.requester_id)}>Accept</button>
+                    <button className="mn-accept-btn" onClick={() => handleAccept(req)}>Accept</button>
                   </div>
                 );
               })}
@@ -690,7 +724,7 @@ export default function ConnectionsPage() {
                         )}
                       </button>
                       <div className="incoming-req-actions">
-                        <button className="req-accept-btn" onClick={() => acceptSpark(req.requester_id)} title="Accept">✓</button>
+                        <button className="req-accept-btn" onClick={() => handleAccept(req)} title="Accept">✓</button>
                         <button className="req-decline-btn" onClick={() => declineSpark(req.requester_id)} title="Decline">✗</button>
                       </div>
                     </div>
@@ -726,7 +760,7 @@ export default function ConnectionsPage() {
                         <div className="spark-name">{spName}</div>
                         {sp?.alter_ego_name && <div className="spark-alter">⚡ {sp.alter_ego_name}</div>}
                       </div>
-                      <button className="spark-accept-btn" onClick={() => acceptSpark(spark.requester_id)}>Accept</button>
+                      <button className="spark-accept-btn" onClick={() => handleAccept(spark)}>Accept</button>
                     </div>
                   );
                 })}
@@ -1099,7 +1133,7 @@ export default function ConnectionsPage() {
                       )}
                     </button>
                     <div className="incoming-req-actions">
-                      <button className="req-accept-btn" onClick={() => acceptSpark(req.requester_id)} title="Accept">✓</button>
+                      <button className="req-accept-btn" onClick={() => handleAccept(req)} title="Accept">✓</button>
                       <button className="req-decline-btn" onClick={() => declineSpark(req.requester_id)} title="Decline">✗</button>
                     </div>
                   </div>

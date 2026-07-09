@@ -143,7 +143,17 @@ const Navigation = () => {
   function handleNotifClick(notif) {
     markRead(notif.id);
     setNotifOpen(false);
-    if (notif.type === 'connection_request' || notif.type === 'connection_accepted') {
+    if (notif.type === 'connection_accepted') {
+      navigate('/connections', {
+        state: {
+          celebrate: {
+            id: notif.actor_id,
+            name: notif.actor ? getDisplayName(notif.actor, 'Someone') : 'Someone',
+            avatarUrl: notif.actor?.avatar_url,
+          },
+        },
+      });
+    } else if (notif.type === 'connection_request') {
       navigate('/connections');
     } else if (notif.type === 'pact_joined' || notif.type === 'pact_post') {
       navigate('/pact');

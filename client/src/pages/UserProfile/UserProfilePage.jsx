@@ -7,6 +7,7 @@ import { useToast } from '../../components/common/Toast.jsx';
 import { createNotification } from '../../hooks/useNotifications.js';
 import { useBlock } from '../../hooks/useBlock.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
+import ConnectedModal from '../../components/common/ConnectedModal.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import './UserProfilePage.css';
@@ -33,6 +34,7 @@ export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [showReport, setShowReport] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [celebrateProfile, setCelebrateProfile] = useState(null);
   const { blockUser, unblockUser, isBlocked } = useBlock();
 
   useEffect(() => {
@@ -168,10 +170,10 @@ export default function UserProfilePage() {
       toast(`Error: ${error.message}`, 'error');
     } else {
       setConnectionStatus('accepted');
-      const { data: me } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
+      const { data: me } = await supabase.from('profiles').select('first_name, last_name, avatar_url').eq('id', user.id).single();
       const name = getDisplayName(me, 'Someone');
       createNotification({ userId, actorId: user.id, type: 'connection_accepted', body: `${name} accepted your spark ⚡ You're now connected!` });
-      toast('Connected! ⚡', 'success');
+      setCelebrateProfile(me);
     }
     setActing(false);
   }
@@ -510,6 +512,16 @@ export default function UserProfilePage() {
           </div>
         )}
       </div>
+
+      <ConnectedModal
+        open={!!celebrateProfile}
+        myAvatarUrl={celebrateProfile?.avatar_url}
+        myName={getDisplayName(celebrateProfile, 'You')}
+        otherAvatarUrl={profile.avatar_url}
+        otherName={fullName}
+        onMessage={() => { setCelebrateProfile(null); navigate(`/messages?with=${userId}`); }}
+        onClose={() => setCelebrateProfile(null)}
+      />
 
       {showReport && <ReportModal reportedUserId={userId} onClose={() => setShowReport(false)} />}
 
