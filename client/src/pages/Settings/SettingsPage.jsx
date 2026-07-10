@@ -222,7 +222,8 @@ export default function SettingsPage() {
   }
 
   async function handleAddCustomLf(name) {
-    await createOrAdopt(name);
+    const { moderation } = await createOrAdopt(name);
+    if (moderation) { toast(moderation.message, 'error'); return; }
     setLookingFor((prev) => prev.includes(name) ? prev : [...prev, name]);
     setLfSearch('');
   }
@@ -230,11 +231,15 @@ export default function SettingsPage() {
   async function handleSaveAccount(e) {
     e.preventDefault();
     setSavingAccount(true);
-    await Promise.all([
+    const [{ error: profileError }] = await Promise.all([
       updateProfile({ first_name: firstName, last_name: lastName }),
       supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName } }),
     ]);
     setSavingAccount(false);
+    if (profileError) {
+      toast(`Couldn't save your account info: ${profileError.message}`, 'error');
+      return;
+    }
     setAccountSaved(true);
     setTimeout(() => setAccountSaved(false), 2500);
   }
@@ -382,7 +387,7 @@ export default function SettingsPage() {
     setSavingNotifs(true);
     const utcOffset = new Date().getTimezoneOffset(); // minutes behind UTC (positive = west)
     const reminderUtcHour = ((notifReminderHour + Math.round(utcOffset / 60)) + 24) % 24;
-    await updateProfile({
+    const { error } = await updateProfile({
       notification_prefs: {
         daily_reminder: notifDailyReminder,
         reminder_hour: notifReminderHour,
@@ -395,6 +400,10 @@ export default function SettingsPage() {
       },
     });
     setSavingNotifs(false);
+    if (error) {
+      toast(`Couldn't save your notification preferences: ${error.message}`, 'error');
+      return;
+    }
     setNotifSaved(true);
     setTimeout(() => setNotifSaved(false), 2500);
   }
@@ -407,7 +416,7 @@ export default function SettingsPage() {
     if (!bioCheck.ok) { toast(bioCheck.message, 'error'); return; }
     setSavingCoach(true);
     const bioArray = coachBio.split(/\n\n+/).map(s => s.trim()).filter(Boolean);
-    await updateProfile({
+    const { error } = await updateProfile({
       coach_specialty: coachSpecialty.trim() || null,
       coach_tagline: coachTagline.trim() || null,
       coach_rate: coachRate.trim() || null,
@@ -418,6 +427,10 @@ export default function SettingsPage() {
       coach_session_types: coachSessionTypes,
     });
     setSavingCoach(false);
+    if (error) {
+      toast(`Couldn't save your coach profile: ${error.message}`, 'error');
+      return;
+    }
     setCoachSaved(true);
     setTimeout(() => setCoachSaved(false), 2500);
   }

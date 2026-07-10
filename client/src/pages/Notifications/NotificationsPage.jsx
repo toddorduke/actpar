@@ -72,6 +72,8 @@ export default function NotificationsPage() {
       navigate('/');
     } else if (notif.type === 'booking_request') {
       navigate(`/messages?with=${notif.actor_id}`);
+    } else if (notif.type === 'pact_joined' || notif.type === 'pact_post') {
+      navigate('/pact');
     }
   }
 

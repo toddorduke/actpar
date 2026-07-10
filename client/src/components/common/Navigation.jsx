@@ -157,7 +157,7 @@ const Navigation = () => {
       navigate('/connections');
     } else if (notif.type === 'pact_joined' || notif.type === 'pact_post') {
       navigate('/pact');
-    } else if (notif.type === 'message') {
+    } else if (notif.type === 'new_message') {
       navigate(`/messages?with=${notif.actor_id}`);
     } else if (notif.type === 'journey_invite' || notif.type === 'journey_accepted') {
       navigate('/connections');
