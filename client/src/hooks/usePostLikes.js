@@ -37,12 +37,18 @@ export const usePostLikes = (postIds = [], postType = 'tribe') => {
     onCountChange(postId, alreadyLiked ? currentLikeCount - 1 : currentLikeCount + 1);
 
     if (alreadyLiked) {
-      await supabase
+      const { error } = await supabase
         .from('post_likes')
         .delete()
         .eq('post_id', postId)
         .eq('user_id', user.id);
-      await supabase.rpc('decrement_post_likes', { p_post_id: postId, p_post_type: postType });
+      if (!error) {
+        await supabase.rpc('decrement_post_likes', { p_post_id: postId, p_post_type: postType });
+      } else {
+        // Roll back the optimistic update
+        setLikedIds((prev) => new Set([...prev, postId]));
+        onCountChange(postId, currentLikeCount);
+      }
     } else {
       const { error } = await supabase
         .from('post_likes')

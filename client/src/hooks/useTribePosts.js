@@ -55,23 +55,11 @@ export const useTribePosts = (communityId = null) => {
     return { data, error };
   }, [user]);
 
-  const likePost = useCallback(async (postId, currentLikes) => {
-    const { error } = await supabase
-      .from('tribe_posts')
-      .update({ likes: currentLikes + 1 })
-      .eq('id', postId);
-    if (!error) {
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, likes: p.likes + 1 } : p))
-      );
-    }
-  }, []);
-
   const deletePost = useCallback(async (postId) => {
     const { error } = await supabase.from('tribe_posts').delete().eq('id', postId);
     if (!error) setPosts((prev) => prev.filter((p) => p.id !== postId));
     return { error };
   }, []);
 
-  return { posts, loading, createPost, likePost, deletePost, refetch: fetchPosts };
+  return { posts, loading, createPost, deletePost, refetch: fetchPosts };
 };

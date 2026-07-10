@@ -242,12 +242,6 @@ export const usePact = (activePactId = null) => {
     return { data, error };
   }, [pact, user, members]);
 
-  const likePost = useCallback(async (postId, currentLikes) => {
-    const { error } = await supabase
-      .from('pact_posts').update({ likes: currentLikes + 1 }).eq('id', postId);
-    if (!error) setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, likes: p.likes + 1 } : p)));
-  }, []);
-
   const removeMember = useCallback(async (userId) => {
     if (!pact) return { error: new Error('No pact selected') };
     const { error } = await supabase
@@ -299,7 +293,7 @@ export const usePact = (activePactId = null) => {
   return {
     myPacts, pact, members, rules, posts, myRole, openPacts, loading,
     switchPact, createPact, joinPactOpen, joinPactByCode, toggleOpen,
-    addRule, updateRule, deleteRule, createPost, likePost,
+    addRule, updateRule, deleteRule, createPost,
     removeMember, updateMemberRole, leavePact, deletePact,
     refetch: fetchAll,
   };

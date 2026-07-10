@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useCommunities } from '../../hooks/useCommunities.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
+import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useCommunityEvents } from '../../hooks/useCommunityEvents.js';
 import { useCommunityChat } from '../../hooks/useCommunityChat.js';
 import { useCommunityChallenges } from '../../hooks/useCommunityChallenges.js';
@@ -21,12 +22,21 @@ const POST_TRUNCATE = 300;
 // ── Feed Tab ─────────────────────────────────────────────
 function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   const { user } = useContext(AuthContext);
-  const { posts, loading, createPost, likePost } = useTribePosts(communityId);
+  const { posts, loading, createPost } = useTribePosts(communityId);
   const toast = useToast();
   const commentState = useCommentState(posts);
   const postIds = useMemo(() => posts.map(p => p.id), [posts]);
   const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
   useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
+  const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'tribe');
+  const [localLikeCounts, setLocalLikeCounts] = useState({});
+  function handleLike(id, currentLikes) {
+    const post = posts.find((p) => p.id === id);
+    toggleLike(id, currentLikes, (postId, newCount) =>
+      setLocalLikeCounts((prev) => ({ ...prev, [postId]: newCount })),
+      post?.user_id ?? null
+    );
+  }
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState('general');
   const [milestone, setMilestone] = useState('');
@@ -80,7 +90,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {pinned && (
         <div className="comm-post-card pinned-post">
           <div className="pinned-label">📌 Pinned</div>
-          <PostCard post={pinned} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} />
+          <PostCard post={pinned} onLike={handleLike} liked={likedIds.has(pinned.id)} isToggling={toggling.has(pinned.id)} likeCount={localLikeCounts[pinned.id] ?? pinned.likes} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} />
         </div>
       )}
 
@@ -88,7 +98,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
 
       {feed.map((p) => p.id !== pinnedPostId && (
-        <PostCard key={p.id} post={p} onLike={likePost} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} />
+        <PostCard key={p.id} post={p} onLike={handleLike} liked={likedIds.has(p.id)} isToggling={toggling.has(p.id)} likeCount={localLikeCounts[p.id] ?? p.likes} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} />
       ))}
 
       {visibleCount < posts.length && (
@@ -106,7 +116,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   );
 }
 
-function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUserId, commentState, reactionCounts, myReaction, onReact }) {
+function PostCard({ post, onLike, liked, isToggling, likeCount, isAdmin, onPin, isPinned, onReport, currentUserId, commentState, reactionCounts, myReaction, onReact }) {
   const [expanded, setExpanded] = useState(false);
   const truncated = post.content.length > POST_TRUNCATE && !expanded;
   const authorName = getDisplayName(post.profiles);
@@ -141,8 +151,8 @@ function PostCard({ post, onLike, isAdmin, onPin, isPinned, onReport, currentUse
       </p>
       {post.milestone && <div className="comm-post-milestone">🏆 {post.milestone}</div>}
       <div className="comm-post-actions">
-        <button className="comm-like-btn" onClick={() => onLike(post.id, post.likes)}>
-          ❤️ {post.likes ?? 0}
+        <button className={`comm-like-btn${liked ? ' active' : ''}`} onClick={() => onLike(post.id, likeCount ?? post.likes)} disabled={isToggling}>
+          {liked ? '❤️' : '🤍'} {likeCount ?? post.likes ?? 0}
         </button>
         <button className={`comm-comment-btn${isOpen ? ' active' : ''}`} onClick={() => togglePanel(post.id)}>
           💬 {count > 0 ? count : ''} Comment{count !== 1 ? 's' : ''}
