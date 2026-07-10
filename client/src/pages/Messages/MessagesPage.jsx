@@ -97,6 +97,11 @@ function MessageThread({ otherUserId, onBack }) {
       setSending(false);
       return;
     }
+    if (result?.error) {
+      setModError("Couldn't send that message. Please try again.");
+      setSending(false);
+      return;
+    }
     setText('');
     setSending(false);
   }

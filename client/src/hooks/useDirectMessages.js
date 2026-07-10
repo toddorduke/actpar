@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase.js';
 import { playDingSound } from '../utils/sounds.js';
 import { checkText } from '../utils/contentModeration.js';
 import { track, Events } from '../lib/analytics.js';
+import { createNotification } from './useNotifications.js';
+import { getDisplayName } from '../utils/displayName.js';
 
 export const useDirectMessages = (otherUserId) => {
   const { user } = useContext(AuthContext);
@@ -93,6 +95,13 @@ export const useDirectMessages = (otherUserId) => {
     if (!error && data) {
       track(Events.MESSAGE_SENT);
       setMessages((prev) => [...prev, data]);
+      const myName = getDisplayName(user?.user_metadata, 'Someone');
+      createNotification({
+        userId: otherUserId,
+        actorId: user.id,
+        type: 'new_message',
+        body: `${myName} sent you a message`,
+      });
     }
     return { error };
   }, [user, otherUserId]);

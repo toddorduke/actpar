@@ -61,5 +61,22 @@ export const useConversations = () => {
 
   useEffect(() => { fetchConversations(); }, [fetchConversations]);
 
+  // Without this, the unread badge (nav bar + conversation list) only ever
+  // reflects the moment this hook first mounted — new messages arriving
+  // elsewhere in the app would never update it until a full page reload.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`conversations_${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'direct_messages',
+        filter: `receiver_id=eq.${user.id}`,
+      }, () => { fetchConversations(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, fetchConversations]);
+
   return { conversations, loading, refetch: fetchConversations };
 };
