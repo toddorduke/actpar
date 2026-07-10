@@ -67,7 +67,7 @@ export const useGoals = () => {
 
     const newCount = (goal.day_count ?? 0) + 1;
     const now = new Date().toISOString();
-    const [{ error }] = await Promise.all([
+    const [{ error: goalError }, { error: logError }] = await Promise.all([
       supabase
         .from('goals')
         .update({ day_count: newCount, last_checked_in: today, updated_at: now })
@@ -76,6 +76,7 @@ export const useGoals = () => {
         .from('checkin_logs')
         .insert({ user_id: user.id, goal_id: goalId, checked_in_at: now, log_type: logType }),
     ]);
+    const error = goalError ?? logError;
 
     const milestone = STREAK_MILESTONES.includes(newCount) ? newCount : null;
     if (!error) {

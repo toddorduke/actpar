@@ -1185,7 +1185,13 @@ const HomePage = () => {
                             <div className="home-journey-inactive">
                               <span className="home-journey-inactive-text">😴 No activity for 7+ days. Is this Journey still active?</span>
                               <div className="home-journey-inactive-actions">
-                                <button className="home-journey-inactive-keep" onClick={() => handleGoalCheckIn(myGoal?.id)}>Check in now</button>
+                                <button
+                                  className="home-journey-inactive-keep"
+                                  onClick={() => handleQuickCheckIn(myGoal?.id)}
+                                  disabled={!!checkingIn[myGoal?.id]}
+                                >
+                                  {checkingIn[myGoal?.id] ? 'Checking in...' : 'Check in now'}
+                                </button>
                                 <button className="home-journey-inactive-end" onClick={() => endJourney(p.id)}>End Journey</button>
                               </div>
                             </div>
