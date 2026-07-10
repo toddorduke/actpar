@@ -381,7 +381,7 @@ function EventCard({ event, myStatus, onRsvp, onDelete, past }) {
 }
 
 // ── Members Tab ──────────────────────────────────────────
-function MembersTab({ communityId, isAdmin, currentUserId }) {
+function MembersTab({ communityId, isAdmin, currentUserId, creatorId }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
@@ -396,14 +396,16 @@ function MembersTab({ communityId, isAdmin, currentUserId }) {
   }, [communityId]);
 
   async function removeMember(userId) {
-    await supabase.from('community_memberships').delete().eq('community_id', communityId).eq('user_id', userId);
+    const { error } = await supabase.from('community_memberships').delete().eq('community_id', communityId).eq('user_id', userId);
+    if (error) { toast("Couldn't remove that member", 'error'); return; }
     setMembers((prev) => prev.filter((m) => m.user_id !== userId));
     toast('Member removed', 'success');
   }
 
   async function toggleAdmin(userId, currentRole) {
     const newRole = currentRole === 'admin' ? 'member' : 'admin';
-    await supabase.from('community_memberships').update({ role: newRole }).eq('community_id', communityId).eq('user_id', userId);
+    const { error } = await supabase.from('community_memberships').update({ role: newRole }).eq('community_id', communityId).eq('user_id', userId);
+    if (error) { toast("Couldn't update that member's role", 'error'); return; }
     setMembers((prev) => prev.map((m) => m.user_id === userId ? { ...m, role: newRole } : m));
   }
 
@@ -424,7 +426,7 @@ function MembersTab({ communityId, isAdmin, currentUserId }) {
                 {m.profiles?.city && <div className="member-city">📍 {m.profiles.city}</div>}
                 <div className={`member-role-badge${m.role === 'admin' ? ' admin' : ''}`}>{m.role}</div>
               </div>
-              {isAdmin && m.user_id !== currentUserId && (
+              {isAdmin && m.user_id !== currentUserId && m.user_id !== creatorId && (
                 <div className="member-actions">
                   <button className="member-action-btn" onClick={() => toggleAdmin(m.user_id, m.role)}>
                     {m.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
@@ -686,6 +688,8 @@ function LeaderboardTab({ communityId }) {
 const TABS = [
   ['feed', '💬 Feed'],
   ['events', '📅 Events'],
+  ['challenges', '🎯 Challenges'],
+  ['leaderboard', '🏆 Leaderboard'],
   ['members', '👥 Members'],
   ['chat', '💬 Chat'],
 ];
@@ -702,8 +706,6 @@ export default function CommunityPage() {
 
   const community = communities.find((c) => c.id === communityId);
   const isMember = myMemberships.includes(communityId);
-  const isAdmin = community?.created_by === user?.id ||
-    (community && communities.find((c) => c.id === communityId));
 
   // Check actual admin role from memberships
   const [userRole, setUserRole] = useState('member');
@@ -805,7 +807,9 @@ export default function CommunityPage() {
       <div className="comm-content">
         {activeTab === 'feed' && <FeedTab communityId={communityId} isAdmin={isActualAdmin} pinnedPostId={community.pinned_post_id} onPin={handlePinPost} />}
         {activeTab === 'events' && <EventsTab communityId={communityId} isAdmin={isActualAdmin} />}
-        {activeTab === 'members' && <MembersTab communityId={communityId} isAdmin={isActualAdmin} currentUserId={user?.id} />}
+        {activeTab === 'challenges' && <ChallengesTab communityId={communityId} />}
+        {activeTab === 'leaderboard' && <LeaderboardTab communityId={communityId} />}
+        {activeTab === 'members' && <MembersTab communityId={communityId} isAdmin={isActualAdmin} currentUserId={user?.id} creatorId={community.created_by} />}
         {activeTab === 'chat' && <ChatTab communityId={communityId} />}
       </div>
     </div>
