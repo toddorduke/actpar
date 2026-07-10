@@ -289,6 +289,7 @@ export default function SettingsPage() {
       return;
     }
 
+    let saveError;
     if (egoChanged && trimmedEgo) {
       const changeCount = profile?.alter_ego_change_count ?? 0;
       const lastChanged = profile?.alter_ego_last_changed ? new Date(profile.alter_ego_last_changed) : null;
@@ -304,7 +305,7 @@ export default function SettingsPage() {
       }
 
       const newCount = withinWindow ? changeCount + 1 : 1;
-      await updateProfile({
+      ({ error: saveError } = await updateProfile({
         alter_ego_name: trimmedEgo,
         alter_ego_change_count: newCount,
         alter_ego_last_changed: new Date().toISOString(),
@@ -313,19 +314,23 @@ export default function SettingsPage() {
         gender: gender || null,
         looking_for: lookingFor,
         working_on: workingOn,
-      });
+      }));
     } else {
-      await updateProfile({
+      ({ error: saveError } = await updateProfile({
         alter_ego_name: trimmedEgo,
         tagline: tagline.trim() || null,
         city: city.trim() || null,
         gender: gender || null,
         looking_for: lookingFor,
         working_on: workingOn,
-      });
+      }));
     }
 
     setSavingProfile(false);
+    if (saveError) {
+      toast(`Couldn't save your profile: ${saveError.message}`, 'error');
+      return;
+    }
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 2500);
   }

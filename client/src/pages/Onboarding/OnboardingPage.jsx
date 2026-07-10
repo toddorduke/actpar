@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useGoals } from '../../hooks/useGoals.js';
 import { supabase } from '../../lib/supabase.js';
+import { createNotification } from '../../hooks/useNotifications.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import { track, Events } from '../../lib/analytics.js';
 import { checkText } from '../../utils/contentModeration.js';
@@ -34,27 +35,6 @@ const GROWTH_AREAS = [
   'Staying Consistent', 'Reigniting My Motivation', 'Mastering My Time',
   'Silencing Self-Doubt', 'Breaking Old Habits', 'Taking More Action',
   'Quieting Overthinking', 'Managing Stress Better', 'Showing Up for Myself',
-];
-
-const STRENGTHS = [
-  'Natural Leader', 'Great Listener', 'Creative Thinker', 'Quick Learner',
-  'Problem Solver', 'Detail-Oriented', 'Self-Starter', 'Big-Picture Thinker',
-  'Highly Empathetic', 'Resilient Under Pressure', 'Strong Communicator', 'Team Player',
-];
-
-const WEAKNESSES = [
-  "I can be too hard on myself",
-  "Patience is a muscle I'm still training",
-  "I sometimes avoid hard conversations",
-  "I struggle with saying no",
-  "I get in my own way",
-  "I shut down under pressure",
-  "I put everyone else first",
-  "I fear what others think",
-  "I take on too much at once",
-  "I have trouble asking for help",
-  "I can be overly cautious",
-  "I hold on to things too long",
 ];
 
 const TIER_META = [
@@ -96,10 +76,8 @@ export default function OnboardingPage() {
     { title: '', category: '' },
   ]);
 
-  // Holding back / know yourself
+  // Holding back
   const [workingOn, setWorkingOn] = useState([]);
-  const [strengths, setStrengths] = useState([]);
-  const [weaknesses, setWeaknesses] = useState([]);
 
   // People suggestions
   const [suggestions, setSuggestions] = useState([]);
@@ -216,7 +194,11 @@ export default function OnboardingPage() {
 
   async function handleSpark(profileId) {
     setSparkedIds((prev) => new Set([...prev, profileId]));
-    await supabase.from('connections').insert({ requester_id: user.id, receiver_id: profileId, status: 'pending' });
+    const { error } = await supabase.from('connections').insert({ requester_id: user.id, receiver_id: profileId, status: 'pending' });
+    if (!error) {
+      const name = getDisplayName(profile, 'Someone');
+      createNotification({ userId: profileId, actorId: user.id, type: 'connection_request', body: `${name} wants to connect with you` });
+    }
   }
 
   function chooseMode(chosen) {
@@ -260,8 +242,6 @@ export default function OnboardingPage() {
           onboarding_complete: true,
           profile_setup_complete: true,
           working_on: workingOn,
-          strengths,
-          weaknesses,
           alter_ego_name: alterEgoName.trim() || null,
           gender: gender || null,
           age: age ? parseInt(age, 10) : null,
@@ -311,7 +291,7 @@ export default function OnboardingPage() {
               <button className="setup-path-card" onClick={() => chooseMode('thorough')}>
                 <div className="path-icon">🧠</div>
                 <div className="path-title">Thorough Setup</div>
-                <div className="path-desc">Go deeper — define your why, your strengths, and what you're overcoming.</div>
+                <div className="path-desc">Go deeper — define your why and what you're overcoming.</div>
                 <div className="path-steps">6 steps</div>
               </button>
             </div>

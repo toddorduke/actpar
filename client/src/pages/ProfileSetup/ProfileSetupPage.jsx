@@ -6,6 +6,7 @@ import { useGoals } from '../../hooks/useGoals.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { checkText } from '../../utils/contentModeration.js';
 import './ProfileSetupPage.css';
 
 const CATEGORIES = [
@@ -91,6 +92,12 @@ export default function ProfileSetupPage() {
     if (!alterEgo.trim()) {
       toast('Please enter your Alter Ego name.', 'error');
       return;
+    }
+    const egoCheck = checkText(alterEgo.trim());
+    if (!egoCheck.ok) { toast(egoCheck.message, 'error'); return; }
+    if (tagline.trim()) {
+      const taglineCheck = checkText(tagline.trim());
+      if (!taglineCheck.ok) { toast(taglineCheck.message, 'error'); return; }
     }
     await updateProfile({ alter_ego_name: alterEgo.trim(), tagline: tagline.trim() || null });
     setStep(2);
