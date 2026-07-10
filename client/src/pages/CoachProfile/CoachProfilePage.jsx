@@ -94,11 +94,17 @@ export default function CoachProfilePage() {
         `Preferred time: ${form.time}\n\n` +
         `Looking forward to working with you!`;
 
-      await supabase.from('direct_messages').insert({
+      const { error: msgError } = await supabase.from('direct_messages').insert({
         sender_id: user.id,
         receiver_id: coach.id,
         content: msgContent,
       });
+
+      if (msgError) {
+        setSubmitting(false);
+        toast("Couldn't send your booking request. Please try again.", 'error');
+        return;
+      }
 
       const myName = getDisplayName(user?.user_metadata, 'A new client');
       await supabase.from('notifications').insert({
