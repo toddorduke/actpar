@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 
@@ -6,6 +6,11 @@ export const useConversations = () => {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
+  // This hook mounts more than once at a time (Navigation's nav badge and
+  // MessagesPage both call it) — a channel topic keyed on user id alone
+  // collides across instances, and Supabase throws "cannot add
+  // postgres_changes callbacks ... after subscribe()" on the second one.
+  const instanceId = useRef(Math.random().toString(36).slice(2)).current;
 
   const fetchConversations = useCallback(async () => {
     if (!user) return;
@@ -67,7 +72,7 @@ export const useConversations = () => {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel(`conversations_${user.id}`)
+      .channel(`conversations_${user.id}_${instanceId}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -76,7 +81,7 @@ export const useConversations = () => {
       }, () => { fetchConversations(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, fetchConversations]);
+  }, [user]);
 
   return { conversations, loading, refetch: fetchConversations };
 };

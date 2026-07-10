@@ -149,14 +149,16 @@ export default function UserProfilePage() {
   async function handleBlock() {
     const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'User';
     const blocked = isBlocked(userId);
+    setShowBlockConfirm(false);
     if (blocked) {
-      await unblockUser(userId);
+      const { error } = await unblockUser(userId);
+      if (error) { toast(`Couldn't unblock ${name}: ${error.message}`, 'error'); return; }
       toast(`${name} unblocked.`, 'success');
     } else {
-      await blockUser(userId);
+      const { error } = await blockUser(userId);
+      if (error) { toast(`Couldn't block ${name}: ${error.message}`, 'error'); return; }
       toast(`${name} blocked. They can no longer message or spark you.`, 'success');
     }
-    setShowBlockConfirm(false);
   }
 
   async function handleAcceptSpark() {
