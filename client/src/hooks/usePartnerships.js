@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js';
 import { createNotification } from './useNotifications.js';
 import { awardXP, XP_VALUES } from '../lib/xp.js';
 import { track, Events } from '../lib/analytics.js';
+import { getDisplayName } from '../utils/displayName.js';
 
 export function usePartnerships() {
   const { user } = useContext(AuthContext);
@@ -65,12 +66,13 @@ export function usePartnerships() {
       const goalTitle = goalId
         ? (await supabase.from('goals').select('title').eq('id', goalId).single()).data?.title
         : null;
+      const myName = getDisplayName(user?.user_metadata, 'Someone');
       createNotification({
         userId: receiverId,
         actorId: user.id,
         type: 'journey_invite',
         refId: data.id,
-        body: `wants to start an accountability journey with you${goalTitle ? ` on "${goalTitle}"` : ''} 🚀`,
+        body: `${myName} wants to start an accountability journey with you${goalTitle ? ` on "${goalTitle}"` : ''} 🚀`,
       });
     }
     return { data, error };
@@ -88,12 +90,13 @@ export function usePartnerships() {
       track(Events.JOURNEY_ACCEPTED);
       await fetchPartnerships();
       if (partnership?.requester_id) {
+        const myName = getDisplayName(user?.user_metadata, 'Someone');
         createNotification({
           userId: partnership.requester_id,
           actorId: user.id,
           type: 'journey_accepted',
           refId: partnershipId,
-          body: `accepted your accountability journey — you're in it together now! 🚀`,
+          body: `${myName} accepted your accountability journey — you're in it together now! 🚀`,
         });
       }
     }

@@ -159,7 +159,8 @@ export const ConnectionsProvider = ({ children }) => {
       .from('connections')
       .update({ status: 'accepted' })
       .eq('requester_id', requesterId)
-      .eq('receiver_id', user.id);
+      .eq('receiver_id', user.id)
+      .eq('status', 'pending');
     if (!error) {
       track(Events.SPARK_ACCEPTED);
       setIncomingSparks((prev) => prev.filter((s) => s.requester_id !== requesterId));
@@ -177,7 +178,8 @@ export const ConnectionsProvider = ({ children }) => {
       .from('connections')
       .update({ status: 'declined' })
       .eq('requester_id', requesterId)
-      .eq('receiver_id', user.id);
+      .eq('receiver_id', user.id)
+      .eq('status', 'pending');
     if (!error) {
       setIncomingSparks((prev) => prev.filter((s) => s.requester_id !== requesterId));
       setIncomingConnects((prev) => prev.filter((s) => s.requester_id !== requesterId));

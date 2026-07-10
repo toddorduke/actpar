@@ -223,7 +223,8 @@ export default function ConnectionsPage() {
   );
 
   async function handleCategorySelect(name) {
-    await createOrAdopt(name);
+    const { moderation } = await createOrAdopt(name);
+    if (moderation) { toast(moderation.message, 'error'); return; }
     setLfFilter(name);
     setLfSearch('');
   }

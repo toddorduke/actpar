@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { checkText } from '../utils/contentModeration.js';
 
 export function useCustomCategories(userId) {
   const [categories, setCategories] = useState([]);
@@ -25,6 +26,8 @@ export function useCustomCategories(userId) {
 
   const createOrAdopt = useCallback(async (name) => {
     if (!userId || !name.trim()) return { error: new Error('Missing name') };
+    const nameCheck = checkText(name.trim());
+    if (!nameCheck.ok) return { error: null, moderation: nameCheck };
     const { error } = await supabase.rpc('increment_custom_category', {
       cat_name: name.trim(),
       p_user_id: userId,
