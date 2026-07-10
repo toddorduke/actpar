@@ -58,7 +58,20 @@ export default function AdminPage() {
 
   async function banUser(userId) {
     if (!window.confirm('Ban this user? This will delete their auth account.')) return;
-    await supabase.auth.admin.deleteUser(userId);
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-ban-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ userId }),
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast(`Couldn't ban user: ${result.error ?? 'Unknown error'}`, 'error');
+      return;
+    }
     toast('User banned.', 'success');
     fetchReports();
   }
