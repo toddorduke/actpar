@@ -842,7 +842,7 @@ export default function ConnectionsPage() {
                             />
                           ) : (
                             <div className="card-header-fallback">
-                              <div className="card-avatar" />
+                              <Avatar url={null} name={getDisplayName(profile, '?')} size={160} className="card-avatar" />
                             </div>
                           )}
                           <div className="card-photo-overlay">

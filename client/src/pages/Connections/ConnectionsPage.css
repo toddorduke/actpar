@@ -367,7 +367,7 @@
   position: relative;
   width: 100%;
   max-width: 500px;
-  height: 620px;
+  height: 680px;
 }
 
 .profile-card {
@@ -414,7 +414,7 @@
 }
 
 .card-header {
-  height: 300px;
+  height: 380px;
   position: relative;
   overflow: hidden;
   background: #1f2937;
@@ -447,10 +447,6 @@
 }
 
 .card-avatar {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   border: 5px solid white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
@@ -1063,7 +1059,7 @@
   }
 
   /* Card stack — taller so content fits */
-  .card-stack { height: 580px; }
+  .card-stack { height: 640px; }
 
   /* Profile card: allow vertical scroll inside the card */
   .profile-card {
@@ -1071,8 +1067,8 @@
     overflow-x: hidden;
   }
 
-  /* Photo: smaller on mobile so more text is visible */
-  .card-header { height: 210px; }
+  /* Photo: still smaller than desktop so text stays visible, but bigger than before */
+  .card-header { height: 260px; }
 
   /* Hide both sidebars — key cards surfaced in mob-right-cards below */
   .left-sidebar { display: none; }
@@ -1655,8 +1651,8 @@
 @media (max-width: 400px) {
   .connections-page { padding: 16px 10px 24px; }
   .page-title { font-size: 1.5em; }
-  .card-stack { height: 520px; }
-  .card-header { height: 190px; }
+  .card-stack { height: 560px; }
+  .card-header { height: 220px; }
   .action-btn { width: 54px; height: 54px; }
   .spark-send-btn { width: 64px; height: 64px; }
   .card-content { padding: 12px 14px 14px; }
