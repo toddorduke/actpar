@@ -72,6 +72,15 @@ function buildSparkHtml(senderName: string, sparkMessage: string | null): string
   `);
 }
 
+function buildMatchHtml(otherName: string): string {
+  return emailWrapper(`
+    <p style="margin:0 0 8px;font-size:26px;">⚡</p>
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#fff;">You're connected with ${otherName}!</h1>
+    <p style="margin:0;font-size:15px;color:rgba(255,255,255,0.6);line-height:1.6;">You can now message each other and cheer each other on.</p>
+    ${ctaButton('Send a Message', `${APP_URL}/connections`)}
+  `);
+}
+
 function buildMessageHtml(senderName: string, preview: string): string {
   return emailWrapper(`
     <p style="margin:0 0 8px;font-size:26px;">💬</p>
@@ -125,12 +134,12 @@ Deno.serve(async (req) => {
   const table       = body.table as string;
   const record      = body.record as Record<string, unknown> | undefined;
 
-  if (!record || webhookType !== 'INSERT') {
+  if (!record || (webhookType !== 'INSERT' && webhookType !== 'UPDATE')) {
     return new Response(JSON.stringify({ skipped: true }), { status: 200 });
   }
 
   // ── Spark (connections INSERT) ────────────────────────────────────────────
-  if (table === 'connections') {
+  if (table === 'connections' && webhookType === 'INSERT') {
     const { requester_id, receiver_id, spark_message } = record as {
       requester_id: string; receiver_id: string; spark_message: string | null;
     };
@@ -152,8 +161,44 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ sent }), { status: 200 });
   }
 
+  // ── Match (connections UPDATE → accepted, opt-in only) ────────────────────
+  if (table === 'connections' && webhookType === 'UPDATE') {
+    const { requester_id, receiver_id, status } = record as {
+      requester_id: string; receiver_id: string; status: string;
+    };
+    if (status !== 'accepted') {
+      return new Response(JSON.stringify({ skipped: true, reason: 'not accepted' }), { status: 200 });
+    }
+
+    const [{ data: requesterProfile }, { data: receiverProfile }] = await Promise.all([
+      supabase.from('profiles').select('first_name, last_name, notification_prefs').eq('id', requester_id).single(),
+      supabase.from('profiles').select('first_name, last_name, notification_prefs').eq('id', receiver_id).single(),
+    ]);
+
+    const nameOf = (p: { first_name?: string; last_name?: string } | null) =>
+      p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'Someone' : 'Someone';
+    const requesterName = nameOf(requesterProfile);
+    const receiverName = nameOf(receiverProfile);
+
+    async function notify(userId: string, prefs: Record<string, unknown> | null | undefined, otherName: string) {
+      if (!prefs?.email_match) return { sent: false, reason: 'opted out' };
+      const { data: auth } = await supabase.auth.admin.getUserById(userId);
+      const email = auth?.user?.email;
+      if (!email) return { sent: false, reason: 'no email' };
+      const sent = await sendEmail(email, `You're connected with ${otherName} ⚡`, buildMatchHtml(otherName));
+      return { sent };
+    }
+
+    const [requesterResult, receiverResult] = await Promise.all([
+      notify(requester_id, requesterProfile?.notification_prefs as Record<string, unknown>, receiverName),
+      notify(receiver_id, receiverProfile?.notification_prefs as Record<string, unknown>, requesterName),
+    ]);
+
+    return new Response(JSON.stringify({ requesterResult, receiverResult }), { status: 200 });
+  }
+
   // ── New message (direct_messages INSERT) ─────────────────────────────────
-  if (table === 'direct_messages') {
+  if (table === 'direct_messages' && webhookType === 'INSERT') {
     const { sender_id, receiver_id, content, read_at } = record as {
       sender_id: string; receiver_id: string; content: string; read_at: string | null;
     };

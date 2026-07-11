@@ -118,6 +118,7 @@ export default function SettingsPage() {
   const [notifSparks, setNotifSparks] = useState(true);
   const [notifPact, setNotifPact] = useState(true);
   const [notifTribe, setNotifTribe] = useState(false);
+  const [notifEmailMatch, setNotifEmailMatch] = useState(false);
   const [savingNotifs, setSavingNotifs] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
 
@@ -163,6 +164,7 @@ export default function SettingsPage() {
       setNotifSparks(prefs.sparks ?? true);
       setNotifPact(prefs.pact ?? true);
       setNotifTribe(prefs.tribe ?? false);
+      setNotifEmailMatch(prefs.email_match ?? false);
       // Coach fields
       setCoachSpecialty(profile.coach_specialty ?? '');
       setCoachTagline(profile.coach_tagline ?? '');
@@ -384,6 +386,7 @@ export default function SettingsPage() {
         sparks: notifSparks,
         pact: notifPact,
         tribe: notifTribe,
+        email_match: notifEmailMatch,
       },
     });
     setSavingNotifs(false);
@@ -889,6 +892,7 @@ export default function SettingsPage() {
                   ],
                   [notifSparks, setNotifSparks, 'Spark Requests', 'When someone sends you a spark connection'],
                   [notifTribe, setNotifTribe, 'Tribe Community', 'New posts in the community feed'],
+                  [notifEmailMatch, setNotifEmailMatch, 'Email Me on New Connections', "Get an email when someone accepts your connection request. Off by default — opt in if you'd like it."],
                 ].map(([val, setter, title, desc, extra]) => (
                   <div key={title} className="settings-toggle-row">
                     <div className="settings-toggle-info">
