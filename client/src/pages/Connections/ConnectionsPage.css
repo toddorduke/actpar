@@ -436,14 +436,18 @@
   display: block;
 }
 
-/* Fallback when no media — show avatar centered over gradient */
+/* Fallback when no media — show avatar over gradient, anchored near the
+   top so it never crowds the name/badge overlay pinned to the bottom
+   (the header shrinks a lot across breakpoints; a vertically-centered
+   avatar would drift down into that text at small sizes) */
 .card-header-fallback {
   width: 100%;
   height: 100%;
   background: var(--gradient-primary);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 50px;
 }
 
 .card-avatar {
@@ -566,16 +570,18 @@
 }
 
 .card-section {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.card-section-label {
-  font-size: 0.7em;
-  font-weight: 700;
+.card-chip-label {
+  font-size: 0.74em;
+  font-weight: 600;
   color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
   margin-bottom: 5px;
+}
+
+.card-about {
+  margin-bottom: 10px;
 }
 
 .card-tagline {
@@ -583,7 +589,7 @@
   color: #374151;
   line-height: 1.5;
   font-style: italic;
-  margin: 0;
+  margin: 0 0 4px;
 }
 
 .card-goals {
@@ -1069,6 +1075,8 @@
 
   /* Photo: still smaller than desktop so text stays visible, but bigger than before */
   .card-header { height: 260px; }
+  .card-header-fallback { padding-top: 30px; }
+  .card-avatar.ap-avatar { width: 110px !important; height: 110px !important; font-size: 40px !important; }
 
   /* Hide both sidebars — key cards surfaced in mob-right-cards below */
   .left-sidebar { display: none; }
@@ -1251,7 +1259,7 @@
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1653,6 +1661,8 @@
   .page-title { font-size: 1.5em; }
   .card-stack { height: 560px; }
   .card-header { height: 220px; }
+  .card-header-fallback { padding-top: 22px; }
+  .card-avatar.ap-avatar { width: 80px !important; height: 80px !important; font-size: 30px !important; }
   .action-btn { width: 54px; height: 54px; }
   .spark-send-btn { width: 64px; height: 64px; }
   .card-content { padding: 12px 14px 14px; }

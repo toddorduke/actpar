@@ -871,21 +871,15 @@ export default function ConnectionsPage() {
                               ✨ {profile.matchReason}
                             </div>
                           )}
-                          {profile.tagline && (
-                            <div className="card-section">
-                              <div className="card-section-label">Their Journey</div>
-                              <p className="card-tagline">"{profile.tagline}"</p>
-                            </div>
-                          )}
-                          {profile.bio && (
-                            <div className="card-section">
-                              <div className="card-section-label">About Me</div>
-                              <p className="card-bio">{profile.bio}</p>
+                          {(profile.tagline || profile.bio) && (
+                            <div className="card-about">
+                              {profile.tagline && <p className="card-tagline">"{profile.tagline}"</p>}
+                              {profile.bio && <p className="card-bio">{profile.bio}</p>}
                             </div>
                           )}
                           {profile.goals?.length > 0 && (
                             <div className="card-section">
-                              <div className="card-section-label">Working On</div>
+                              <div className="card-chip-label">🎯 Working on</div>
                               <div className="card-goals">
                                 {profile.goals.slice(0, 3).map((g, idx) => (
                                   <span key={idx} className="card-goal-chip">{g.title}</span>
@@ -895,7 +889,7 @@ export default function ConnectionsPage() {
                           )}
                           {profile.looking_for?.length > 0 && (
                             <div className="card-section">
-                              <div className="card-section-label">Looking For</div>
+                              <div className="card-chip-label">🔍 Looking for</div>
                               <div className="card-goals">
                                 {profile.looking_for.slice(0, 4).map((tag, idx) => (
                                   <span key={idx} className="card-lf-chip">{tag}</span>
