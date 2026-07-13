@@ -1043,28 +1043,28 @@ const HomePage = () => {
                   {
                     done: hasGoal,
                     title: 'Add your first goal',
-                    desc: 'Set a habit or progress goal to track your journey',
+                    desc: 'A habit or a numeric target',
                     cta: 'Add →',
                     action: () => { addGoalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); },
                   },
                   {
                     done: hasConnection,
                     title: 'Connect with an accountability partner',
-                    desc: 'Find someone working toward similar goals and spark them',
+                    desc: 'Spark someone with similar goals',
                     cta: 'Find →',
                     action: () => navigate('/connections'),
                   },
                   {
                     done: hasProfile,
                     title: 'Complete your profile',
-                    desc: 'Add a photo and tagline so others can find you',
+                    desc: 'Photo + tagline',
                     cta: 'Edit →',
                     action: () => setEditing(true),
                   },
                   {
                     done: hasReminders,
                     title: 'Enable daily reminders',
-                    desc: 'Get a nudge every day so you never miss a check-in',
+                    desc: 'Never miss a check-in',
                     cta: 'Set up →',
                     action: () => navigate('/settings'),
                   },
@@ -1076,7 +1076,6 @@ const HomePage = () => {
                       <h2 className="home-card-title">🚀 Getting Started</h2>
                       <span className="home-gs-progress">{completedCount}/{steps.length}</span>
                     </div>
-                    <p className="home-gs-sub">Complete these steps to get the most out of ActPar.</p>
                     <div className="home-gs-steps">
                       {steps.map((s) => (
                         <div key={s.title} className={`home-gs-step${s.done ? ' done' : ''}`}>
