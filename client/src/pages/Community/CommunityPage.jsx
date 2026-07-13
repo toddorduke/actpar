@@ -701,7 +701,6 @@ export default function CommunityPage() {
   const toast = useToast();
   const { communities, myMemberships, joinCommunity, leaveCommunity, refetch } = useCommunities();
   const [activeTab, setActiveTab] = useState('feed');
-  const [editingCover, setEditingCover] = useState(false);
   const coverInputRef = useRef(null);
 
   const community = communities.find((c) => c.id === communityId);
