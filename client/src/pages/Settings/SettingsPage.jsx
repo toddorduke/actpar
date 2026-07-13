@@ -910,7 +910,7 @@ export default function SettingsPage() {
                   ],
                   [notifSparks, setNotifSparks, 'Spark Requests', 'When someone sends you a spark connection'],
                   [notifTribe, setNotifTribe, 'Tribe Community', 'New posts in the community feed'],
-                  [notifEmailMatch, setNotifEmailMatch, 'Email Me on New Connections', "Get an email when someone accepts your connection request. Off by default — opt in if you'd like it."],
+                  [notifEmailMatch, setNotifEmailMatch, 'Email Me on New Connections', 'Get an email when someone accepts your connection request'],
                 ].map(([val, setter, title, desc, extra]) => (
                   <div key={title} className="settings-toggle-row">
                     <div className="settings-toggle-info">
