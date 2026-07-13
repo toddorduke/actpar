@@ -14,7 +14,6 @@ const HomePage           = lazy(() => import('./pages/Home/HomePage.jsx'));
 const CoachProfilePage   = lazy(() => import('./pages/CoachProfile/CoachProfilePage.jsx'));
 const CoachDiscoveryPage = lazy(() => import('./pages/CoachDiscovery/CoachDiscoveryPage.jsx'));
 const LeaderboardPage    = lazy(() => import('./pages/Leaderboard/LeaderboardPage.jsx'));
-const YouPage            = lazy(() => import('./pages/You/YouPage.jsx'));
 const SettingsPage       = lazy(() => import('./pages/Settings/SettingsPage.jsx'));
 const OnboardingPage     = lazy(() => import('./pages/Onboarding/OnboardingPage.jsx'));
 const ProfileSetupPage   = lazy(() => import('./pages/ProfileSetup/ProfileSetupPage.jsx'));
@@ -72,7 +71,6 @@ export const AppRoutes = () => (
       <Route path="/coach/:coachId" element={<ProtectedRoute><CoachProfilePage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-      <Route path="/you" element={<ProtectedRoute><YouPage /></ProtectedRoute>} />
       <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/post/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
