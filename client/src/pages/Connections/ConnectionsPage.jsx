@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useBlock } from '../../hooks/useBlock.js';
-import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
@@ -25,11 +24,6 @@ const DEADLINE_OPTIONS = Array.from({ length: 18 }, (_, i) => i + 6).map((h) => 
 });
 
 const TIER_LABELS = { 1: 'Top Priority', 2: 'Important', 3: 'Foundation' };
-
-const LF_CATEGORIES = [
-  'Faith / Church', 'Fitness', 'Nutrition', 'Mental Health', 'Career',
-  'Finance', 'Sobriety', 'Reading', 'Meditation', 'Sleep', 'Relationships', 'Education',
-];
 
 export default function ConnectionsPage() {
   const navigate = useNavigate();
@@ -209,29 +203,10 @@ export default function ConnectionsPage() {
   }
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
-  const [lfFilter, setLfFilter] = useState('');
-  const [lfSearch, setLfSearch] = useState('');
   const [genderFilter, setGenderFilter] = useState('all');
   const [mobileConnOpen, setMobileConnOpen] = useState(false);
   const [sparkModalOpen, setSparkModalOpen] = useState(false);
   const sparksRemaining = Math.max(0, 5 - getSparksUsedToday());
-
-  const { search: searchCats, createOrAdopt } = useCustomCategories(user?.id);
-  const lfSuggestions = useMemo(() => searchCats(lfSearch), [lfSearch, searchCats]);
-  const hasExactMatch = lfSuggestions.some(
-    (c) => c.name.toLowerCase() === lfSearch.toLowerCase().trim(),
-  );
-
-  async function handleCategorySelect(name) {
-    const { moderation } = await createOrAdopt(name);
-    if (moderation) { toast(moderation.message, 'error'); return; }
-    setLfFilter(name);
-    setLfSearch('');
-  }
-
-  function toggleLfFilter(cat) {
-    setLfFilter((prev) => (prev === cat ? '' : cat));
-  }
 
   const visibleProfiles = browseProfiles.filter((p) => {
     const name = getDisplayName(p).toLowerCase();
@@ -243,12 +218,10 @@ export default function ConnectionsPage() {
       || lfTags.includes(searchValue.toLowerCase());
     const matchesFilter = activeFilter === 'all'
       || (p.account_type ?? '').toLowerCase() === activeFilter;
-    const matchesLf = !lfFilter
-      || (p.looking_for ?? []).some((t) => t.toLowerCase() === lfFilter.toLowerCase());
     const matchesGender = genderFilter === 'all'
       || (p.gender ?? '').toLowerCase() === genderFilter.toLowerCase();
     const notBlocked = !blockedIds.has(p.id);
-    return matchesSearch && matchesFilter && matchesLf && matchesGender && notBlocked;
+    return matchesSearch && matchesFilter && matchesGender && notBlocked;
   });
 
   const currentProfile = visibleProfiles[0];
