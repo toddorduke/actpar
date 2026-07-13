@@ -28,7 +28,6 @@ export default function UserProfilePage() {
   const [affirmations, setAffirmations] = useState([]);
   const [journalEntries, setJournalEntries] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState(null);
-  const [connectionId, setConnectionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -118,7 +117,6 @@ export default function UserProfilePage() {
     setJournalEntries(journalData ?? []);
 
     if (connData) {
-      setConnectionId(connData.id);
       if (connData.status === 'accepted') {
         setConnectionStatus('accepted');
       } else if (connData.status === 'pending') {
