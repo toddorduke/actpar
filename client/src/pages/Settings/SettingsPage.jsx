@@ -79,14 +79,6 @@ export default function SettingsPage() {
   const [showReportIssue, setShowReportIssue] = useState(false);
   const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush, permission: pushPermission, pushError } = usePushNotifications();
 
-  // Account
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [savingAccount, setSavingAccount] = useState(false);
-  const [accountSaved, setAccountSaved] = useState(false);
-  const [savingEmail, setSavingEmail] = useState(false);
-  const [emailMsg, setEmailMsg] = useState(null);
 
   // Profile
   const [alterEgo, setAlterEgo] = useState('');
@@ -226,37 +218,6 @@ export default function SettingsPage() {
     if (moderation) { toast(moderation.message, 'error'); return; }
     setLookingFor((prev) => prev.includes(name) ? prev : [...prev, name]);
     setLfSearch('');
-  }
-
-  async function handleSaveAccount(e) {
-    e.preventDefault();
-    setSavingAccount(true);
-    const [{ error: profileError }] = await Promise.all([
-      updateProfile({ first_name: firstName, last_name: lastName }),
-      supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName } }),
-    ]);
-    setSavingAccount(false);
-    if (profileError) {
-      toast(`Couldn't save your account info: ${profileError.message}`, 'error');
-      return;
-    }
-    setAccountSaved(true);
-    setTimeout(() => setAccountSaved(false), 2500);
-  }
-
-  async function handleChangeEmail(e) {
-    e.preventDefault();
-    if (!newEmail.trim() || newEmail.trim() === user?.email) return;
-    setSavingEmail(true);
-    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
-    setSavingEmail(false);
-    if (error) {
-      setEmailMsg({ type: 'error', text: error.message });
-    } else {
-      setEmailMsg({ type: 'success', text: 'Confirmation sent to your new email — click the link to complete the change.' });
-      setNewEmail('');
-    }
-    setTimeout(() => setEmailMsg(null), 6000);
   }
 
   async function handleAvatarChange(e) {
