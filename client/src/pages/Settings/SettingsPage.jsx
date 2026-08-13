@@ -141,8 +141,6 @@ export default function SettingsPage() {
 
   React.useEffect(() => {
     if (profile) {
-      setFirstName(profile.first_name ?? '');
-      setLastName(profile.last_name ?? '');
       setAlterEgo(profile.alter_ego_name ?? '');
       setTagline(profile.tagline ?? '');
       setCity(profile.city ?? '');
