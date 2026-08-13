@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
@@ -28,7 +28,7 @@ export default function TribeCommunityPage() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const { profile } = useProfile();
-  const { acceptedConnections } = useConnections();
+  const { acceptedConnections, loading: connectionsLoading } = useConnections();
   const { posts, loading: postsLoading, createPost } = useTribePosts(null);
   const toast = useToast();
   const commentState = useCommentState(posts);
@@ -64,7 +64,15 @@ export default function TribeCommunityPage() {
       .map(([tag, score]) => ({ tag, posts: score }));
   }, [posts]);
 
-  const [feedTab, setFeedTab] = useState('circle');
+  const [feedTab, setFeedTab] = useState(() =>
+    !connectionsLoading && acceptedConnections.length === 0 ? 'community' : 'circle'
+  );
+  const defaultTabApplied = useRef(!connectionsLoading);
+  useEffect(() => {
+    if (connectionsLoading || defaultTabApplied.current) return;
+    defaultTabApplied.current = true;
+    if (acceptedConnections.length === 0) setFeedTab('community');
+  }, [connectionsLoading, acceptedConnections.length]);
   const [filter, setFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(10);
   const [showModal, setShowModal] = useState(false);
@@ -188,7 +196,7 @@ export default function TribeCommunityPage() {
           <div className="feed-tabs">
             <button
               className={`feed-tab${feedTab === 'circle' ? ' active' : ''}`}
-              onClick={() => { setFeedTab('circle'); setVisibleCount(10); }}
+              onClick={() => { defaultTabApplied.current = true; setFeedTab('circle'); setVisibleCount(10); }}
             >
               🔥 My Circle
               {(circleActivity.length + sparkPosts.length) > 0 && (
@@ -197,7 +205,7 @@ export default function TribeCommunityPage() {
             </button>
             <button
               className={`feed-tab${feedTab === 'community' ? ' active' : ''}`}
-              onClick={() => { setFeedTab('community'); setVisibleCount(10); }}
+              onClick={() => { defaultTabApplied.current = true; setFeedTab('community'); setVisibleCount(10); }}
             >
               🌍 Community
               <span className="feed-tab-count">{posts.length}</span>
