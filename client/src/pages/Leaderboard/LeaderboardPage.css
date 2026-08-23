@@ -29,7 +29,7 @@
 
 /* ── My Rank Card ── */
 .lb-my-rank-card {
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: var(--gradient-primary);
   border-radius: 20px;
   padding: 18px 20px;
   color: white;
@@ -107,14 +107,14 @@
 }
 
 .lb-ctrl-btn.active {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
-  border-color: #7c3aed;
+  background: var(--gradient-primary);
+  border-color: var(--color-primary);
   color: white;
 }
 
 .lb-ctrl-btn:hover:not(.active) {
-  border-color: #7c3aed;
-  color: #7c3aed;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .lb-city-select {
@@ -130,7 +130,7 @@
   cursor: pointer;
 }
 
-.lb-city-select:focus { border-color: #7c3aed; }
+.lb-city-select:focus { border-color: var(--color-primary); }
 
 /* ── Category chips ── */
 .lb-category-chips {
@@ -153,9 +153,9 @@
   white-space: nowrap;
 }
 
-.lb-cat-chip:hover { border-color: #7c3aed; color: #7c3aed; }
+.lb-cat-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .lb-cat-chip.active {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-primary);
   border-color: transparent;
   color: white;
 }
@@ -212,7 +212,7 @@
 .lb-podium-score {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #7c3aed;
+  color: var(--color-primary);
   text-align: center;
 }
 
@@ -225,7 +225,7 @@
 .lb-podium-cat {
   font-size: 0.65rem;
   font-weight: 600;
-  color: #7c3aed;
+  color: var(--color-primary);
   text-align: center;
   margin-top: 2px;
   opacity: 0.85;
@@ -275,11 +275,11 @@
 .lb-row:hover { background: #f9fafb; }
 
 .lb-row-me {
-  background: rgba(124, 58, 237, 0.05);
-  border-left: 3px solid #7c3aed;
+  background: rgba(255, 122, 0, 0.05);
+  border-left: 3px solid var(--color-primary);
 }
 
-.lb-row-me:hover { background: rgba(124, 58, 237, 0.08); }
+.lb-row-me:hover { background: rgba(255, 122, 0, 0.08); }
 
 .lb-row-rank {
   min-width: 36px;
@@ -308,7 +308,7 @@
 
 .lb-row-you {
   font-size: 0.68rem;
-  background: #7c3aed;
+  background: var(--color-primary);
   color: white;
   padding: 1px 7px;
   border-radius: 999px;
@@ -329,7 +329,7 @@
 .lb-row-cat-tag {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #7c3aed;
+  color: var(--color-primary);
   margin-top: 2px;
 }
 
@@ -341,7 +341,7 @@
 .lb-row-score-num {
   font-size: 1.1rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

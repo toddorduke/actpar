@@ -1,6 +1,6 @@
 .pp-page {
   min-height: 100vh;
-  background: #0f1117;
+  background: var(--color-background);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -9,35 +9,36 @@
 
 .pp-spinner {
   width: 32px; height: 32px;
-  border: 3px solid rgba(255,255,255,0.1);
-  border-top-color: #f59e0b;
+  border: 3px solid rgba(43,29,20,0.1);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: ppSpin 0.8s linear infinite;
   margin-top: 80px;
 }
 @keyframes ppSpin { to { transform: rotate(360deg); } }
 
-.pp-missing { color: rgba(255,255,255,0.4); margin-top: 80px; }
+.pp-missing { color: var(--color-muted); margin-top: 80px; }
 
 .pp-card {
   width: 100%;
   max-width: 500px;
-  background: #1a1d27;
+  background: var(--color-surface);
   border-radius: 20px;
   overflow: hidden;
+  box-shadow: var(--shadow-subtle);
 }
 
 .pp-back {
   display: block;
   background: none;
   border: none;
-  color: rgba(255,255,255,0.5);
+  color: var(--color-muted);
   font-size: 0.85rem;
   cursor: pointer;
   padding: 16px 20px 8px;
   transition: color 0.15s;
 }
-.pp-back:hover { color: #fff; }
+.pp-back:hover { color: var(--color-text); }
 
 .pp-media-wrap { width: 100%; background: #000; }
 .pp-media { width: 100%; max-height: 500px; object-fit: contain; display: block; }
@@ -50,8 +51,8 @@
   gap: 12px;
   margin-bottom: 16px;
 }
-.pp-author-name { font-size: 0.95rem; font-weight: 700; color: #fff; }
-.pp-author-time { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+.pp-author-name { font-size: 0.95rem; font-weight: 700; color: var(--color-text); }
+.pp-author-time { font-size: 0.75rem; color: var(--color-muted); }
 
 .pp-milestone {
   display: inline-flex;
@@ -68,20 +69,20 @@
 
 .pp-content {
   font-size: 0.95rem;
-  color: rgba(255,255,255,0.85);
+  color: var(--color-text);
   line-height: 1.6;
   margin: 0 0 20px;
 }
 
 .pp-feed-btn {
-  background: #f59e0b;
-  color: #000;
+  background: var(--gradient-primary);
+  color: #fff;
   border: none;
   border-radius: 20px;
   padding: 10px 20px;
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: opacity 0.15s;
 }
-.pp-feed-btn:hover { background: #d97706; }
+.pp-feed-btn:hover { opacity: 0.88; }

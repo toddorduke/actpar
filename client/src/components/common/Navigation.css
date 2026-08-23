@@ -410,9 +410,9 @@
     left: 0;
     right: 0;
     z-index: 200;
-    background: #111827;
-    border-top: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+    background: var(--color-surface);
+    border-top: 1px solid rgba(43, 29, 20, 0.1);
+    box-shadow: 0 -4px 24px rgba(43, 29, 20, 0.1);
     padding-bottom: env(safe-area-inset-bottom);
   }
 
@@ -422,7 +422,7 @@
     align-items: center;
     justify-content: center;
     padding: 8px 2px;
-    color: rgba(255,255,255,0.5);
+    color: var(--color-muted);
     text-decoration: none;
     transition: color 0.15s;
     min-height: 56px;
