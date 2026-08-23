@@ -70,7 +70,7 @@ export default function UserProfilePage() {
         .order('tier'),
       supabase
         .from('tribe_posts')
-        .select('id, content, post_type, likes, created_at, media_url, caption')
+        .select('id, content, post_type, likes, created_at, media_url')
         .eq('user_id', userId)
         .order('created_at', { ascending: false }),
       supabase

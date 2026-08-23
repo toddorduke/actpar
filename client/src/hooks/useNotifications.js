@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import { playSparkSound, playDingSound } from '../utils/sounds.js';
@@ -7,6 +7,7 @@ export const useNotifications = () => {
   const { user } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const instanceId = useRef(Math.random().toString(36).slice(2)).current;
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -26,7 +27,7 @@ export const useNotifications = () => {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel(`notif_${user.id}`)
+      .channel(`notif_${user.id}_${instanceId}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -69,8 +70,9 @@ export const useNotifications = () => {
   }, [user]);
 
   const deleteNotif = useCallback(async (notifId) => {
-    await supabase.from('notifications').delete().eq('id', notifId);
-    setNotifications((prev) => prev.filter((n) => n.id !== notifId));
+    const { error } = await supabase.from('notifications').delete().eq('id', notifId);
+    if (!error) setNotifications((prev) => prev.filter((n) => n.id !== notifId));
+    return { error };
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
