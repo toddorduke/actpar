@@ -31,8 +31,19 @@ Deno.serve(async (req) => {
   const { userId } = await req.json().catch(() => ({}));
   if (!userId) return new Response(JSON.stringify({ error: 'Missing userId' }), { status: 400 });
 
-  const { error } = await supabase.auth.admin.deleteUser(userId);
+  // Suspend, don't delete — a hard delete destroys the evidence (their posts,
+  // messages, report history) an admin might need later, and can't be undone.
+  // ban_duration locks them out at auth time; ~100 years is Supabase's
+  // convention for "indefinite" since there's no literal "forever" value.
+  const { error } = await supabase.auth.admin.updateUserById(userId, { ban_duration: '876000h' });
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+
+  await supabase.from('admin_audit_log').insert({
+    admin_id: caller.id,
+    action: 'ban_user',
+    target_type: 'user',
+    target_id: userId,
+  });
 
   return new Response(JSON.stringify({ success: true }), { status: 200 });
 });

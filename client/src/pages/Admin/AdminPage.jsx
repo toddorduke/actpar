@@ -14,6 +14,7 @@ export default function AdminPage() {
   const toast = useToast();
   const [reports, setReports] = useState([]);
   const [issueReports, setIssueReports] = useState([]);
+  const [auditLog, setAuditLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState('content');
   const [tab, setTab] = useState('pending');
@@ -24,7 +25,17 @@ export default function AdminPage() {
     if (!isAdmin) { navigate('/'); return; }
     fetchReports();
     fetchIssueReports();
+    fetchAuditLog();
   }, [isAdmin]);
+
+  async function fetchAuditLog() {
+    const { data } = await supabase
+      .from('admin_audit_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    setAuditLog(data ?? []);
+  }
 
   async function fetchReports() {
     setLoading(true);
@@ -44,10 +55,21 @@ export default function AdminPage() {
     setIssueReports(data ?? []);
   }
 
+  async function logAdminAction(action, targetType, targetId, details) {
+    await supabase.from('admin_audit_log').insert({
+      admin_id: user.id,
+      action,
+      target_type: targetType,
+      target_id: targetId != null ? String(targetId) : null,
+      details: details ?? null,
+    });
+  }
+
   async function updateStatus(id, status) {
     const { error } = await supabase.from('reports').update({ status }).eq('id', id);
     if (error) { toast("Couldn't update that report — try again.", 'error'); return; }
     setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+    logAdminAction('update_report_status', 'report', id, { status });
     toast(`Report marked as ${status}`, 'success');
   }
 
@@ -55,11 +77,12 @@ export default function AdminPage() {
     const { error } = await supabase.from('issue_reports').update({ status }).eq('id', id);
     if (error) { toast("Couldn't update that issue — try again.", 'error'); return; }
     setIssueReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+    logAdminAction('update_issue_status', 'issue_report', id, { status });
     toast(`Issue marked as ${status}`, 'success');
   }
 
   async function banUser(userId) {
-    if (!window.confirm('Ban this user? This will delete their auth account.')) return;
+    if (!window.confirm('Ban this user? They will be locked out immediately; their data and posts are kept.')) return;
     const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-ban-user`, {
       method: 'POST',
@@ -76,6 +99,7 @@ export default function AdminPage() {
     }
     toast('User banned.', 'success');
     fetchReports();
+    fetchAuditLog();
   }
 
   const filtered = reports.filter((r) => r.status === tab);
@@ -104,8 +128,14 @@ export default function AdminPage() {
               {issueReports.filter((r) => r.status === 'pending').length}
             </span>
           </button>
+          <button
+            className={`admin-tab${section === 'audit' ? ' active' : ''}`}
+            onClick={() => setSection('audit')}
+          >
+            📋 Audit Log
+          </button>
         </div>
-        <div className="admin-tabs">
+        {section !== 'audit' && <div className="admin-tabs">
           {['pending', 'reviewed', 'dismissed'].map((t) => (
             <button
               key={t}
@@ -118,10 +148,27 @@ export default function AdminPage() {
               </span>
             </button>
           ))}
-        </div>
+        </div>}
       </div>
 
-      {loading ? (
+      {section === 'audit' ? (
+        <div className="admin-reports">
+          {auditLog.length === 0 ? (
+            <div className="admin-empty">No admin actions logged yet.</div>
+          ) : auditLog.map((entry) => (
+            <div key={entry.id} className="admin-report-card">
+              <div className="report-meta">
+                <span className="report-reason">{entry.action}</span>
+                <span className="report-date">{new Date(entry.created_at).toLocaleString()}</span>
+              </div>
+              <div className="report-parties">
+                <div><span className="report-label">Target:</span> {entry.target_type} — {entry.target_id ?? 'n/a'}</div>
+                {entry.details && <div><span className="report-label">Details:</span> {JSON.stringify(entry.details)}</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : loading ? (
         <div className="admin-loading">Loading reports...</div>
       ) : section === 'content' ? (
         filtered.length === 0 ? (
