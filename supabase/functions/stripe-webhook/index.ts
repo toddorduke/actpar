@@ -2,12 +2,28 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 
-// Minimal Stripe webhook signature verification (HMAC-SHA256)
+// Minimal Stripe webhook signature verification (HMAC-SHA256).
+// Mirrors Stripe's own default: reject signatures older than 5 minutes so a
+// captured-and-replayed payload (e.g. from a leaked proxy log) can't be
+// resubmitted indefinitely, and compare digests in constant time so the
+// check itself can't leak timing information.
+const TOLERANCE_SECONDS = 5 * 60;
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
   const parts = Object.fromEntries(sigHeader.split(',').map((s) => s.split('=')));
   const timestamp = parts['t'];
   const sig = parts['v1'];
   if (!timestamp || !sig) return false;
+
+  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!Number.isFinite(age) || age > TOLERANCE_SECONDS) return false;
 
   const signed = `${timestamp}.${payload}`;
   const key = await crypto.subtle.importKey(
@@ -15,7 +31,7 @@ async function verifyStripeSignature(payload: string, sigHeader: string, secret:
   );
   const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signed));
   const computed = Array.from(new Uint8Array(mac)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  return computed === sig;
+  return timingSafeEqual(computed, sig);
 }
 
 Deno.serve(async (req) => {
