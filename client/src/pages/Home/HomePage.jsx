@@ -1141,6 +1141,98 @@ const HomePage = () => {
                 );
               })()}
 
+              {/* Add a Goal — the single most important first action, so it
+                  leads the main column on both desktop and mobile instead
+                  of sitting inside the sidebar (which renders second on
+                  narrow viewports where the grid collapses to one column). */}
+              <div className="profile-sidebar-card" ref={addGoalRef}>
+                <h3 className="sidebar-card-title">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add a Goal
+                </h3>
+                <form className="add-goal-form-wrap" onSubmit={handleAddGoal}>
+                  <div className="goal-type-toggle">
+                    <button
+                      type="button"
+                      className={`goal-type-btn${newGoalType === 'habit' ? ' active' : ''}`}
+                      onClick={() => setNewGoalType('habit')}
+                    >✓ Habit</button>
+                    <button
+                      type="button"
+                      className={`goal-type-btn${newGoalType === 'numeric' ? ' active' : ''}`}
+                      onClick={() => setNewGoalType('numeric')}
+                    >📊 Progress Goal</button>
+                  </div>
+                  <div className="add-goal-row">
+                    <input
+                      type="text"
+                      className="add-goal-input"
+                      placeholder={newGoalType === 'habit' ? 'e.g. Attend church weekly' : 'e.g. Run more miles'}
+                      value={newGoalTitle}
+                      onChange={(e) => setNewGoalTitle(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="add-goal-btn"
+                      disabled={addingGoal || (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget))}
+                    >
+                      {addingGoal ? '...' : 'Add'}
+                    </button>
+                  </div>
+                  {newGoalType === 'numeric' && (
+                    <div className="numeric-goal-fields">
+                      <div className="numeric-inputs-row">
+                        <input type="number" className="add-goal-input target-num-input" placeholder="Target" min="0" step="any" value={newGoalTarget} onChange={(e) => setNewGoalTarget(e.target.value)} required />
+                        <input type="text" className="add-goal-input unit-text-input" placeholder="unit (miles, lbs, $…)" value={newGoalUnit} onChange={(e) => setNewGoalUnit(e.target.value)} required />
+                      </div>
+                      {newGoalCategory && UNIT_SUGGESTIONS[newGoalCategory] && (
+                        <div className="unit-suggestion-chips">
+                          {UNIT_SUGGESTIONS[newGoalCategory].map((u) => (
+                            <button key={u} type="button" className={`unit-chip${newGoalUnit === u ? ' active' : ''}`} onClick={() => setNewGoalUnit(u)}>{u}</button>
+                          ))}
+                        </div>
+                      )}
+                      <div className="period-toggle">
+                        {[['weekly', 'Weekly'], ['monthly', 'Monthly'], ['total', 'One-Time']].map(([val, lbl]) => (
+                          <button key={val} type="button" className={`period-btn${newGoalPeriod === val ? ' active' : ''}`} onClick={() => setNewGoalPeriod(val)}>{lbl}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="add-goal-categories">
+                    {GOAL_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        className={`goal-cat-chip${newGoalCategory === cat.value ? ' active' : ''}`}
+                        onClick={() => setNewGoalCategory((prev) => prev === cat.value ? '' : cat.value)}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="add-goal-reminder">
+                    <span className="add-goal-reminder-label">🔔 Daily reminder</span>
+                    <select
+                      className="add-goal-reminder-select"
+                      value={newGoalReminder}
+                      onChange={(e) => setNewGoalReminder(e.target.value)}
+                    >
+                      <option value="">No reminder</option>
+                      {Array.from({ length: 24 }, (_, i) => {
+                        const h = i % 12 === 0 ? 12 : i % 12;
+                        const ampm = i < 12 ? 'AM' : 'PM';
+                        const val = `${String(i).padStart(2, '0')}:00`;
+                        return <option key={i} value={val}>{h}:00 {ampm}</option>;
+                      })}
+                    </select>
+                  </div>
+                </form>
+              </div>
+
               {/* Today's Check-Ins */}
               {!goalsLoading && habitGoals.length > 0 && (
                 <div className="home-card">
@@ -1571,142 +1663,19 @@ const HomePage = () => {
                 </button>
               </div>
 
-              {/* Add a Goal */}
-              <div className="profile-sidebar-card" ref={addGoalRef}>
-                <h3 className="sidebar-card-title">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add a Goal
-                </h3>
-                <form className="add-goal-form-wrap" onSubmit={handleAddGoal}>
-                  <div className="goal-type-toggle">
-                    <button
-                      type="button"
-                      className={`goal-type-btn${newGoalType === 'habit' ? ' active' : ''}`}
-                      onClick={() => setNewGoalType('habit')}
-                    >✓ Habit</button>
-                    <button
-                      type="button"
-                      className={`goal-type-btn${newGoalType === 'numeric' ? ' active' : ''}`}
-                      onClick={() => setNewGoalType('numeric')}
-                    >📊 Progress Goal</button>
-                  </div>
-                  <div className="add-goal-row">
-                    <input
-                      type="text"
-                      className="add-goal-input"
-                      placeholder={newGoalType === 'habit' ? 'e.g. Attend church weekly' : 'e.g. Run more miles'}
-                      value={newGoalTitle}
-                      onChange={(e) => setNewGoalTitle(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="add-goal-btn"
-                      disabled={addingGoal || (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget))}
-                    >
-                      {addingGoal ? '...' : 'Add'}
-                    </button>
-                  </div>
-                  {newGoalType === 'numeric' && (
-                    <div className="numeric-goal-fields">
-                      <div className="numeric-inputs-row">
-                        <input type="number" className="add-goal-input target-num-input" placeholder="Target" min="0" step="any" value={newGoalTarget} onChange={(e) => setNewGoalTarget(e.target.value)} required />
-                        <input type="text" className="add-goal-input unit-text-input" placeholder="unit (miles, lbs, $…)" value={newGoalUnit} onChange={(e) => setNewGoalUnit(e.target.value)} required />
-                      </div>
-                      {newGoalCategory && UNIT_SUGGESTIONS[newGoalCategory] && (
-                        <div className="unit-suggestion-chips">
-                          {UNIT_SUGGESTIONS[newGoalCategory].map((u) => (
-                            <button key={u} type="button" className={`unit-chip${newGoalUnit === u ? ' active' : ''}`} onClick={() => setNewGoalUnit(u)}>{u}</button>
-                          ))}
-                        </div>
-                      )}
-                      <div className="period-toggle">
-                        {[['weekly', 'Weekly'], ['monthly', 'Monthly'], ['total', 'One-Time']].map(([val, lbl]) => (
-                          <button key={val} type="button" className={`period-btn${newGoalPeriod === val ? ' active' : ''}`} onClick={() => setNewGoalPeriod(val)}>{lbl}</button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div className="add-goal-categories">
-                    {GOAL_CATEGORIES.map((cat) => (
-                      <button
-                        key={cat.value}
-                        type="button"
-                        className={`goal-cat-chip${newGoalCategory === cat.value ? ' active' : ''}`}
-                        onClick={() => setNewGoalCategory((prev) => prev === cat.value ? '' : cat.value)}
-                      >
-                        {cat.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="add-goal-reminder">
-                    <span className="add-goal-reminder-label">🔔 Daily reminder</span>
-                    <select
-                      className="add-goal-reminder-select"
-                      value={newGoalReminder}
-                      onChange={(e) => setNewGoalReminder(e.target.value)}
-                    >
-                      <option value="">No reminder</option>
-                      {Array.from({ length: 24 }, (_, i) => {
-                        const h = i % 12 === 0 ? 12 : i % 12;
-                        const ampm = i < 12 ? 'AM' : 'PM';
-                        const val = `${String(i).padStart(2, '0')}:00`;
-                        return <option key={i} value={val}>{h}:00 {ampm}</option>;
-                      })}
-                    </select>
-                  </div>
-                </form>
-              </div>
-
-              {/* Daily Reflection */}
-              <div className="profile-sidebar-card">
-                <div className="reflection-card-header">
-                  <h3 className="sidebar-card-title">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Daily Reflection
-                  </h3>
-                  <button className="edit-questions-btn" onClick={editingQuestions ? () => setEditingQuestions(false) : () => { setDraftQuestions([...activeQuestions]); setEditingQuestions(true); }}>
-                    {editingQuestions ? 'Cancel' : '✏️ Edit'}
-                  </button>
-                </div>
-                {editingQuestions ? (
-                  <div className="edit-questions-form">
-                    {(draftQuestions ?? activeQuestions).map((q, i) => (
-                      <div key={i} className="edit-question-row">
-                        <span className="edit-question-num">{i + 1}.</span>
-                        <input className="edit-question-input" value={q} onChange={(e) => setDraftQuestions((prev) => prev.map((x, j) => j === i ? e.target.value : x))} placeholder={`Question ${i + 1}`} />
-                      </div>
-                    ))}
-                    <button className="save-questions-btn" onClick={handleSaveQuestions} disabled={savingQuestions}>
-                      {savingQuestions ? 'Saving...' : 'Save Questions'}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="reflection-list">
-                    {activeQuestions.map((q, i) => (
-                      <div key={i} className="reflection-item">
-                        <p className="reflection-question">{q}</p>
-                        <textarea className="reflection-input" placeholder="Your thoughts..." rows={2} value={answers[i] ?? ''} onChange={(e) => setAnswers((prev) => ({ ...prev, [i]: e.target.value }))} />
-                        <div className="reflection-footer">
-                          <label className="reflection-privacy-toggle">
-                            <input type="checkbox" checked={publicAnswers[i] ?? false} onChange={(e) => setPublicAnswers((prev) => ({ ...prev, [i]: e.target.checked }))} />
-                            <span>{publicAnswers[i] ? '🌍 Public' : '🔒 Private'}</span>
-                          </label>
-                          <button type="button" className="reflection-submit" onClick={() => handleSaveAnswer(i)} disabled={savingAnswers[i] || !answers[i]?.trim()}>
-                            {savingAnswers[i] ? '...' : 'Save'}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 30-Day Affirmation */}
+              {/* 30-Day Affirmation — a slim, low-commitment prompt until
+                  someone actually opts in; the full 30-day tracker only
+                  earns its space once it has real progress to show. */}
+              {!profile?.affirmation_start_date ? (
+                <button className="affirmation-slim-prompt" onClick={handleStartChallenge}>
+                  <span className="affirmation-slim-icon">⭐</span>
+                  <span className="affirmation-slim-text">
+                    <strong>30-Day Affirmation</strong>
+                    <span>Write one positive affirmation a day</span>
+                  </span>
+                  <span className="affirmation-slim-cta">Start →</span>
+                </button>
+              ) : (
               <div className="profile-sidebar-card affirmation-card">
                 <h3 className="sidebar-card-title">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
@@ -1714,12 +1683,7 @@ const HomePage = () => {
                   </svg>
                   30-Day Affirmation
                 </h3>
-                {!profile?.affirmation_start_date ? (
-                  <div className="affirmation-start">
-                    <p className="affirmation-start-desc">Commit to writing one positive affirmation every day for 30 days.</p>
-                    <button className="affirmation-begin-btn" onClick={handleStartChallenge}>Start the Challenge</button>
-                  </div>
-                ) : affirmationDayNumber > 30 ? (
+                {affirmationDayNumber > 30 ? (
                   <div className="affirmation-complete">
                     <div className="affirmation-complete-icon">🎉</div>
                     <p className="affirmation-complete-text">You completed 30 days!</p>
@@ -1764,45 +1728,35 @@ const HomePage = () => {
                   </>
                 )}
               </div>
+              )}
 
-
-              {/* Active Now */}
-              <div className="profile-sidebar-card">
-                <h3 className="sidebar-card-title">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  Active Now
-                </h3>
-                <div className="active-members-list">
-                  {connectionProfiles.length === 0 && (
-                    <p style={{ fontSize: '0.85rem', color: '#ffffff', margin: 0 }}>No connections yet — send a spark to someone!</p>
-                  )}
-                  {connectionProfiles.map((p) => {
-                    const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'Member';
-                    return (
-                      <div key={p.id} className="active-member-item" style={{ cursor: 'pointer' }} onClick={() => navigate(`/profile/${p.id}`)}>
-                        <Avatar url={p.avatar_url} name={name} size={36} />
-                        <div className="active-member-info">
-                          <div className="active-member-name">{name}</div>
-                          <div className="active-member-status">{p.tagline || p.city || 'Spark connection'}</div>
+              {/* Active Now — hidden entirely rather than shown as an empty
+                  state; a new user with zero connections doesn't need a
+                  card telling them so. */}
+              {connectionProfiles.length > 0 && (
+                <div className="profile-sidebar-card">
+                  <h3 className="sidebar-card-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Active Now
+                  </h3>
+                  <div className="active-members-list">
+                    {connectionProfiles.map((p) => {
+                      const name = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'Member';
+                      return (
+                        <div key={p.id} className="active-member-item" style={{ cursor: 'pointer' }} onClick={() => navigate(`/profile/${p.id}`)}>
+                          <Avatar url={p.avatar_url} name={name} size={36} />
+                          <div className="active-member-info">
+                            <div className="active-member-name">{name}</div>
+                            <div className="active-member-status">{p.tagline || p.city || 'Spark connection'}</div>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-
-              {/* Quick Access */}
-              <div className="home-sidebar-card">
-                <h3 className="home-sidebar-title">Quick Access</h3>
-                <div className="home-quick-links">
-                  <button className="home-quick-btn" onClick={() => navigate('/connections')}>⚡ Sparks</button>
-                  <button className="home-quick-btn" onClick={() => navigate('/tribe-community')}>🌍 Tribe</button>
-                  <button className="home-quick-btn" onClick={() => navigate('/messages')}>💬 Messages</button>
-                  <button className="home-quick-btn" onClick={() => navigate('/leaderboard')}>🏆 Ranks</button>
-                </div>
-              </div>
+              )}
 
             </aside>
           </div>
