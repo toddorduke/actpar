@@ -476,14 +476,25 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 150;
-  display: flex;
-  align-items: flex-end;
+  /* Must clear .bottom-nav's z-index: 200 (Navigation.css) or the comment
+     input renders underneath the persistent bottom nav on mobile.
+     Matches the share sheet's z-index below, the other full-screen
+     bottom-sheet overlay on this page. */
+  z-index: 300;
 }
 
 .feed-comment-overlay-sheet {
+  /* Anchored directly to the viewport rather than sized as a % of the
+     backdrop's flex layout — the backdrop's height is the full LAYOUT
+     viewport, which doesn't shrink when a mobile keyboard opens, so a
+     height computed against it left the comment input hidden behind the
+     keyboard. dvh tracks the actual visible (visual) viewport instead. */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
-  height: 65%;
+  height: min(65vh, 65dvh);
   background: #1a1a2e;
   border-radius: 20px 20px 0 0;
   display: flex;
@@ -600,7 +611,9 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 200;
+  /* Same tier as .bottom-nav (Navigation.css) is unreliable -- bumped to
+     300 to reliably render above it, matching the comment/share sheets. */
+  z-index: 300;
   display: flex;
   align-items: flex-end;
 }
