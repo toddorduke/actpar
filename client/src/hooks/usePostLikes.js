@@ -42,21 +42,18 @@ export const usePostLikes = (postIds = [], postType = 'tribe') => {
         .delete()
         .eq('post_id', postId)
         .eq('user_id', user.id);
-      if (!error) {
-        const { error: rpcError } = await supabase.rpc('decrement_post_likes', { p_post_id: postId, p_post_type: postType });
-        if (rpcError) onCountChange(postId, currentLikeCount);
-      } else {
+      if (error) {
         // Roll back the optimistic update
         setLikedIds((prev) => new Set([...prev, postId]));
         onCountChange(postId, currentLikeCount);
       }
+      // The post_likes_count_trigger keeps the like count in sync — no
+      // separate RPC call needed (and the old ones had no ownership check).
     } else {
       const { error } = await supabase
         .from('post_likes')
         .insert({ post_id: postId, post_type: postType, user_id: user.id });
       if (!error) {
-        const { error: rpcError } = await supabase.rpc('increment_post_likes', { p_post_id: postId, p_post_type: postType });
-        if (rpcError) onCountChange(postId, currentLikeCount);
         // Notify post owner
         if (postOwnerId) {
           createNotification({
