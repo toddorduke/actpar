@@ -11,6 +11,7 @@ import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
+import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
@@ -28,6 +29,8 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   const postIds = useMemo(() => posts.map(p => p.id), [posts]);
   const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
   useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
+  const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
   const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   function handleLike(id, currentLikes) {
@@ -108,7 +111,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {pinned && (
         <div className="comm-post-card pinned-post">
           <div className="pinned-label">📌 Pinned</div>
-          <PostCard post={pinned} onLike={handleLike} liked={likedIds.has(pinned.id)} isToggling={toggling.has(pinned.id)} likeCount={localLikeCounts[pinned.id] ?? pinned.likes} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} />
+          <PostCard post={pinned} onLike={handleLike} liked={likedIds.has(pinned.id)} isToggling={toggling.has(pinned.id)} likeCount={localLikeCounts[pinned.id] ?? pinned.likes} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[pinned.id]} rsvpMyStatus={myRsvps[pinned.id] ?? null} onRsvp={toggleRsvp} />
         </div>
       )}
 
@@ -116,7 +119,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
 
       {feed.map((p) => p.id !== pinnedPostId && (
-        <PostCard key={p.id} post={p} onLike={handleLike} liked={likedIds.has(p.id)} isToggling={toggling.has(p.id)} likeCount={localLikeCounts[p.id] ?? p.likes} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} />
+        <PostCard key={p.id} post={p} onLike={handleLike} liked={likedIds.has(p.id)} isToggling={toggling.has(p.id)} likeCount={localLikeCounts[p.id] ?? p.likes} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[p.id]} rsvpMyStatus={myRsvps[p.id] ?? null} onRsvp={toggleRsvp} />
       ))}
 
       {visibleCount < posts.length && (
@@ -134,7 +137,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   );
 }
 
-function PostCard({ post, onLike, liked, isToggling, likeCount, isAdmin, onPin, isPinned, onReport, currentUserId, commentState, reactionCounts, myReaction, onReact }) {
+function PostCard({ post, onLike, liked, isToggling, likeCount, isAdmin, onPin, isPinned, onReport, currentUserId, commentState, reactionCounts, myReaction, onReact, rsvpGoingCount, rsvpMyStatus, onRsvp }) {
   const [expanded, setExpanded] = useState(false);
   const truncated = post.content.length > POST_TRUNCATE && !expanded;
   const authorName = getDisplayName(post.profiles);
@@ -173,6 +176,25 @@ function PostCard({ post, onLike, liked, isToggling, likeCount, isAdmin, onPin, 
           {post.event_date && `🗓️ ${new Date(post.event_date).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
           {post.event_date && post.location && ' · '}
           {post.location && `📍 ${post.location}`}
+        </div>
+      )}
+      {post.post_type === 'meetup' && onRsvp && (
+        <div className="comm-meetup-rsvp-row">
+          <span className="comm-meetup-rsvp-label">
+            {rsvpGoingCount > 0
+              ? `${rsvpGoingCount} ${rsvpGoingCount === 1 ? 'person' : 'people'} going`
+              : 'Be the first to RSVP'}
+          </span>
+          <div className="comm-meetup-rsvp-btns">
+            <button
+              className={`comm-meetup-rsvp-btn going${rsvpMyStatus === 'going' ? ' active' : ''}`}
+              onClick={() => onRsvp(post.id, 'going')}
+            >✓ Going</button>
+            <button
+              className={`comm-meetup-rsvp-btn cant${rsvpMyStatus === 'not_going' ? ' active' : ''}`}
+              onClick={() => onRsvp(post.id, 'not_going')}
+            >✗ Can't make it</button>
+          </div>
         </div>
       )}
       <div className="comm-post-actions">
@@ -417,7 +439,11 @@ function MembersTab({ communityId, isAdmin, currentUserId, creatorId }) {
       .from('community_memberships')
       .select('*, profiles(id, first_name, last_name, alter_ego_name, avatar_url, city, account_type)')
       .eq('community_id', communityId)
-      .then(({ data }) => { setMembers(data ?? []); setLoading(false); });
+      .then(({ data, error }) => {
+        if (error) toast("Couldn't load members", 'error');
+        setMembers(data ?? []);
+        setLoading(false);
+      });
   }, [communityId]);
 
   async function removeMember(userId) {

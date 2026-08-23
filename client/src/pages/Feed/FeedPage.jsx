@@ -7,6 +7,7 @@ import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
+import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
@@ -40,7 +41,7 @@ const HEART_PATH  = 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 
 const BUBBLE_PATH = 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z';
 const SHARE_PATH  = 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z';
 
-function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount, onShare, reactionCounts, myReaction, onReact, currentUserId, onDelete }) {
+function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, commentCount, onShare, reactionCounts, myReaction, onReact, currentUserId, onDelete, rsvpGoingCount, rsvpMyStatus, onRsvp }) {
   const authorName  = getDisplayName(post.profiles);
   const gradient    = getGradient(post.post_type, post.id);
   const type        = post.post_type ?? 'general';
@@ -147,6 +148,25 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
           </div>
         )}
         <p className="feed-content">{post.content}</p>
+        {type === 'meetup' && onRsvp && (
+          <div className="feed-meetup-rsvp-row">
+            <span className="feed-meetup-rsvp-label">
+              {rsvpGoingCount > 0
+                ? `${rsvpGoingCount} ${rsvpGoingCount === 1 ? 'person' : 'people'} going`
+                : 'Be the first to RSVP'}
+            </span>
+            <div className="feed-meetup-rsvp-btns">
+              <button
+                className={`feed-meetup-rsvp-btn going${rsvpMyStatus === 'going' ? ' active' : ''}`}
+                onClick={() => onRsvp(post.id, 'going')}
+              >✓ Going</button>
+              <button
+                className={`feed-meetup-rsvp-btn cant${rsvpMyStatus === 'not_going' ? ' active' : ''}`}
+                onClick={() => onRsvp(post.id, 'not_going')}
+              >✗ Can't make it</button>
+            </div>
+          </div>
+        )}
         {/* Reaction chips */}
         <div className="feed-reactions">
           {REACTION_EMOJIS.map(({ key, label }) => {
@@ -558,6 +578,8 @@ export default function FeedPage() {
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   const commentState                          = useCommentState(posts);
   const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
+  const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
   const [showSheet, setShowSheet]             = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState(null);
   const [sharePost, setSharePost]             = useState(null);
@@ -726,6 +748,9 @@ export default function FeedPage() {
             onReact={toggleReaction}
             currentUserId={user?.id}
             onDelete={deletePost}
+            rsvpGoingCount={goingCounts[post.id]}
+            rsvpMyStatus={myRsvps[post.id] ?? null}
+            onRsvp={toggleRsvp}
           />
         ))}
       </div>
