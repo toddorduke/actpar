@@ -86,6 +86,7 @@ export default function AppGuide() {
   const [neverShow, setNeverShow] = useState(true);
   const [spotlight, setSpotlight] = useState(null); // { top, left, width, height }
   const rafRef = useRef(null);
+  const touchStartX = useRef(null);
 
   useEffect(() => {
     if (!user) return;
@@ -212,7 +213,6 @@ export default function AppGuide() {
   const isLast = slide === slides.length - 1;
   const isMobile = window.innerWidth <= 540;
 
-  const touchStartX = useRef(null);
   function handleTouchStart(e) { touchStartX.current = e.touches[0].clientX; }
   function handleTouchEnd(e) {
     if (touchStartX.current === null) return;
