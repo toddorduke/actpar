@@ -34,6 +34,7 @@ export default function UserProfilePage() {
   const [showReport, setShowReport] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const [celebrateProfile, setCelebrateProfile] = useState(null);
+  const [bannerBroken, setBannerBroken] = useState(false);
   const { blockUser, unblockUser, isBlocked } = useBlock();
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function UserProfilePage() {
       navigate('/profile');
       return;
     }
+    setBannerBroken(false);
     loadProfile();
   }, [userId, user]);
 
@@ -251,10 +253,10 @@ export default function UserProfilePage() {
           {/* Banner — first media item or avatar */}
           {(media.length > 0 || profile.avatar_url) && (
             <div className="up-banner">
-              {media.length > 0 && media[0].file_type === 'video' ? (
-                <video src={media[0].file_url} className="up-banner-media" autoPlay muted loop playsInline />
-              ) : media.length > 0 ? (
-                <img src={media[0].file_url} alt="" className="up-banner-media" />
+              {media.length > 0 && !bannerBroken && media[0].file_type === 'video' ? (
+                <video src={media[0].file_url} className="up-banner-media" autoPlay muted loop playsInline onError={() => setBannerBroken(true)} />
+              ) : media.length > 0 && !bannerBroken ? (
+                <img src={media[0].file_url} alt="" className="up-banner-media" onError={() => setBannerBroken(true)} />
               ) : (
                 <img src={profile.avatar_url} alt={fullName} className="up-banner-media" />
               )}
@@ -423,8 +425,8 @@ export default function UserProfilePage() {
                   {post.media_url && (
                     <div className="up-post-media">
                       {isVideo
-                        ? <video src={post.media_url} className="up-post-media-file" controls playsInline />
-                        : <img src={post.media_url} alt="" className="up-post-media-file" />}
+                        ? <video src={post.media_url} className="up-post-media-file" controls playsInline onError={(e) => { e.currentTarget.closest('.up-post-media').style.display = 'none'; }} />
+                        : <img src={post.media_url} alt="" className="up-post-media-file" onError={(e) => { e.currentTarget.closest('.up-post-media').style.display = 'none'; }} />}
                     </div>
                   )}
                   {post.content && <p className="up-post-content">{post.content}</p>}
@@ -442,9 +444,9 @@ export default function UserProfilePage() {
             {allMedia.map((item) => (
               <div key={item.id} className="up-media-item">
                 {item.file_type === 'video' ? (
-                  <video src={item.file_url} className="up-media-file" controls playsInline />
+                  <video src={item.file_url} className="up-media-file" controls playsInline onError={(e) => { e.currentTarget.closest('.up-media-item').style.display = 'none'; }} />
                 ) : (
-                  <img src={item.file_url} alt={item.caption ?? ''} className="up-media-file" />
+                  <img src={item.file_url} alt={item.caption ?? ''} className="up-media-file" onError={(e) => { e.currentTarget.closest('.up-media-item').style.display = 'none'; }} />
                 )}
                 {item.caption && <div className="up-media-caption">{item.caption}</div>}
               </div>

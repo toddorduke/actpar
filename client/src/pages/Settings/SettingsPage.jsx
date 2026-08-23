@@ -9,7 +9,7 @@ import Avatar from '../../components/common/Avatar.jsx';
 import PremiumModal from '../../components/common/PremiumModal.jsx';
 import ReportIssueModal from '../../components/common/ReportIssueModal.jsx';
 import { supabase } from '../../lib/supabase.js';
-import { checkText } from '../../utils/contentModeration.js';
+import { checkText, scanMediaUrl } from '../../utils/contentModeration.js';
 import './SettingsPage.css';
 
 const LF_CATEGORIES = [
@@ -221,16 +221,27 @@ export default function SettingsPage() {
   async function handleAvatarChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { toast('Please select an image file.', 'error'); return; }
+    const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) { toast('Profile photo must be JPG, PNG, WebP, or GIF.', 'error'); return; }
+    if (file.size > MAX_AVATAR_SIZE) { toast('Photo too large. Max 5 MB.', 'error'); return; }
     setUploadingAvatar(true);
     const ext = file.name.split('.').pop();
     const path = `avatars/${user.id}.${ext}`;
     const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { upsert: true, cacheControl: '3600' });
     if (uploadError) { toast(`Upload failed: ${uploadError.message}`, 'error'); setUploadingAvatar(false); return; }
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
-    await updateProfile({ avatar_url: urlData.publicUrl });
-    toast('Profile photo updated!', 'success');
+    const mediaScan = await scanMediaUrl(urlData.publicUrl);
+    if (!mediaScan.ok) {
+      await supabase.storage.from('media').remove([path]);
+      toast(mediaScan.message, 'error');
+      setUploadingAvatar(false);
+      return;
+    }
+    const { error: profileError } = await updateProfile({ avatar_url: urlData.publicUrl });
     setUploadingAvatar(false);
+    if (profileError) { toast("Photo uploaded but couldn't save it to your profile — try again.", 'error'); return; }
+    toast('Profile photo updated!', 'success');
   }
 
   async function handleSaveProfile(e) {

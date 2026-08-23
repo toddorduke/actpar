@@ -8,6 +8,7 @@ import { useCommunities } from '../../hooks/useCommunities.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
+import { scanMediaUrl } from '../../utils/contentModeration.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
@@ -46,7 +47,8 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
   const authorName  = getDisplayName(post.profiles);
   const gradient    = getGradient(post.post_type, post.id);
   const type        = post.post_type ?? 'general';
-  const hasMedia    = !!post.media_url;
+  const [mediaBroken, setMediaBroken] = useState(false);
+  const hasMedia    = !!post.media_url && !mediaBroken;
   const isVideo     = hasMedia && /\.(mp4|mov|webm|quicktime)$/i.test(post.media_url);
   const [burst, setBurst] = useState(false);
 
@@ -61,9 +63,9 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
       {/* Subtle noise texture overlay for gradient cards */}
       {!hasMedia && <div className="feed-card-noise" />}
 
-      {hasMedia && !isVideo && <img src={post.media_url} alt="" className="feed-media-bg" />}
+      {hasMedia && !isVideo && <img src={post.media_url} alt="" className="feed-media-bg" onError={() => setMediaBroken(true)} />}
       {hasMedia && isVideo && (
-        <video src={post.media_url} className="feed-media-bg" autoPlay muted loop playsInline />
+        <video src={post.media_url} className="feed-media-bg" autoPlay muted loop playsInline onError={() => setMediaBroken(true)} />
       )}
 
       <div className="feed-card-scrim" />
@@ -429,6 +431,12 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
         const path = `posts/${user.id}/${Date.now()}.${ext}`;
         await xhrUpload(path, capturedFile, session.access_token, onUploadProgress);
         const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+        const mediaScan = await scanMediaUrl(urlData.publicUrl);
+        if (!mediaScan.ok) {
+          await supabase.storage.from('media').remove([path]);
+          onUploadError(mediaScan.message);
+          return;
+        }
         media_url = urlData.publicUrl;
       } catch (err) {
         onUploadError(err.message);

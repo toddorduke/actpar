@@ -62,10 +62,17 @@ export const useTribePosts = (communityId = null) => {
   }, [user]);
 
   const deletePost = useCallback(async (postId) => {
+    const mediaUrl = posts.find((p) => p.id === postId)?.media_url;
     const { error } = await supabase.from('tribe_posts').delete().eq('id', postId);
-    if (!error) setPosts((prev) => prev.filter((p) => p.id !== postId));
+    if (!error) {
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      if (mediaUrl) {
+        const path = mediaUrl.split('/media/')[1];
+        if (path) await supabase.storage.from('media').remove([path]);
+      }
+    }
     return { error };
-  }, []);
+  }, [posts]);
 
   return { posts, loading, createPost, deletePost, refetch: fetchPosts };
 };

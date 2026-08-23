@@ -266,6 +266,7 @@ export default function ConnectionsPage() {
   // released past the threshold, then the actual action fires after the
   // animation finishes so the card visibly leaves before the list updates.
   const SWIPE_THRESHOLD = 110;
+  const [brokenMediaIds, setBrokenMediaIds] = useState(new Set());
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [exitDir, setExitDir] = useState(null);
@@ -887,11 +888,12 @@ export default function ConnectionsPage() {
                         <div className={`card-swipe-stamp card-stamp-connect${dragPos.x > 20 ? ' card-stamp-visible' : ''}`} style={{ opacity: exitDir === 'right' ? 1 : Math.min(Math.max(dragPos.x, 0) / SWIPE_THRESHOLD, 1) }}>Connect</div>
                         <div className={`card-swipe-stamp card-stamp-skip${dragPos.x < -20 ? ' card-stamp-visible' : ''}`} style={{ opacity: exitDir === 'left' ? 1 : Math.min(Math.max(-dragPos.x, 0) / SWIPE_THRESHOLD, 1) }}>Skip</div>
                         <div className="card-header">
-                          {profile.avatar_url ? (
+                          {profile.avatar_url && !brokenMediaIds.has(profile.id) ? (
                             <img
                               src={profile.avatar_url}
                               alt={profile.first_name}
                               className="card-header-media"
+                              onError={() => setBrokenMediaIds((prev) => new Set([...prev, profile.id]))}
                             />
                           ) : profile.featured_video_url ? (
                             <video

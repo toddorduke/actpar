@@ -23,7 +23,7 @@ import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
-import { checkText } from '../../utils/contentModeration.js';
+import { checkText, scanMediaUrl } from '../../utils/contentModeration.js';
 import '../Profile/ProfilePage.css';
 import './HomePage.css';
 
@@ -774,9 +774,14 @@ const HomePage = () => {
   }
 
   async function handleDeletePost(postId) {
+    const mediaUrl = myOwnPosts.find((p) => p.id === postId)?.media_url;
     const { error } = await supabase.from('tribe_posts').delete().eq('id', postId);
     if (error) { toast("Couldn't delete that post — try again.", 'error'); return; }
     setMyOwnPosts((prev) => prev.filter((p) => p.id !== postId));
+    if (mediaUrl) {
+      const path = mediaUrl.split('/media/')[1];
+      if (path) await supabase.storage.from('media').remove([path]);
+    }
     toast('Post deleted.', 'success');
   }
 
@@ -837,6 +842,12 @@ const HomePage = () => {
     const { error: storageError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '3600', upsert: true });
     if (storageError) { toast(`Upload failed: ${storageError.message}`, 'error'); return; }
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+    const mediaScan = await scanMediaUrl(urlData.publicUrl);
+    if (!mediaScan.ok) {
+      await supabase.storage.from('media').remove([path]);
+      toast(mediaScan.message, 'error');
+      return;
+    }
     const { error: profileError } = await updateProfile({ avatar_url: urlData.publicUrl });
     if (profileError) { toast("Photo uploaded but couldn't save it to your profile — try again.", 'error'); return; }
     toast('Profile photo updated!', 'success');
@@ -1003,7 +1014,7 @@ const HomePage = () => {
                   <div className="header-photos-label">Latest Photos</div>
                   <div className="header-photos-row">
                     {photos.slice(0, 3).map((photo) => (
-                      <img key={photo.id} src={photo.file_url} alt={photo.caption || ''} className="header-photo-thumb" />
+                      <img key={photo.id} src={photo.file_url} alt={photo.caption || ''} className="header-photo-thumb" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     ))}
                   </div>
                 </div>

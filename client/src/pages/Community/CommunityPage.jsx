@@ -14,6 +14,7 @@ import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { scanMediaUrl } from '../../utils/contentModeration.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import './CommunityPage.css';
@@ -797,10 +798,23 @@ export default function CommunityPage() {
   async function handleCoverUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
+    const ALLOWED_COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_COVER_SIZE = 10 * 1024 * 1024;
+    if (!ALLOWED_COVER_TYPES.includes(file.type)) { toast('Cover must be a JPG, PNG, WebP, or GIF image.', 'error'); return; }
+    if (file.size > MAX_COVER_SIZE) { toast('Image too large. Max 10 MB.', 'error'); return; }
     const path = `community_covers/${communityId}`;
     const { error } = await supabase.storage.from('media').upload(path, file, { upsert: true });
     if (error) { toast('Upload failed', 'error'); return; }
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+    const mediaScan = await scanMediaUrl(urlData.publicUrl);
+    if (!mediaScan.ok) {
+      // Cover uploads use a fixed path with upsert, so the flagged image has
+      // already overwritten whatever was there — remove it rather than leave
+      // it live under the community's existing cover URL.
+      await supabase.storage.from('media').remove([path]);
+      toast(mediaScan.message, 'error');
+      return;
+    }
     const { error: updateError } = await supabase.from('communities').update({ cover_url: urlData.publicUrl }).eq('id', communityId);
     if (updateError) { toast("Cover uploaded but couldn't save it — try again.", 'error'); return; }
     refetch();

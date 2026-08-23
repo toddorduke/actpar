@@ -6,7 +6,7 @@ import { useGoals } from '../../hooks/useGoals.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { supabase } from '../../lib/supabase.js';
-import { checkText } from '../../utils/contentModeration.js';
+import { checkText, scanMediaUrl } from '../../utils/contentModeration.js';
 import './ProfileSetupPage.css';
 
 const CATEGORIES = [
@@ -70,7 +70,10 @@ export default function ProfileSetupPage() {
   async function handleAvatarChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { toast('Please select an image file.', 'error'); return; }
+    const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_AVATAR_SIZE = 10 * 1024 * 1024;
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) { toast('Please select a JPG, PNG, WebP, or GIF image.', 'error'); return; }
+    if (file.size > MAX_AVATAR_SIZE) { toast('Photo too large. Max 10 MB.', 'error'); return; }
     setUploadingAvatar(true);
     const ext = file.name.split('.').pop();
     const path = `avatars/${user.id}.${ext}`;
@@ -83,6 +86,13 @@ export default function ProfileSetupPage() {
       return;
     }
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+    const mediaScan = await scanMediaUrl(urlData.publicUrl);
+    if (!mediaScan.ok) {
+      await supabase.storage.from('media').remove([path]);
+      toast(mediaScan.message, 'error');
+      setUploadingAvatar(false);
+      return;
+    }
     setAvatarUrl(urlData.publicUrl);
     setUploadingAvatar(false);
     toast('Photo uploaded!', 'success');
