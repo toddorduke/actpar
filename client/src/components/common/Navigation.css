@@ -6,6 +6,17 @@
   z-index: 100;
 }
 
+/* Standalone (home-screen-installed) PWA mode has no browser chrome, so
+   the sticky top nav sits flush against the notch/Dynamic Island/status
+   bar unless it clears that space itself. Scoped to standalone only --
+   in a regular Safari tab the browser's own address bar already provides
+   this clearance, so adding it unconditionally would waste space there. */
+@media (display-mode: standalone) {
+  .main-nav {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
 .nav-container {
   max-width: 1400px;
   margin: 0 auto;
