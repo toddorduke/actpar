@@ -1,7 +1,7 @@
 .np-page {
   min-height: 100vh;
-  background: #0f1117;
-  color: #f9fafb;
+  background: var(--color-background);
+  color: var(--color-text);
   padding: 24px 16px 80px;
   max-width: 640px;
   margin: 0 auto;
@@ -17,14 +17,14 @@
 .np-title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text);
   margin: 0;
 }
 
 .np-mark-all-btn {
   background: none;
-  border: 1.5px solid rgba(245, 158, 11, 0.5);
-  color: #f59e0b;
+  border: 1.5px solid rgba(255, 122, 0, 0.5);
+  color: var(--color-primary-end);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 6px 14px;
@@ -33,8 +33,8 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .np-mark-all-btn:hover {
-  background: rgba(245, 158, 11, 0.1);
-  border-color: #f59e0b;
+  background: rgba(255, 122, 0, 0.1);
+  border-color: var(--color-primary);
 }
 
 /* Filter tabs */
@@ -42,7 +42,7 @@
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1.5px solid #e5e7eb;
   padding-bottom: 12px;
 }
 
@@ -52,7 +52,7 @@
   gap: 6px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-muted);
   font-size: 0.9rem;
   font-weight: 600;
   padding: 6px 12px;
@@ -60,25 +60,25 @@
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
-.np-filter-tab:hover { color: rgba(255, 255, 255, 0.75); }
+.np-filter-tab:hover { color: var(--color-text); }
 .np-filter-tab.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+  background: #f3f4f6;
 }
 
 .np-filter-count {
   font-size: 0.72rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.6);
+  background: #e5e7eb;
+  color: #374151;
   padding: 1px 7px;
   border-radius: 10px;
   min-width: 18px;
   text-align: center;
 }
 .np-filter-count.unread {
-  background: #f59e0b;
-  color: #000;
+  background: var(--color-primary);
+  color: #fff;
 }
 
 /* Loading */
@@ -88,26 +88,29 @@
   align-items: center;
   gap: 12px;
   padding: 60px 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
 }
 .np-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #f59e0b;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: npSpin 0.8s linear infinite;
 }
 @keyframes npSpin { to { transform: rotate(360deg); } }
 
-/* Empty */
+/* Empty -- centered in the actual viewport, not pinned near the top, so a
+   brand-new user's notification list doesn't read as a broken half-empty
+   page. */
 .np-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 80px 0;
-  color: rgba(255, 255, 255, 0.4);
+  min-height: 50vh;
+  color: var(--color-muted);
 }
 .np-empty-icon { font-size: 2.8rem; }
 .np-empty p { font-size: 0.95rem; margin: 0; }
@@ -120,7 +123,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--color-muted);
   margin-bottom: 8px;
   padding: 0 4px;
 }
@@ -137,15 +140,18 @@
   position: relative;
   margin-bottom: 4px;
 }
-.np-item:hover { background: rgba(255, 255, 255, 0.05); }
-.np-item.unread { background: rgba(245, 158, 11, 0.06); }
-.np-item.unread:hover { background: rgba(245, 158, 11, 0.1); }
+.np-item:hover { background: #f9fafb; }
+.np-item.unread { background: rgba(255, 122, 0, 0.06); }
+.np-item.unread:hover { background: rgba(255, 122, 0, 0.1); }
 
 .np-avatar-wrap {
   position: relative;
   flex-shrink: 0;
 }
 
+/* Notification-type indicator -- a fixed, bounded legend (spark/connect/
+   milestone/like/cheer/message), not a stray accent, so these keep their
+   own distinct colors on purpose. */
 .np-type-badge {
   position: absolute;
   bottom: -2px;
@@ -158,9 +164,9 @@
   justify-content: center;
   font-size: 0.65rem;
   font-weight: 700;
-  border: 2px solid #0f1117;
+  border: 2px solid var(--color-background);
 }
-.np-type-badge.spark { background: #f59e0b; }
+.np-type-badge.spark { background: var(--color-primary); }
 .np-type-badge.connect { background: #10b981; }
 .np-type-badge.milestone { background: #ef4444; }
 .np-type-badge.like { background: #ec4899; }
@@ -173,20 +179,20 @@
 }
 .np-item-text {
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: #374151;
   margin: 0 0 4px;
   line-height: 1.4;
 }
-.np-item.unread .np-item-text { color: #fff; font-weight: 500; }
+.np-item.unread .np-item-text { color: var(--color-text); font-weight: 500; }
 .np-item-time {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--color-muted);
 }
 
 .np-unread-dot {
   width: 8px;
   height: 8px;
-  background: #f59e0b;
+  background: var(--color-primary);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -194,7 +200,7 @@
 .np-dismiss-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--color-muted);
   font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
@@ -204,8 +210,8 @@
   transition: color 0.15s, background 0.15s;
 }
 .np-dismiss-btn:hover {
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+  background: #f3f4f6;
 }
 
 @media (max-width: 768px) {

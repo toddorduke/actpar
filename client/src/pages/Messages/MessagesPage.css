@@ -8,18 +8,18 @@
   display: grid;
   grid-template-columns: 320px 1fr;
   height: 100%;
-  background: #111827;
+  background: var(--color-surface);
   border-radius: var(--radius-large);
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid #e5e7eb;
 }
 
 /* ── Conversation List ── */
 .conv-list {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.08);
-  background: #0f1623;
+  border-right: 1px solid #e5e7eb;
+  background: #f9fafb;
   overflow: hidden;
 }
 
@@ -28,14 +28,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 18px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid #e5e7eb;
   flex-shrink: 0;
 }
 
 .conv-list-title {
   font-size: 1.15rem;
   font-weight: 800;
-  color: white;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -43,9 +43,9 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.7);
+  border: 1.5px solid #e5e7eb;
+  background: var(--color-surface);
+  color: var(--color-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,14 +54,14 @@
 }
 
 .new-msg-btn:hover {
-  background: rgba(124,58,237,0.2);
-  border-color: rgba(124,58,237,0.4);
-  color: white;
+  background: rgba(255,122,0,0.1);
+  border-color: rgba(255,122,0,0.4);
+  color: var(--color-primary-end);
 }
 
 .conv-empty {
   padding: 32px 18px;
-  color: rgba(255,255,255,0.4);
+  color: var(--color-muted);
   font-size: 0.88rem;
   text-align: center;
   line-height: 1.6;
@@ -78,11 +78,11 @@
   transition: background 0.12s;
   text-align: left;
   width: 100%;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid #f0eee9;
 }
 
-.conv-item:hover { background: rgba(255,255,255,0.04); }
-.conv-item.active { background: rgba(124,58,237,0.12); }
+.conv-item:hover { background: #f3f4f6; }
+.conv-item.active { background: rgba(255,122,0,0.1); }
 
 .conv-item-info {
   flex: 1;
@@ -99,7 +99,7 @@
 .conv-item-name {
   font-size: 0.92rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -107,7 +107,7 @@
 
 .conv-item-time {
   font-size: 0.74rem;
-  color: rgba(255,255,255,0.4);
+  color: var(--color-muted);
   flex-shrink: 0;
   margin-left: 8px;
 }
@@ -121,7 +121,7 @@
 
 .conv-preview-text {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.45);
+  color: var(--color-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -129,12 +129,12 @@
 }
 
 .conv-item.unread .conv-preview-text {
-  color: rgba(255,255,255,0.75);
+  color: #374151;
   font-weight: 600;
 }
 
 .conv-unread-badge {
-  background: #7c3aed;
+  background: var(--color-primary);
   color: white;
   font-size: 0.7rem;
   font-weight: 800;
@@ -148,7 +148,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #111827;
+  background: var(--color-surface);
 }
 
 .thread-header {
@@ -156,8 +156,8 @@
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  background: #0f1623;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
   flex-shrink: 0;
 }
 
@@ -166,7 +166,7 @@
   padding: 6px;
   border: none;
   background: transparent;
-  color: rgba(255,255,255,0.7);
+  color: var(--color-muted);
   cursor: pointer;
 }
 
@@ -180,12 +180,12 @@
 .thread-header-name {
   font-size: 0.97rem;
   font-weight: 800;
-  color: white;
+  color: var(--color-text);
 }
 
 .thread-header-ego {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.5);
+  color: var(--color-muted);
   margin-top: 1px;
 }
 
@@ -197,11 +197,11 @@
   flex-direction: column;
   gap: 4px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  scrollbar-color: #d1d5db transparent;
 }
 
 .thread-loading {
-  color: rgba(255,255,255,0.4);
+  color: var(--color-muted);
   text-align: center;
   padding: 40px;
   font-size: 0.9rem;
@@ -221,20 +221,20 @@
 .thread-empty-name {
   font-size: 1.1rem;
   font-weight: 800;
-  color: white;
+  color: var(--color-text);
   margin: 6px 0 0;
 }
 
 .thread-empty-tagline {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.45);
+  color: var(--color-muted);
   font-style: italic;
   margin: 0;
 }
 
 .thread-empty-hint {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.35);
+  color: var(--color-muted);
   margin-top: 6px;
 }
 
@@ -263,20 +263,20 @@
 }
 
 .msg-bubble.mine {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-primary);
   color: white;
   border-bottom-right-radius: 4px;
 }
 
 .msg-bubble.theirs {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.9);
+  background: #f3f4f6;
+  color: #374151;
   border-bottom-left-radius: 4px;
 }
 
 .msg-time {
   font-size: 0.7rem;
-  color: rgba(255,255,255,0.3);
+  color: var(--color-muted);
   margin-top: 4px;
   padding-left: 4px;
 }
@@ -290,9 +290,9 @@
 /* Input bar */
 .thread-mod-error {
   padding: 10px 16px;
-  background: rgba(239,68,68,0.1);
+  background: rgba(239,68,68,0.08);
   border-top: 1px solid rgba(239,68,68,0.25);
-  color: #fca5a5;
+  color: #b91c1c;
   font-size: 0.8rem;
   line-height: 1.5;
   flex-shrink: 0;
@@ -300,16 +300,16 @@
 
 .thread-blocked-bar {
   padding: 14px 20px;
-  background: #0f1623;
-  border-top: 1px solid rgba(255,255,255,0.07);
-  color: #9ca3af;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  color: var(--color-muted);
   font-size: 0.88rem;
   text-align: center;
   flex-shrink: 0;
 }
 
 .thread-blocked-bar a {
-  color: #f59e0b;
+  color: var(--color-primary-end);
   font-weight: 600;
   text-decoration: none;
 }
@@ -319,8 +319,8 @@
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-top: 1px solid rgba(255,255,255,0.07);
-  background: #0f1623;
+  border-top: 1px solid #e5e7eb;
+  background: var(--color-surface);
   flex-shrink: 0;
 }
 
@@ -328,23 +328,23 @@
   flex: 1;
   padding: 10px 16px;
   border-radius: 24px;
-  border: 1.5px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: white;
+  border: 1.5px solid #d1d5db;
+  background: #f9fafb;
+  color: var(--color-text);
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.15s;
 }
 
-.thread-input::placeholder { color: rgba(255,255,255,0.3); }
-.thread-input:focus { border-color: rgba(124,58,237,0.5); }
+.thread-input::placeholder { color: #9ca3af; }
+.thread-input:focus { border-color: rgba(255,122,0,0.5); }
 
 .thread-send-btn {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-primary);
   color: white;
   display: flex;
   align-items: center;
@@ -365,13 +365,13 @@
   justify-content: center;
   height: 100%;
   gap: 12px;
-  color: rgba(255,255,255,0.5);
+  color: var(--color-muted);
   text-align: center;
   padding: 40px;
 }
 
 .thread-empty-icon { font-size: 4rem; }
-.thread-empty-title { font-size: 1.4rem; font-weight: 800; color: white; margin: 0; }
+.thread-empty-title { font-size: 1.4rem; font-weight: 800; color: var(--color-text); margin: 0; }
 .thread-empty-desc { font-size: 0.9rem; margin: 0; max-width: 300px; line-height: 1.5; }
 
 .thread-empty-new-btn {
@@ -379,7 +379,7 @@
   padding: 11px 24px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-primary);
   color: white;
   font-size: 0.9rem;
   font-weight: 700;
@@ -391,13 +391,13 @@
 
 /* ── New Message Modal ── */
 .new-msg-modal {
-  background: #1f2937;
+  background: var(--color-surface);
   border-radius: 20px;
   padding: 0;
   width: 100%;
   max-width: 420px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(43,29,20,0.25);
 }
 
 .new-msg-modal-header {
@@ -405,13 +405,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .new-msg-modal-header h2 {
   font-size: 1.1rem;
   font-weight: 800;
-  color: white;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -420,8 +420,8 @@
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.7);
+  background: #f3f4f6;
+  color: var(--color-muted);
   font-size: 1.1rem;
   cursor: pointer;
   display: flex;
@@ -433,15 +433,15 @@
   width: 100%;
   padding: 12px 20px;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.05);
-  color: white;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: var(--color-text);
   font-size: 0.9rem;
   outline: none;
   box-sizing: border-box;
 }
 
-.new-msg-search::placeholder { color: rgba(255,255,255,0.35); }
+.new-msg-search::placeholder { color: #9ca3af; }
 
 .new-msg-list {
   max-height: 380px;
@@ -451,7 +451,7 @@
 
 .new-msg-empty {
   padding: 24px 20px;
-  color: rgba(255,255,255,0.4);
+  color: var(--color-muted);
   font-size: 0.88rem;
   text-align: center;
 }
@@ -469,17 +469,17 @@
   text-align: left;
 }
 
-.new-msg-person:hover { background: rgba(255,255,255,0.06); }
+.new-msg-person:hover { background: #f3f4f6; }
 
 .new-msg-person-name {
   font-size: 0.92rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
 }
 
 .new-msg-person-ego {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.45);
+  color: var(--color-muted);
   margin-top: 2px;
 }
 
