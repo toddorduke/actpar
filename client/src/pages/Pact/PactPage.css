@@ -3,7 +3,7 @@
   background: var(--color-background);
   border-radius: var(--radius-large);
   color: var(--color-text);
-  padding: 30px 20px;
+  padding: 30px 20px calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
 }
 
 /* ── Pact Switcher ── */

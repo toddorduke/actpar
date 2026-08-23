@@ -1,7 +1,7 @@
 .up-page {
   min-height: 100vh;
-  padding: 32px 24px 80px;
-  background: var(--color-bg);
+  padding: 32px 24px calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
+  background: var(--color-background);
 }
 
 .up-container {
@@ -450,7 +450,7 @@
 .up-block-cancel-btn:hover { background: #f9fafb; }
 
 @media (max-width: 600px) {
-  .up-page { padding: 20px 16px 80px; }
+  .up-page { padding: 20px 16px calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom)); }
   .up-header-top { flex-wrap: wrap; }
   .up-actions { flex-direction: row; flex-wrap: wrap; }
   .up-stats-strip { flex-wrap: wrap; }

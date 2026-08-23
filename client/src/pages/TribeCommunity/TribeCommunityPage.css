@@ -1,6 +1,7 @@
 .tribe-page {
   background-color: var(--color-background);
   overflow-x: hidden;
+  padding-bottom: calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
 }
 
 .page-header { margin-bottom: 30px; }

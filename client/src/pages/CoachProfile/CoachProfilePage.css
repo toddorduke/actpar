@@ -197,7 +197,7 @@
 
 /* ── Body ── */
 .coach-body {
-  padding-bottom: 40px;
+  padding-bottom: calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
 }
 
 /* ── Tab grid layout ── */

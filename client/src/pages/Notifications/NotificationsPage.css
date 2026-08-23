@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: var(--color-background);
   color: var(--color-text);
-  padding: 24px 16px 80px;
+  padding: 24px 16px calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
   max-width: 640px;
   margin: 0 auto;
 }

@@ -4,6 +4,7 @@
   gap: 0;
   max-width: 900px;
   margin: 0 auto;
+  padding-bottom: calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
 }
 
 /* ── Cover ──────────────────────────────────────────── */

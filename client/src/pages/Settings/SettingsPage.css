@@ -1,5 +1,6 @@
 .settings-page {
   min-height: 60vh;
+  padding-bottom: calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
 }
 
 .settings-container {

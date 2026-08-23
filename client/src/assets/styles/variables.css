@@ -25,4 +25,10 @@
   --shadow-card: 0 20px 45px rgba(255, 122, 0, 0.12);
   --shadow-subtle: 0 8px 20px rgba(43, 29, 20, 0.08);
   --transition-base: 0.2s ease-in-out;
+  /* .bottom-nav (Navigation.css) is ~64px tall plus its own home-indicator
+     safe-area padding. Every scrollable page needs at least this much
+     reserved at its bottom edge, or its last item ends up tucked behind
+     the persistent mobile tab bar -- use calc(var(--bottom-nav-clearance)
+     + env(safe-area-inset-bottom)) on any page-root padding-bottom. */
+  --bottom-nav-clearance: 80px;
 }

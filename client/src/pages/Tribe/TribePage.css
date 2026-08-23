@@ -1,7 +1,7 @@
 .tribe-hub-page {
   max-width: 720px;
   margin: 0 auto;
-  padding: 24px 20px 80px;
+  padding: 24px 20px calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -491,7 +491,7 @@
 
 /* ── Mobile ── */
 @media (max-width: 540px) {
-  .tribe-hub-page { padding: 20px 16px 100px; gap: 20px; }
+  .tribe-hub-page { padding: 20px 16px calc(var(--bottom-nav-clearance) + env(safe-area-inset-bottom)); gap: 20px; }
   .tribe-hub-title { font-size: 1.6rem; }
   .tribe-hub-stat-number { font-size: 1.3rem; }
   .tribe-modal { padding: 24px 18px; }
