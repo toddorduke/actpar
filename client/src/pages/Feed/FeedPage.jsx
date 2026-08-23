@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { supabase } from '../../lib/supabase.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
+import { useCommunities } from '../../hooks/useCommunities.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
@@ -137,6 +138,13 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
       <div className="feed-bottom">
         {type === 'achievement' && post.milestone && (
           <div className="feed-milestone">🎯 {post.milestone}</div>
+        )}
+        {type === 'meetup' && (post.event_date || post.location) && (
+          <div className="feed-milestone">
+            {post.event_date && `🗓️ ${new Date(post.event_date).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
+            {post.event_date && post.location && ' · '}
+            {post.location && `📍 ${post.location}`}
+          </div>
         )}
         <p className="feed-content">{post.content}</p>
         {/* Reaction chips */}
@@ -345,10 +353,14 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
   const [postType, setPostType]       = useState('general');
   const [content, setContent]         = useState('');
   const [milestone, setMilestone]     = useState('');
+  const [eventDate, setEventDate]     = useState('');
+  const [eventLocation, setEventLocation] = useState('');
+  const [eventCommunityId, setEventCommunityId] = useState('');
   const [mediaFile, setMediaFile]     = useState(null);
   const [previewUrl, setPreviewUrl]   = useState(null);
   const [error, setError]             = useState('');
   const fileRef                       = useRef(null);
+  const { myCommunities } = useCommunities();
 
   function pickFile(e) {
     const file = e.target.files[0];
@@ -371,10 +383,14 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
 
   async function handleSubmit() {
     if (!content.trim() && !mediaFile) { setError('Add some text or media to post.'); return; }
+    if (postType === 'meetup' && !eventDate) { setError('Add a date and time for the meetup.'); return; }
 
     const capturedContent   = content.trim();
     const capturedType      = postType;
     const capturedMilestone = milestone;
+    const capturedEventDate = eventDate;
+    const capturedLocation  = eventLocation;
+    const capturedCommunityId = eventCommunityId;
     const capturedFile      = mediaFile;
 
     // Close sheet immediately — upload continues in background
@@ -401,6 +417,9 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
       content: capturedContent,
       post_type: capturedType,
       milestone: capturedType === 'achievement' ? capturedMilestone : null,
+      event_date: capturedType === 'meetup' ? new Date(capturedEventDate).toISOString() : null,
+      location: capturedType === 'meetup' ? capturedLocation : null,
+      community_id: capturedType === 'meetup' && capturedCommunityId ? capturedCommunityId : null,
       media_url,
     });
 
@@ -442,6 +461,37 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
             value={milestone}
             onChange={(e) => setMilestone(e.target.value)}
           />
+        )}
+
+        {/* Meetup details */}
+        {postType === 'meetup' && (
+          <>
+            <input
+              type="datetime-local"
+              className="feed-post-milestone-input"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              required
+            />
+            <input
+              className="feed-post-milestone-input"
+              placeholder="📍 Where's it happening?"
+              value={eventLocation}
+              onChange={(e) => setEventLocation(e.target.value)}
+            />
+            {myCommunities.length > 0 && (
+              <select
+                className="feed-post-milestone-input"
+                value={eventCommunityId}
+                onChange={(e) => setEventCommunityId(e.target.value)}
+              >
+                <option value="">Just my personal feed</option>
+                {myCommunities.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            )}
+          </>
         )}
 
         {/* Media preview — shown above caption when media is attached */}

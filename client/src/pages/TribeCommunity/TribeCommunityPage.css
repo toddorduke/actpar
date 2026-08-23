@@ -501,6 +501,20 @@
 
 .join-meetup-btn:hover { background: #d97706; transform: translateY(-2px); }
 
+/* ── Meetup event details ── */
+.meetup-details-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.meetup-detail {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #374151;
+}
+
 /* ── Meetup RSVP row ── */
 .meetup-rsvp-row {
   display: flex;
@@ -717,42 +731,42 @@
   justify-content: space-between;
   align-items: center;
   padding: 25px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-content .modal-title { font-size: 1.5em; color: #ffffff; font-weight: 800; letter-spacing: -0.01em; }
+.modal-content .modal-title { font-size: 1.5em; color: #1f2937; font-weight: 800; letter-spacing: -0.01em; }
 
 .modal-content .close-modal {
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 5px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #6b7280;
 }
 
-.modal-content .close-modal:hover { color: #ffffff; }
+.modal-content .close-modal:hover { color: #1f2937; }
 .modal-content .modal-body { padding: 25px; }
 
 .modal-content .form-group { margin-bottom: 20px; }
-.modal-content .form-group label { display: block; font-weight: 700; color: #ffffff; margin-bottom: 8px; font-size: 0.92rem; }
+.modal-content .form-group label { display: block; font-weight: 700; color: #374151; margin-bottom: 8px; font-size: 0.92rem; }
 
 .modal-content .post-type-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
 .modal-content .type-btn {
   padding: 11px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: #f3f4f6;
+  border: 2px solid #e5e7eb;
   border-radius: 10px;
   font-weight: 500;
-  color: #d1d5db;
+  color: #374151;
   cursor: pointer;
   transition: all var(--transition-base);
 }
 
 .modal-content .type-btn.active {
-  background: rgba(124, 58, 237, 0.25);
+  background: rgba(124, 58, 237, 0.1);
   border-color: var(--color-primary);
-  color: #c4b5fd;
+  color: #6d28d9;
 }
 
 .modal-content .post-textarea,
@@ -760,25 +774,25 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  border: 2px solid #d1d5db;
   border-radius: 10px;
   font-family: inherit;
   font-size: 1em;
-  background: rgba(255, 255, 255, 0.07);
-  color: #ffffff;
+  background: #f9fafb;
+  color: #1f2937;
   resize: vertical;
 }
 
 .modal-content .post-textarea::placeholder,
 .modal-content .input-field::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: #9ca3af;
 }
 
 .modal-content .post-textarea:focus,
 .modal-content .input-field:focus {
   outline: none;
   border-color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.1);
+  background: #ffffff;
 }
 
 .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }

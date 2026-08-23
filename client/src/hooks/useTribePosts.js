@@ -28,12 +28,16 @@ export const useTribePosts = (communityId = null) => {
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
-  const createPost = useCallback(async ({ content, post_type, milestone, community_id, media_url }) => {
+  const createPost = useCallback(async ({ content, post_type, milestone, community_id, media_url, event_date, location }) => {
     const modResult = checkText(content);
     if (!modResult.ok) return { data: null, error: null, moderation: modResult };
     if (milestone) {
       const milestoneCheck = checkText(milestone);
       if (!milestoneCheck.ok) return { data: null, error: null, moderation: milestoneCheck };
+    }
+    if (location) {
+      const locationCheck = checkText(location);
+      if (!locationCheck.ok) return { data: null, error: null, moderation: locationCheck };
     }
 
     const { data, error } = await supabase
@@ -45,6 +49,8 @@ export const useTribePosts = (communityId = null) => {
         milestone: milestone || null,
         community_id: community_id || null,
         media_url: media_url || null,
+        event_date: event_date || null,
+        location: location || null,
       })
       .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .single();

@@ -9,6 +9,7 @@ import { useMedia } from '../../hooks/useMedia.js';
 import { useReflections, DEFAULT_QUESTIONS } from '../../hooks/useReflections.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
 import { useConnections } from '../../hooks/useConnections.js';
+import { useCommunities } from '../../hooks/useCommunities.js';
 import { useGoalProgress } from '../../hooks/useGoalProgress.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
@@ -521,7 +522,11 @@ const HomePage = () => {
   const [postType, setPostType] = useState('general');
   const [postContent, setPostContent] = useState('');
   const [postMilestone, setPostMilestone] = useState('');
+  const [postEventDate, setPostEventDate] = useState('');
+  const [postLocation, setPostLocation] = useState('');
+  const [postCommunityId, setPostCommunityId] = useState('');
   const [submittingPost, setSubmittingPost] = useState(false);
+  const { myCommunities } = useCommunities();
 
   // Journal
   const [journalSubject, setJournalSubject] = useState('');
@@ -757,11 +762,15 @@ const HomePage = () => {
 
   async function handleSubmitPost() {
     if (!postContent.trim()) return;
+    if (postType === 'meetup' && !postEventDate) { toast('Add a date and time for the meetup.', 'warning'); return; }
     setSubmittingPost(true);
     const { error, moderation } = await createPost({
       content: postContent,
       post_type: postType,
       milestone: postType === 'achievement' ? postMilestone : null,
+      event_date: postType === 'meetup' ? new Date(postEventDate).toISOString() : null,
+      location: postType === 'meetup' ? postLocation : null,
+      community_id: postType === 'meetup' && postCommunityId ? postCommunityId : null,
     });
     setSubmittingPost(false);
     if (moderation) { toast(moderation.message, moderation.type === 'crisis' ? 'warning' : 'error', 7000); return; }
@@ -769,6 +778,9 @@ const HomePage = () => {
     setShowPostModal(false);
     setPostContent('');
     setPostMilestone('');
+    setPostEventDate('');
+    setPostLocation('');
+    setPostCommunityId('');
     setPostType('general');
     toast('Post shared to the community! 🎉', 'success');
   }
@@ -1841,6 +1853,13 @@ const HomePage = () => {
                       >×</button>
                     </div>
                     {post.milestone && <div className="my-post-milestone">🏆 {post.milestone}</div>}
+                    {post.post_type === 'meetup' && (post.event_date || post.location) && (
+                      <div className="my-post-milestone">
+                        {post.event_date && `🗓️ ${new Date(post.event_date).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
+                        {post.event_date && post.location && ' · '}
+                        {post.location && `📍 ${post.location}`}
+                      </div>
+                    )}
                     <p className="my-post-content">{post.content}</p>
                     <div className="my-post-stats"><span>❤️ {post.likes} likes</span></div>
                   </div>
@@ -1986,6 +2005,29 @@ const HomePage = () => {
                     <label>Milestone Reached</label>
                     <input type="text" className="upload-input" placeholder="e.g., 30-day streak, Lost 10 lbs..." value={postMilestone} onChange={(e) => setPostMilestone(e.target.value)} />
                   </div>
+                )}
+                {postType === 'meetup' && (
+                  <>
+                    <div className="upload-field">
+                      <label>Date &amp; Time *</label>
+                      <input type="datetime-local" className="upload-input" value={postEventDate} onChange={(e) => setPostEventDate(e.target.value)} required />
+                    </div>
+                    <div className="upload-field">
+                      <label>Location</label>
+                      <input type="text" className="upload-input" placeholder="📍 Where's it happening?" value={postLocation} onChange={(e) => setPostLocation(e.target.value)} />
+                    </div>
+                    {myCommunities.length > 0 && (
+                      <div className="upload-field">
+                        <label>Post to a community (optional)</label>
+                        <select className="upload-input" value={postCommunityId} onChange={(e) => setPostCommunityId(e.target.value)}>
+                          <option value="">Just my personal feed</option>
+                          {myCommunities.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </>
                 )}
                 <button className="upload-submit-btn" onClick={handleSubmitPost} disabled={submittingPost || !postContent.trim()}>
                   {submittingPost ? 'Posting...' : 'Post to Community'}

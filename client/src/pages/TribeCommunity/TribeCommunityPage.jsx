@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
+import { useCommunities } from '../../hooks/useCommunities.js';
 import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useReactions } from '../../hooks/useReactions.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
@@ -79,8 +80,12 @@ export default function TribeCommunityPage() {
   const [postType, setPostType] = useState('general');
   const [content, setContent] = useState('');
   const [milestone, setMilestone] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventLocation, setEventLocation] = useState('');
+  const [eventCommunityId, setEventCommunityId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [reportPost, setReportPost] = useState(null);
+  const { myCommunities } = useCommunities();
 
   const connectedUserIds = useMemo(() => {
     if (!user) return new Set();
@@ -113,14 +118,25 @@ export default function TribeCommunityPage() {
 
   async function submitPost() {
     if (!content.trim()) { toast('Write something before posting!', 'warning'); return; }
+    if (postType === 'meetup' && !eventDate) { toast('Add a date and time for the meetup.', 'warning'); return; }
     setSubmitting(true);
-    const { error, moderation } = await createPost({ content, post_type: postType, milestone: postType === 'achievement' ? milestone : null });
+    const { error, moderation } = await createPost({
+      content,
+      post_type: postType,
+      milestone: postType === 'achievement' ? milestone : null,
+      event_date: postType === 'meetup' ? new Date(eventDate).toISOString() : null,
+      location: postType === 'meetup' ? eventLocation : null,
+      community_id: postType === 'meetup' && eventCommunityId ? eventCommunityId : null,
+    });
     setSubmitting(false);
     if (moderation) { toast(moderation.message, moderation.type === 'crisis' ? 'warning' : 'error', 7000); return; }
     if (error) { toast(`Error: ${error.message}`, 'error'); return; }
     setShowModal(false);
     setContent('');
     setMilestone('');
+    setEventDate('');
+    setEventLocation('');
+    setEventCommunityId('');
     setPostType('general');
   }
 
@@ -378,6 +394,29 @@ export default function TribeCommunityPage() {
                   <label>Milestone Reached</label>
                   <input type="text" className="input-field" placeholder="e.g., 30-day streak" value={milestone} onChange={(e) => setMilestone(e.target.value)} />
                 </div>
+              )}
+              {postType === 'meetup' && (
+                <>
+                  <div className="form-group">
+                    <label>Date &amp; Time *</label>
+                    <input type="datetime-local" className="input-field" value={eventDate} onChange={(e) => setEventDate(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Location</label>
+                    <input type="text" className="input-field" placeholder="📍 Where's it happening?" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
+                  </div>
+                  {myCommunities.length > 0 && (
+                    <div className="form-group">
+                      <label>Post to a community (optional)</label>
+                      <select className="input-field" value={eventCommunityId} onChange={(e) => setEventCommunityId(e.target.value)}>
+                        <option value="">Just my personal feed</option>
+                        {myCommunities.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
               )}
               <button className="submit-post-btn" onClick={submitPost} disabled={submitting}>
                 {submitting ? 'Posting...' : 'Post to Community'}

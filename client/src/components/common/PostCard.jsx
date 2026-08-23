@@ -126,6 +126,16 @@ export default function PostCard({
         {showMilestone && type === 'achievement' && post.milestone && (
           <div className="achievement-milestone">🏆 {post.milestone}</div>
         )}
+        {type === 'meetup' && (post.event_date || post.location) && (
+          <div className="meetup-details-row">
+            {post.event_date && (
+              <span className="meetup-detail">
+                🗓️ {new Date(post.event_date).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </span>
+            )}
+            {post.location && <span className="meetup-detail">📍 {post.location}</span>}
+          </div>
+        )}
         {type === 'meetup' && onRsvp && (
           <div className="meetup-rsvp-row">
             <span className="meetup-rsvp-label">

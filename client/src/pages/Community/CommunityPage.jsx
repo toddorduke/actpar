@@ -40,6 +40,8 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState('general');
   const [milestone, setMilestone] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventLocation, setEventLocation] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [visibleCount, setVisibleCount] = useState(10);
   const [reportPostId, setReportPostId] = useState(null);
@@ -47,13 +49,23 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
 
   async function submit() {
     if (!content.trim()) return;
+    if (postType === 'meetup' && !eventDate) { toast('Add a date and time for the meetup.', 'warning'); return; }
     setSubmitting(true);
-    const { error, moderation } = await createPost({ content, post_type: postType, milestone, community_id: communityId });
+    const { error, moderation } = await createPost({
+      content,
+      post_type: postType,
+      milestone,
+      community_id: communityId,
+      event_date: postType === 'meetup' ? new Date(eventDate).toISOString() : null,
+      location: postType === 'meetup' ? eventLocation : null,
+    });
     setSubmitting(false);
     if (moderation) { toast(moderation.message, 'warning', 7000); return; }
     if (error) { toast('Post failed', 'error'); return; }
     setContent('');
     setMilestone('');
+    setEventDate('');
+    setEventLocation('');
     setPostType('general');
   }
 
@@ -80,6 +92,12 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
         />
         {postType === 'achievement' && (
           <input className="compose-milestone" placeholder="Milestone (e.g. 5K PR)" value={milestone} onChange={(e) => setMilestone(e.target.value)} />
+        )}
+        {postType === 'meetup' && (
+          <>
+            <input type="datetime-local" className="compose-milestone" value={eventDate} onChange={(e) => setEventDate(e.target.value)} required />
+            <input className="compose-milestone" placeholder="📍 Where's it happening?" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} />
+          </>
         )}
         <button className="compose-submit" onClick={submit} disabled={submitting || !content.trim()}>
           {submitting ? 'Posting...' : 'Post'}
@@ -150,6 +168,13 @@ function PostCard({ post, onLike, liked, isToggling, likeCount, isAdmin, onPin, 
         )}
       </p>
       {post.milestone && <div className="comm-post-milestone">🏆 {post.milestone}</div>}
+      {post.post_type === 'meetup' && (post.event_date || post.location) && (
+        <div className="comm-post-milestone">
+          {post.event_date && `🗓️ ${new Date(post.event_date).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
+          {post.event_date && post.location && ' · '}
+          {post.location && `📍 ${post.location}`}
+        </div>
+      )}
       <div className="comm-post-actions">
         <button className={`comm-like-btn${liked ? ' active' : ''}`} onClick={() => onLike(post.id, likeCount ?? post.likes)} disabled={isToggling}>
           {liked ? '❤️' : '🤍'} {likeCount ?? post.likes ?? 0}
