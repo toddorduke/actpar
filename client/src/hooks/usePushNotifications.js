@@ -71,12 +71,11 @@ export const usePushNotifications = () => {
       });
 
       const { endpoint, keys } = sub.toJSON();
-      const { error } = await supabase.from('push_subscriptions').upsert({
-        user_id: user.id,
-        endpoint,
-        p256dh: keys.p256dh,
-        auth: keys.auth,
-      }, { onConflict: 'endpoint' });
+      const { error } = await supabase.rpc('claim_push_subscription', {
+        p_endpoint: endpoint,
+        p_p256dh: keys.p256dh,
+        p_auth: keys.auth,
+      });
 
       if (error) throw error;
       track(Events.PUSH_ENABLED);
