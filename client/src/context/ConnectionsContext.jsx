@@ -65,7 +65,7 @@ export const ConnectionsProvider = ({ children }) => {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, alter_ego_name, age, city, account_type, tagline, bio, avatar_url, looking_for, gender')
+      .select('id, first_name, last_name, alter_ego_name, age, city, account_type, tagline, bio, avatar_url, looking_for, gender, accountability_style, checkin_frequency')
       .not('id', 'in', `(${excludeIds.join(',')})`)
       .limit(50);
 
@@ -77,7 +77,7 @@ export const ConnectionsProvider = ({ children }) => {
       profileList.length > 0
         ? supabase.from('goals').select('user_id, title, tier').in('user_id', profileList.map((p) => p.id)).eq('is_active', true)
         : Promise.resolve({ data: [] }),
-      supabase.from('profiles').select('looking_for, city').eq('id', user.id).single(),
+      supabase.from('profiles').select('looking_for, city, accountability_style, checkin_frequency').eq('id', user.id).single(),
       supabase.from('goals').select('title').eq('user_id', user.id).eq('is_active', true),
     ]);
 
@@ -88,6 +88,8 @@ export const ConnectionsProvider = ({ children }) => {
 
     const myLf = myProfResult.data?.looking_for ?? [];
     const myCity = (myProfResult.data?.city ?? '').toLowerCase().trim();
+    const myStyle = myProfResult.data?.accountability_style ?? '';
+    const myFreq = myProfResult.data?.checkin_frequency ?? '';
     const myGoalWords = new Set(
       (myGoalsResult.data ?? [])
         .flatMap((g) => g.title.toLowerCase().split(/\W+/))
@@ -101,6 +103,8 @@ export const ConnectionsProvider = ({ children }) => {
       );
       score += sharedLf.length * 3;
       if (myCity && (p.city ?? '').toLowerCase().trim() === myCity) score += 2;
+      if (myStyle && p.accountability_style === myStyle) score += 2;
+      if (myFreq && p.checkin_frequency === myFreq) score += 2;
       const theirWords = pGoals.flatMap((g) => g.title.toLowerCase().split(/\W+/)).filter((w) => w.length > 3);
       if (theirWords.some((w) => myGoalWords.has(w))) score += 1;
       return score;
@@ -112,6 +116,9 @@ export const ConnectionsProvider = ({ children }) => {
       );
       if (sharedLf.length === 1) return `Both looking for ${sharedLf[0]} support`;
       if (sharedLf.length > 1) return `Share ${sharedLf.length} interests: ${sharedLf.slice(0, 2).join(', ')}`;
+      if (myStyle && p.accountability_style === myStyle && myFreq && p.checkin_frequency === myFreq) return 'Same accountability style and check-in rhythm';
+      if (myStyle && p.accountability_style === myStyle) return 'Same accountability style';
+      if (myFreq && p.checkin_frequency === myFreq) return 'Same check-in rhythm';
       if (myCity && (p.city ?? '').toLowerCase().trim() === myCity) return `Local to you in ${p.city}`;
       const theirWords = pGoals.flatMap((g) => g.title.toLowerCase().split(/\W+/)).filter((w) => w.length > 3);
       if (theirWords.some((w) => myGoalWords.has(w))) return 'Working on similar goals';

@@ -11,6 +11,7 @@ import SparkModal, { getSparksUsedToday } from '../../components/common/SparkMod
 import ConnectedModal from '../../components/common/ConnectedModal.jsx';
 import { getDisplayName } from '../../utils/displayName.js';
 import { checkText } from '../../utils/contentModeration.js';
+import { getLiveStreak } from '../../utils/streak.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import './ConnectionsPage.css';
 
@@ -182,15 +183,17 @@ export default function ConnectionsPage() {
     if (partnerIds.length === 0) return;
     supabase
       .from('goals')
-      .select('user_id, day_count, last_checked_in')
+      .select('user_id, day_count, last_checked_in, grace_used_week')
       .in('user_id', partnerIds)
       .eq('is_active', true)
       .then(({ data }) => {
+        const today = new Date().toISOString().split('T')[0];
         const stats = {};
         for (const g of data ?? []) {
           if (!stats[g.user_id]) stats[g.user_id] = { bestStreak: 0, activeGoals: 0, lastCheckin: null };
           stats[g.user_id].activeGoals++;
-          if ((g.day_count ?? 0) > stats[g.user_id].bestStreak) stats[g.user_id].bestStreak = g.day_count ?? 0;
+          const liveDays = getLiveStreak(g, today);
+          if (liveDays > stats[g.user_id].bestStreak) stats[g.user_id].bestStreak = liveDays;
           if (g.last_checked_in && (!stats[g.user_id].lastCheckin || g.last_checked_in > stats[g.user_id].lastCheckin)) {
             stats[g.user_id].lastCheckin = g.last_checked_in;
           }

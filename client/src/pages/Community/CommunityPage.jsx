@@ -17,6 +17,7 @@ import { supabase } from '../../lib/supabase.js';
 import { scanMediaUrl } from '../../utils/contentModeration.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
+import { getLiveStreak } from '../../utils/streak.js';
 import './CommunityPage.css';
 
 const POST_TRUNCATE = 300;
@@ -709,13 +710,14 @@ function LeaderboardTab({ communityId }) {
       const ids = members.map((m) => m.user_id);
       const { data: goals } = await supabase
         .from('goals')
-        .select('user_id, day_count')
+        .select('user_id, day_count, last_checked_in, grace_used_week')
         .in('user_id', ids)
         .eq('is_active', true);
 
+      const today = new Date().toISOString().split('T')[0];
       const totals = {};
       (goals ?? []).forEach((g) => {
-        totals[g.user_id] = (totals[g.user_id] ?? 0) + (g.day_count ?? 0);
+        totals[g.user_id] = (totals[g.user_id] ?? 0) + getLiveStreak(g, today);
       });
 
       const ranked = members

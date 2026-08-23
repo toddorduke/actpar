@@ -956,6 +956,71 @@
   color: #1f2937;
 }
 
+.goal-why {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--color-muted);
+  margin: 2px 0 0;
+  max-width: 42ch;
+}
+
+.focus-check-banner {
+  background: #fff7ed;
+  border: 1px solid rgba(255, 122, 0, 0.25);
+  border-radius: var(--radius-small);
+  padding: 12px 14px;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.focus-check-text {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.focus-check-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.focus-check-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.focus-check-goal-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focus-check-pause-btn {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-primary-end);
+  background: none;
+  border: 1px solid rgba(255, 122, 0, 0.3);
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.focus-check-pause-btn:hover { background: #ffedd5; }
+
 .goal-meta {
   display: flex;
   align-items: center;
@@ -1029,9 +1094,30 @@
   color: rgba(31, 41, 55, 0.7);
 }
 
+.checkin-area { margin-top: 14px; }
+
+.checkin-note-input { margin-bottom: 8px; }
+
+.checkin-btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.checkin-note-toggle {
+  flex-shrink: 0;
+  width: 42px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: border-color 0.15s;
+}
+.checkin-note-toggle:hover { border-color: var(--color-primary); }
+
 .checkin-btn {
+  flex: 1;
   width: 100%;
-  margin-top: 14px;
   padding: 10px;
   border: none;
   border-radius: 12px;

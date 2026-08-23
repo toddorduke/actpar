@@ -5,6 +5,7 @@ import { createNotification } from './useNotifications.js';
 import { track, Events } from '../lib/analytics.js';
 import { awardXP, XP_VALUES, milestoneXP } from '../lib/xp.js';
 import { checkText } from '../utils/contentModeration.js';
+import { computeCheckInStreak } from '../utils/streak.js';
 
 const STREAK_MILESTONES = [7, 30, 60, 90];
 
@@ -34,7 +35,11 @@ export const useGoals = () => {
     if (!user) return { error: 'Not authenticated' };
     const titleCheck = checkText(title);
     if (!titleCheck.ok) return { data: null, error: null, moderation: titleCheck };
-    const { goal_type = 'habit', target_value, target_unit, target_period, tier, reminder_utc_hour } = options;
+    const { goal_type = 'habit', target_value, target_unit, target_period, tier, reminder_utc_hour, description } = options;
+    if (description) {
+      const whyCheck = checkText(description);
+      if (!whyCheck.ok) return { data: null, error: null, moderation: whyCheck };
+    }
     const { data, error } = await supabase
       .from('goals')
       .insert({
@@ -47,6 +52,7 @@ export const useGoals = () => {
         target_unit: target_unit ?? null,
         target_period: target_period ?? null,
         reminder_utc_hour: reminder_utc_hour ?? null,
+        description: description?.trim() || null,
       })
       .select()
       .single();
@@ -59,22 +65,22 @@ export const useGoals = () => {
   }, [user]);
 
   // Check in for today — only once per day
-  const checkIn = useCallback(async (goalId, logType = 'manual') => {
+  const checkIn = useCallback(async (goalId, logType = 'manual', note = null) => {
     const today = todayStr();
     const goal = goals.find((g) => g.id === goalId);
     if (!goal) return { error: new Error('Goal not found') };
     if (goal.last_checked_in === today) return { alreadyDone: true };
 
-    const newCount = (goal.day_count ?? 0) + 1;
+    const { newCount, graceUsedWeek, graceConsumed } = computeCheckInStreak(goal, today);
     const now = new Date().toISOString();
     const [{ error: goalError }, { error: logError }] = await Promise.all([
       supabase
         .from('goals')
-        .update({ day_count: newCount, last_checked_in: today, updated_at: now })
+        .update({ day_count: newCount, last_checked_in: today, grace_used_week: graceUsedWeek, updated_at: now })
         .eq('id', goalId),
       supabase
         .from('checkin_logs')
-        .insert({ user_id: user.id, goal_id: goalId, checked_in_at: now, log_type: logType }),
+        .insert({ user_id: user.id, goal_id: goalId, checked_in_at: now, log_type: logType, note: note?.trim() || null }),
     ]);
     const error = goalError ?? logError;
 
@@ -96,7 +102,7 @@ export const useGoals = () => {
       }
       setGoals((prev) =>
         prev.map((g) =>
-          g.id === goalId ? { ...g, day_count: newCount, last_checked_in: today } : g
+          g.id === goalId ? { ...g, day_count: newCount, last_checked_in: today, grace_used_week: graceUsedWeek } : g
         )
       );
       if (milestone) {
@@ -128,7 +134,7 @@ export const useGoals = () => {
           });
       }
     }
-    return { error, milestone, goalTitle: goal.title };
+    return { error, milestone, goalTitle: goal.title, graceConsumed };
   }, [goals, user]);
 
   // Log a check-in for a past day — doesn't change streak, just records the history

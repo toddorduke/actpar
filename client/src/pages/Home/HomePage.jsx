@@ -24,6 +24,7 @@ import Avatar from '../../components/common/Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import { checkText, scanMediaUrl } from '../../utils/contentModeration.js';
+import { getLiveStreak } from '../../utils/streak.js';
 import '../Profile/ProfilePage.css';
 import './HomePage.css';
 
@@ -93,12 +94,15 @@ function getTodayStr() {
 
 const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress, checkinDates = new Set(), onDelete, onComplete }) => {
   const isNumeric = goal.goal_type === 'numeric';
-  const habitPct = useMemo(() => Math.min((goal.day_count / 90) * 100, 100), [goal.day_count]);
+  const liveStreak = useMemo(() => getLiveStreak(goal, getTodayStr()), [goal]);
+  const habitPct = useMemo(() => Math.min((liveStreak / 90) * 100, 100), [liveStreak]);
   const checkedInToday = goal.last_checked_in === getTodayStr();
   const [checking, setChecking] = useState(false);
   const [logValue, setLogValue] = useState('');
   const [logNote, setLogNote] = useState('');
   const [logging, setLogging] = useState(false);
+  const [showCheckinNote, setShowCheckinNote] = useState(false);
+  const [checkinNote, setCheckinNote] = useState('');
 
   const numericPct = useMemo(() => {
     if (!isNumeric || !goal.target_value) return 0;
@@ -108,16 +112,18 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
   const badges = useMemo(() => {
     if (isNumeric) return [];
     const earned = [];
-    if (goal.day_count >= 30) earned.push({ id: '30', label: '30-Day Streak' });
-    if (goal.day_count >= 60) earned.push({ id: '60', label: '60-Day Streak' });
+    if (liveStreak >= 30) earned.push({ id: '30', label: '30-Day Streak' });
+    if (liveStreak >= 60) earned.push({ id: '60', label: '60-Day Streak' });
     return earned;
-  }, [goal.day_count, isNumeric]);
+  }, [liveStreak, isNumeric]);
 
   async function handleCheckIn() {
     if (checkedInToday || checking) return;
     setChecking(true);
-    await onCheckIn(goal.id);
+    await onCheckIn(goal.id, checkinNote);
     setChecking(false);
+    setShowCheckinNote(false);
+    setCheckinNote('');
   }
 
   async function handleLog() {
@@ -139,6 +145,9 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
       <div className="goal-header">
         <div>
           <h3 className="goal-title">{goal.title}</h3>
+          {goal.description && (
+            <p className="goal-why">{goal.description}</p>
+          )}
           {goal.category && (
             <span className="goal-category-badge">{CATEGORY_LABELS[goal.category] ?? goal.category}</span>
           )}
@@ -163,7 +172,7 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
             </div>
           ) : (
             <div className="day-count">
-              <div className="day-number">{goal.day_count}</div>
+              <div className="day-number">{liveStreak}</div>
               <div className="day-label">days</div>
             </div>
           )}
@@ -241,13 +250,38 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
           )}
         </div>
       ) : (
-        <button
-          className={`checkin-btn${checkedInToday ? ' done' : ''}`}
-          onClick={handleCheckIn}
-          disabled={checkedInToday || checking}
-        >
-          {checkedInToday ? '✓ Done for today' : checking ? 'Saving...' : '✓ Check in for today'}
-        </button>
+        <div className="checkin-area">
+          {!checkedInToday && showCheckinNote && (
+            <input
+              type="text"
+              className="add-goal-input checkin-note-input"
+              placeholder="How'd it go? (optional)"
+              value={checkinNote}
+              onChange={(e) => setCheckinNote(e.target.value)}
+              maxLength={200}
+              autoFocus
+            />
+          )}
+          <div className="checkin-btn-row">
+            <button
+              className={`checkin-btn${checkedInToday ? ' done' : ''}`}
+              onClick={handleCheckIn}
+              disabled={checkedInToday || checking}
+            >
+              {checkedInToday ? '✓ Done for today' : checking ? 'Saving...' : '✓ Check in for today'}
+            </button>
+            {!checkedInToday && !showCheckinNote && (
+              <button
+                type="button"
+                className="checkin-note-toggle"
+                onClick={() => setShowCheckinNote(true)}
+                title="Add a note"
+              >
+                📝
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {badges.length > 0 && (
@@ -519,6 +553,7 @@ const HomePage = () => {
   const [newGoalTarget, setNewGoalTarget] = useState('');
   const [newGoalPeriod, setNewGoalPeriod] = useState('weekly');
   const [newGoalReminder, setNewGoalReminder] = useState('');
+  const [newGoalWhy, setNewGoalWhy] = useState('');
   const [addingGoal, setAddingGoal] = useState(false);
 
   // Looking For
@@ -603,8 +638,8 @@ const HomePage = () => {
   }
 
   // — Shared check-in handler used by both quick cards and GoalCard buttons —
-  async function handleGoalCheckIn(goalId) {
-    const result = await checkIn(goalId);
+  async function handleGoalCheckIn(goalId, note = null) {
+    const result = await checkIn(goalId, 'manual', note);
     if (result?.alreadyDone) return result;
     if (result?.error) { toast("Couldn't check in — try again.", 'error'); return result; }
     setCheckinHistory((prev) => {
@@ -618,6 +653,8 @@ const HomePage = () => {
         goalTitle: result.goalTitle,
         xpEarned: XP_VALUES.CHECKIN + milestoneXP(result.milestone),
       });
+    } else if (result?.graceConsumed) {
+      toast(`Missed a day, but your streak's covered — everyone gets 1 grace day a week. +${XP_VALUES.CHECKIN} XP`, 'success', 3200);
     } else {
       toast(`+${XP_VALUES.CHECKIN} XP`, 'success', 2000);
     }
@@ -691,6 +728,7 @@ const HomePage = () => {
       target_unit: newGoalType === 'numeric' ? newGoalUnit.trim() : null,
       target_period: newGoalType === 'numeric' ? newGoalPeriod : null,
       reminder_utc_hour: reminderUtcHour,
+      description: newGoalWhy.trim() || null,
     });
     if (moderation) { toast(moderation.message, 'error'); setAddingGoal(false); return; }
     if (error) { toast("Couldn't add that goal — try again.", 'error'); setAddingGoal(false); return; }
@@ -701,6 +739,7 @@ const HomePage = () => {
     setNewGoalPeriod('weekly');
     setNewGoalType('habit');
     setNewGoalReminder('');
+    setNewGoalWhy('');
     setAddingGoal(false);
   };
 
@@ -1152,6 +1191,27 @@ const HomePage = () => {
                   </svg>
                   Add a Goal
                 </h3>
+                {goals.length >= 3 && (
+                  <div className="focus-check-banner">
+                    <p className="focus-check-text">
+                      You've got {goals.length} active goals. Coaches usually recommend focusing on 1–3 at a time for the best follow-through — want to pause one before adding another?
+                    </p>
+                    <div className="focus-check-goals">
+                      {goals.map((g) => (
+                        <div key={g.id} className="focus-check-goal-row">
+                          <span className="focus-check-goal-title">{g.title}</span>
+                          <button
+                            type="button"
+                            className="focus-check-pause-btn"
+                            onClick={() => deleteGoal(g.id)}
+                          >
+                            Pause
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <form className="add-goal-form-wrap" onSubmit={handleAddGoal}>
                   <div className="goal-type-toggle">
                     <button
@@ -1182,6 +1242,14 @@ const HomePage = () => {
                       {addingGoal ? '...' : 'Add'}
                     </button>
                   </div>
+                  <input
+                    type="text"
+                    className="add-goal-input add-goal-why-input"
+                    placeholder="Why does this matter to you? (optional)"
+                    value={newGoalWhy}
+                    onChange={(e) => setNewGoalWhy(e.target.value)}
+                    maxLength={200}
+                  />
                   {newGoalType === 'numeric' && (
                     <div className="numeric-goal-fields">
                       <div className="numeric-inputs-row">
@@ -1258,12 +1326,13 @@ const HomePage = () => {
                       {habitGoals.map((goal) => {
                         const done = goal.last_checked_in === todayStr;
                         const loading = !!checkingIn[goal.id];
-                        const nextMilestone = [7, 30, 60, 90].find((m) => m > (goal.day_count ?? 0));
-                        const daysLeft = nextMilestone ? nextMilestone - (goal.day_count ?? 0) : null;
+                        const liveDays = getLiveStreak(goal, todayStr);
+                        const nextMilestone = [7, 30, 60, 90].find((m) => m > liveDays);
+                        const daysLeft = nextMilestone ? nextMilestone - liveDays : null;
                         return (
                           <div key={goal.id} className={`checkin-card${done ? ' checkin-card--done' : ''}`}>
                             <div className="checkin-card-streak">
-                              <span className="checkin-card-day">{goal.day_count ?? 0}</span>
+                              <span className="checkin-card-day">{liveDays}</span>
                               <span className="checkin-card-day-label">days</span>
                             </div>
                             <div className="checkin-card-info">
@@ -1559,7 +1628,7 @@ const HomePage = () => {
                     <div className="home-stat-label">Active Goals</div>
                   </div>
                   <div className="home-stat">
-                    <div className="home-stat-value">{goals.length > 0 ? Math.max(...goals.map((g) => g.day_count || 0)) : 0}</div>
+                    <div className="home-stat-value">{goals.length > 0 ? Math.max(...goals.map((g) => getLiveStreak(g, getTodayStr()))) : 0}</div>
                     <div className="home-stat-label">Best Streak</div>
                   </div>
                   <div className="home-stat">

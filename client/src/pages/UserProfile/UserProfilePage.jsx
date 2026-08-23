@@ -10,6 +10,7 @@ import ReportModal from '../../components/common/ReportModal.jsx';
 import ConnectedModal from '../../components/common/ConnectedModal.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
+import { getLiveStreak } from '../../utils/streak.js';
 import './UserProfilePage.css';
 
 const TIER_LABELS = { 1: 'Top Priority', 2: 'Important', 3: 'Foundation' };
@@ -66,7 +67,7 @@ export default function UserProfilePage() {
         .single(),
       supabase
         .from('goals')
-        .select('id, title, tier, day_count, progress, goal_type, target_value, target_unit, target_period')
+        .select('id, title, tier, day_count, last_checked_in, grace_used_week, progress, goal_type, target_value, target_unit, target_period')
         .eq('user_id', userId)
         .eq('is_active', true)
         .order('tier'),
@@ -205,7 +206,8 @@ export default function UserProfilePage() {
 
   // Derive achievements from existing data
   const achievements = [];
-  const maxStreak = goals.filter(g => g.goal_type !== 'numeric').reduce((m, g) => Math.max(m, g.day_count || 0), 0);
+  const todayStrForStreak = new Date().toISOString().split('T')[0];
+  const maxStreak = goals.filter(g => g.goal_type !== 'numeric').reduce((m, g) => Math.max(m, getLiveStreak(g, todayStrForStreak)), 0);
   if (maxStreak >= 90) achievements.push({ icon: '🔥', label: '90-Day Streak', desc: `${maxStreak} days strong` });
   else if (maxStreak >= 30) achievements.push({ icon: '🔥', label: '30-Day Streak', desc: `${maxStreak} days strong` });
   else if (maxStreak >= 7) achievements.push({ icon: '🔥', label: '7-Day Streak', desc: `${maxStreak} days strong` });
@@ -350,7 +352,7 @@ export default function UserProfilePage() {
             {goals.some(g => g.goal_type !== 'numeric') && (
               <div className="up-stat">
                 <div className="up-stat-value">
-                  {Math.max(...goals.filter(g => g.goal_type !== 'numeric').map(g => g.day_count || 0))}
+                  {Math.max(...goals.filter(g => g.goal_type !== 'numeric').map(g => getLiveStreak(g, todayStrForStreak)))}
                 </div>
                 <div className="up-stat-label">Best Streak</div>
               </div>
@@ -383,14 +385,15 @@ export default function UserProfilePage() {
             {goals.length === 0 && <p className="up-empty">No active goals yet.</p>}
             {goals.map((goal) => {
               const isNumeric = goal.goal_type === 'numeric';
+              const liveDays = getLiveStreak(goal, todayStrForStreak);
               const progress = isNumeric
                 ? goal.target_value ? Math.min(((goal.progress ?? 0) / goal.target_value) * 100, 100) : 0
-                : Math.min(((goal.day_count || 0) / 90) * 100, 100);
+                : Math.min((liveDays / 90) * 100, 100);
               const meta = isNumeric
                 ? goal.target_value
                   ? `${goal.progress ?? 0} / ${goal.target_value} ${goal.target_unit ?? ''}`.trim()
                   : `${goal.progress ?? 0} ${goal.target_unit ?? ''}`.trim()
-                : `Day ${goal.day_count ?? 0}`;
+                : `Day ${liveDays}`;
               return (
                 <div key={goal.id} className={`up-goal-card tier-${goal.tier ?? 3}`}>
                   <div className="up-goal-header">

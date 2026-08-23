@@ -7,7 +7,8 @@ import { supabase } from '../lib/supabase.js';
 const PROFILE_COLUMNS = `
   id, first_name, last_name, alter_ego_name, city, account_type, gender, age,
   avatar_url, bio, created_at, tagline, onboarding_complete, reflection_questions,
-  looking_for, working_on, affirmation_start_date, notification_prefs,
+  looking_for, working_on, accountability_style, checkin_frequency,
+  affirmation_start_date, notification_prefs,
   coach_specialty, coach_tagline, coach_rate, coach_rate_num, coach_experience,
   coach_clients_helped, coach_session_types, coach_tags, coach_bio, coach_verified,
   coach_credentials, coach_links, coach_philosophy, coach_values, coach_testimonials,

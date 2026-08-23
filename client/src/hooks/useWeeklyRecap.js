@@ -1,3 +1,5 @@
+import { getLiveStreak } from '../utils/streak.js';
+
 const MILESTONES = [7, 30, 60, 90];
 
 function mondayOfThisWeek() {
@@ -50,10 +52,12 @@ export function getPrevGrade() {
 }
 
 export function computeRecap(goals, acceptedConnections, activity) {
-  const habitGoals = goals.filter((g) => g.goal_type !== 'numeric');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const liveGoals = goals.map((g) => ({ ...g, day_count: getLiveStreak(g, todayStr) }));
+  const habitGoals = liveGoals.filter((g) => g.goal_type !== 'numeric');
   const activeThisWeek = habitGoals.filter((g) => isThisWeek(g.last_checked_in));
-  const totalStreakDays = goals.reduce((sum, g) => sum + (g.day_count ?? 0), 0);
-  const bestStreak = goals.reduce((best, g) => (!best || (g.day_count ?? 0) > (best.day_count ?? 0)) ? g : best, null);
+  const totalStreakDays = liveGoals.reduce((sum, g) => sum + (g.day_count ?? 0), 0);
+  const bestStreak = liveGoals.reduce((best, g) => (!best || (g.day_count ?? 0) > (best.day_count ?? 0)) ? g : best, null);
 
   const goalsWithMilestone = habitGoals
     .map((g) => {
@@ -75,7 +79,7 @@ export function computeRecap(goals, acceptedConnections, activity) {
     grade = 'Flawless'; gradeColor = '#10b981';
     message = "Perfect week. Every single goal. That's discipline, not luck.";
   } else if (ratio >= 0.75) {
-    grade = 'Strong'; gradeColor = '#7c3aed';
+    grade = 'Strong'; gradeColor = '#FF7A00';
     message = 'Solid week. A few misses, but you showed up where it counts.';
   } else if (ratio >= 0.5) {
     grade = 'Decent'; gradeColor = '#f59e0b';

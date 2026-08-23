@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 import Avatar from '../../components/common/Avatar.jsx';
 import { getDisplayName } from '../../utils/displayName.js';
+import { getLiveStreak } from '../../utils/streak.js';
 import './LeaderboardPage.css';
 
 const CATEGORY_META = {
@@ -51,9 +52,10 @@ export default function LeaderboardPage() {
 
       const { data: goalData } = await supabase
         .from('goals')
-        .select('user_id, day_count, goal_type, category, title, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city, total_xp, milestones_count)')
+        .select('user_id, day_count, last_checked_in, grace_used_week, goal_type, category, title, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city, total_xp, milestones_count)')
         .eq('is_active', true);
 
+      const todayStr = new Date().toISOString().split('T')[0];
       const userMap = {};
       const catSet = new Set();
 
@@ -84,7 +86,7 @@ export default function LeaderboardPage() {
         u.totalGoals += 1;
 
         if (g.goal_type !== 'numeric') {
-          const days = g.day_count ?? 0;
+          const days = getLiveStreak(g, todayStr);
           // overall best
           if (days > u.bestStreak) {
             u.bestStreak = days;

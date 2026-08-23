@@ -47,6 +47,18 @@ const GROWTH_AREAS = [
   'Quieting Overthinking', 'Managing Stress Better', 'Showing Up for Myself',
 ];
 
+export const ACCOUNTABILITY_STYLES = [
+  { value: 'tough_love', label: '💪 Tough love — push me' },
+  { value: 'gentle_encouragement', label: '🌱 Gentle encouragement' },
+  { value: 'just_listen', label: '👂 Mostly just listen' },
+];
+
+export const CHECKIN_FREQUENCIES = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'A few times a week' },
+  { value: 'flexible', label: 'Flexible / as-needed' },
+];
+
 const SECTIONS = [
   { id: 'account', label: 'Account', icon: '👤' },
   { id: 'profile', label: 'My Profile', icon: '✨' },
@@ -92,6 +104,8 @@ export default function SettingsPage() {
   const [gender, setGender] = useState('');
   const [lookingFor, setLookingFor] = useState([]);
   const [workingOn, setWorkingOn] = useState([]);
+  const [accountabilityStyle, setAccountabilityStyle] = useState('');
+  const [checkinFrequency, setCheckinFrequency] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -147,6 +161,8 @@ export default function SettingsPage() {
       setGender(profile.gender ?? '');
       setLookingFor(profile.looking_for ?? []);
       setWorkingOn(profile.working_on ?? []);
+      setAccountabilityStyle(profile.accountability_style ?? '');
+      setCheckinFrequency(profile.checkin_frequency ?? '');
       const prefs = profile.notification_prefs ?? {};
       setNotifDailyReminder(prefs.daily_reminder ?? true);
       setNotifReminderHour(prefs.reminder_hour ?? 8);
@@ -289,6 +305,8 @@ export default function SettingsPage() {
         gender: gender || null,
         looking_for: lookingFor,
         working_on: workingOn,
+        accountability_style: accountabilityStyle || null,
+        checkin_frequency: checkinFrequency || null,
       }));
     } else {
       ({ error: saveError } = await updateProfile({
@@ -298,6 +316,8 @@ export default function SettingsPage() {
         gender: gender || null,
         looking_for: lookingFor,
         working_on: workingOn,
+        accountability_style: accountabilityStyle || null,
+        checkin_frequency: checkinFrequency || null,
       }));
     }
 
@@ -773,6 +793,39 @@ export default function SettingsPage() {
                         )}
                       >
                         {area}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="settings-field">
+                  <label>How do you like to be held accountable?</label>
+                  <span className="settings-hint" style={{ marginBottom: 8 }}>Helps match you with partners whose style fits yours — a mismatch here is the #1 reason accountability partnerships fizzle out</span>
+                  <div className="settings-lf-chips">
+                    {ACCOUNTABILITY_STYLES.map(({ value, label }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={`settings-lf-chip${accountabilityStyle === value ? ' selected' : ''}`}
+                        onClick={() => setAccountabilityStyle((prev) => prev === value ? '' : value)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="settings-field">
+                  <label>How often do you want to check in with a partner?</label>
+                  <div className="settings-lf-chips">
+                    {CHECKIN_FREQUENCIES.map(({ value, label }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={`settings-lf-chip${checkinFrequency === value ? ' selected' : ''}`}
+                        onClick={() => setCheckinFrequency((prev) => prev === value ? '' : value)}
+                      >
+                        {label}
                       </button>
                     ))}
                   </div>
