@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
@@ -239,6 +239,59 @@ export default function ConnectionsPage() {
   function handleSkip() {
     if (!currentProfile) return;
     skipProfile(currentProfile.id);
+  }
+
+  // Swipe/drag state for the top card. dragPos tracks live finger/mouse
+  // position while dragging; exitDir drives the fling-off animation once
+  // released past the threshold, then the actual action fires after the
+  // animation finishes so the card visibly leaves before the list updates.
+  const SWIPE_THRESHOLD = 110;
+  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [exitDir, setExitDir] = useState(null);
+  const dragStart = useRef(null);
+  const movedRef = useRef(false);
+
+  function triggerExit(dir) {
+    if (!currentProfile || exitDir) return;
+    setIsDragging(false);
+    setExitDir(dir);
+    setTimeout(() => {
+      if (dir === 'right') handleConnect();
+      else handleSkip();
+      setDragPos({ x: 0, y: 0 });
+      setExitDir(null);
+    }, 300);
+  }
+
+  function handleCardPointerDown(e) {
+    if (exitDir || e.target.closest('.card-view-profile-btn')) return;
+    dragStart.current = { x: e.clientX, y: e.clientY };
+    movedRef.current = false;
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function handleCardPointerMove(e) {
+    if (!dragStart.current) return;
+    const x = e.clientX - dragStart.current.x;
+    const y = e.clientY - dragStart.current.y;
+    if (Math.abs(x) > 4 || Math.abs(y) > 4) movedRef.current = true;
+    setDragPos({ x, y });
+  }
+
+  function handleCardPointerUp() {
+    if (!dragStart.current) return;
+    dragStart.current = null;
+    setIsDragging(false);
+    if (Math.abs(dragPos.x) > SWIPE_THRESHOLD) {
+      triggerExit(dragPos.x > 0 ? 'right' : 'left');
+    } else if (!movedRef.current && currentProfile) {
+      navigate(`/profile/${currentProfile.id}`);
+      setDragPos({ x: 0, y: 0 });
+    } else {
+      setDragPos({ x: 0, y: 0 });
+    }
   }
 
   return (
@@ -785,18 +838,34 @@ export default function ConnectionsPage() {
                   <p className="empty-message">Check back later for new goal-driven individuals.</p>
                 </div>
               ) : (
-                visibleProfiles.slice(0, 3).map((profile, i) => (
+                visibleProfiles.slice(0, 3).map((profile, i) => {
+                  const isTop = i === 0;
+                  const topTransform = exitDir
+                    ? `translateX(${exitDir === 'right' ? 700 : -700}px) rotate(${exitDir === 'right' ? 28 : -28}deg)`
+                    : isDragging
+                      ? `translateX(${dragPos.x}px) translateY(${dragPos.y * 0.3}px) rotate(${dragPos.x / 16}deg)`
+                      : 'translateY(0)';
+                  return (
                   <div
                     key={profile.id}
-                    className={`profile-card${i === 0 ? ' profile-card-top' : ''}`}
-                    style={{
+                    className={`profile-card${isTop ? ' profile-card-top' : ''}`}
+                    style={isTop ? {
+                      transform: topTransform,
+                      transition: isDragging ? 'none' : 'transform 0.3s ease',
+                      zIndex: 10,
+                    } : {
                       transform: `scale(${1 - i * 0.04}) translateY(${i * 10}px)`,
                       zIndex: 10 - i,
                     }}
-                    onClick={i === 0 ? () => navigate(`/profile/${profile.id}`) : undefined}
+                    onPointerDown={isTop ? handleCardPointerDown : undefined}
+                    onPointerMove={isTop ? handleCardPointerMove : undefined}
+                    onPointerUp={isTop ? handleCardPointerUp : undefined}
+                    onPointerCancel={isTop ? handleCardPointerUp : undefined}
                   >
-                    {i === 0 && (
+                    {isTop && (
                       <>
+                        <div className={`card-swipe-stamp card-stamp-connect${dragPos.x > 20 ? ' card-stamp-visible' : ''}`} style={{ opacity: exitDir === 'right' ? 1 : Math.min(Math.max(dragPos.x, 0) / SWIPE_THRESHOLD, 1) }}>Connect</div>
+                        <div className={`card-swipe-stamp card-stamp-skip${dragPos.x < -20 ? ' card-stamp-visible' : ''}`} style={{ opacity: exitDir === 'left' ? 1 : Math.min(Math.max(-dragPos.x, 0) / SWIPE_THRESHOLD, 1) }}>Skip</div>
                         <div className="card-header">
                           {profile.avatar_url ? (
                             <img
@@ -870,6 +939,12 @@ export default function ConnectionsPage() {
                               </div>
                             </div>
                           )}
+                          {!profile.matchReason && !profile.tagline && !profile.bio
+                            && !(profile.goals?.length > 0) && !(profile.looking_for?.length > 0) && (
+                            <p className="card-no-extra">
+                              {getDisplayName(profile, 'This person')} hasn't filled in their goals or bio yet — check their full profile to learn more.
+                            </p>
+                          )}
                           <button
                             className="card-view-profile-btn"
                             onClick={(e) => { e.stopPropagation(); navigate(`/profile/${profile.id}`); }}
@@ -880,7 +955,8 @@ export default function ConnectionsPage() {
                       </>
                     )}
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}
@@ -888,7 +964,7 @@ export default function ConnectionsPage() {
           {!loading && visibleProfiles.length > 0 && (
             <>
               <div className="action-buttons" onClick={(e) => e.stopPropagation()}>
-                <button className="action-btn skip-btn" onClick={handleSkip} title="Skip — not for me">
+                <button className="action-btn skip-btn" onClick={() => triggerExit('left')} title="Skip — not for me">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -903,7 +979,7 @@ export default function ConnectionsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </button>
-                <button className="action-btn connect-btn" onClick={handleConnect} title="Connect — send a request">
+                <button className="action-btn connect-btn" onClick={() => triggerExit('right')} title="Connect — send a request">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="30" height="30">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>

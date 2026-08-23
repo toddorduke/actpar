@@ -367,13 +367,14 @@
   position: relative;
   width: 100%;
   max-width: 500px;
-  height: 680px;
 }
 
 .profile-card {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 480px;
   background: white;
   border-radius: 25px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -383,8 +384,53 @@
 }
 
 .profile-card-top {
-  cursor: pointer;
+  position: relative;
+  height: auto;
+  min-height: 480px;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18), 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.profile-card-top:active { cursor: grabbing; }
+
+.card-swipe-stamp {
+  position: absolute;
+  top: 26px;
+  z-index: 3;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 3px solid;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+.card-stamp-connect {
+  left: 22px;
+  color: #10b981;
+  border-color: #10b981;
+  background: rgba(255,255,255,0.85);
+  transform: rotate(-12deg);
+}
+
+.card-stamp-skip {
+  right: 22px;
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(255,255,255,0.85);
+  transform: rotate(12deg);
+}
+
+.card-no-extra {
+  font-size: 0.88em;
+  color: var(--color-muted);
+  line-height: 1.5;
+  padding: 10px 0 4px;
 }
 
 .profile-card-top:hover {
@@ -895,14 +941,13 @@
     margin-bottom: 20px;
   }
 
-  /* Card stack — taller so content fits */
-  .card-stack { height: 640px; }
-
   /* Profile card: allow vertical scroll inside the card */
   .profile-card {
+    height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
   }
+  .profile-card-top { height: auto; min-height: 400px; }
 
   /* Photo: still smaller than desktop so text stays visible, but bigger than before */
   .card-header { height: 260px; }
@@ -1490,7 +1535,8 @@
 @media (max-width: 400px) {
   .connections-page { padding: 16px 10px 24px; }
   .page-title { font-size: 1.5em; }
-  .card-stack { height: 560px; }
+  .profile-card { height: 340px; }
+  .profile-card-top { height: auto; min-height: 340px; }
   .card-header { height: 220px; }
   .card-header-fallback { padding-top: 22px; }
   .card-avatar.ap-avatar { width: 80px !important; height: 80px !important; font-size: 30px !important; }
