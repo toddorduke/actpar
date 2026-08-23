@@ -368,7 +368,7 @@ export default function CoachDiscoveryPage() {
             {filtered.map(coach => (
               <div key={coach.id} className="coach-card" onClick={() => navigate(`/coach/${coach.id}`)}>
                 <div className="coach-card-header">
-                  <div className="coach-card-avatar" />
+                  <Avatar url={coach.avatar_url} name={coach.name} size={60} className="coach-card-avatar" />
                   <div className="coach-card-meta">
                     <div className="coach-card-name-row">
                       <h3 className="coach-card-name">{coach.name}</h3>

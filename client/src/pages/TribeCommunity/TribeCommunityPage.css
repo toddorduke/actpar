@@ -370,10 +370,10 @@
 .feed-empty {
   text-align: center;
   padding: 48px 24px;
-  color: #ffffff;
+  color: var(--color-muted);
   font-size: 0.95rem;
   line-height: 1.6;
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 16px;
   border: 1px dashed #d1d5db;
 }

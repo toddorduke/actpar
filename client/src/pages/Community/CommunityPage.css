@@ -173,7 +173,7 @@
 .comm-empty {
   text-align: center;
   padding: 40px;
-  color: #4b5563;
+  color: var(--color-muted);
   font-size: 0.95rem;
 }
 

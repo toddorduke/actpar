@@ -142,7 +142,7 @@ export default function CoachProfilePage() {
         <div className="coach-hero-bg" />
         <div className="coach-hero-content">
           <div className="coach-photo-wrap">
-            <div className="coach-photo" />
+            <Avatar url={coach.avatar_url} name={coach.name} size={160} shape="rounded" className="coach-photo" />
             {coach.verified && (
               <div className="verified-badge">
                 <svg fill="currentColor" viewBox="0 0 20 20" width="13" height="13">

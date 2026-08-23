@@ -940,7 +940,7 @@
 
 .add-rule-btn:hover { background: rgba(255,122,0,0.07); border-color: var(--color-primary-end); }
 
-.rules-empty { color: #374151; font-size: 0.88rem; margin-bottom: 8px; }
+.rules-empty { color: var(--color-muted); font-size: 0.88rem; margin-bottom: 8px; }
 
 /* ── Create pact draft rules ── */
 .label-hint { font-weight: 400; color: #374151; font-size: 0.82rem; }
@@ -1031,7 +1031,7 @@
 .feed-empty-pact {
   text-align: center;
   padding: 48px 24px;
-  color: #374151;
+  color: var(--color-muted);
   background: var(--color-surface);
   border-radius: 16px;
   border: 1px dashed rgba(255,122,0,0.2);

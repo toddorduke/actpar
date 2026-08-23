@@ -34,10 +34,6 @@
 }
 
 .coach-photo {
-  width: 160px;
-  height: 160px;
-  border-radius: var(--radius-medium);
-  background: var(--gradient-primary);
   border: 5px solid white;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   margin-top: 60px;
@@ -874,7 +870,7 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 
 @media (max-width: 768px) {
   .coach-hero-content { flex-direction: column; align-items: center; text-align: center; padding: 28px 20px 0; }
-  .coach-photo { margin-top: 30px; width: 120px; height: 120px; }
+  .coach-photo { margin-top: 30px; width: 120px !important; height: 120px !important; }
   .coach-hero-info { padding-top: 16px; }
   .coach-name { font-size: 1.7rem; }
   .coach-stats-row { justify-content: center; }
