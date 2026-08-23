@@ -405,6 +405,70 @@ export default function SettingsPage() {
     setTimeout(() => setCoachSaved(false), 2500);
   }
 
+  const [exportingData, setExportingData] = useState(false);
+
+  async function handleExportData() {
+    setExportingData(true);
+    try {
+      const uid = user.id;
+      const [
+        goalsRes, checkinsRes, journalRes, reflectionsRes,
+        tribePostsRes, pactPostsRes, sentMsgsRes, receivedMsgsRes,
+        connectionsRes, mediaRes, notificationsRes, blockedRes, membershipsRes,
+        issueReportsRes,
+      ] = await Promise.all([
+        supabase.from('goals').select('*').eq('user_id', uid),
+        supabase.from('checkin_logs').select('*').eq('user_id', uid),
+        supabase.from('journal_entries').select('*').eq('user_id', uid),
+        supabase.from('reflections').select('*').eq('user_id', uid),
+        supabase.from('tribe_posts').select('*').eq('user_id', uid),
+        supabase.from('pact_posts').select('*').eq('user_id', uid),
+        supabase.from('direct_messages').select('*').eq('sender_id', uid),
+        supabase.from('direct_messages').select('*').eq('receiver_id', uid),
+        supabase.from('connections').select('*').or(`requester_id.eq.${uid},receiver_id.eq.${uid}`),
+        supabase.from('media').select('*').eq('user_id', uid),
+        supabase.from('notifications').select('*').eq('user_id', uid),
+        supabase.from('blocked_users').select('*').eq('blocker_id', uid),
+        supabase.from('community_memberships').select('*').eq('user_id', uid),
+        supabase.from('issue_reports').select('*').eq('user_id', uid),
+      ]);
+
+      const exportData = {
+        exported_at: new Date().toISOString(),
+        profile: profile ?? null,
+        goals: goalsRes.data ?? [],
+        checkin_logs: checkinsRes.data ?? [],
+        journal_entries: journalRes.data ?? [],
+        reflections: reflectionsRes.data ?? [],
+        tribe_posts: tribePostsRes.data ?? [],
+        pact_posts: pactPostsRes.data ?? [],
+        messages_sent: sentMsgsRes.data ?? [],
+        messages_received: receivedMsgsRes.data ?? [],
+        connections: connectionsRes.data ?? [],
+        media: mediaRes.data ?? [],
+        notifications: notificationsRes.data ?? [],
+        users_you_blocked: blockedRes.data ?? [],
+        community_memberships: membershipsRes.data ?? [],
+        issue_reports_you_filed: issueReportsRes.data ?? [],
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `actpar-my-data-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Your data has downloaded.', 'success');
+    } catch (err) {
+      toast("Couldn't export your data — try again.", 'error');
+    } finally {
+      setExportingData(false);
+    }
+  }
+
   async function handleDeleteAccount() {
     if (deleteInput !== 'DELETE') return;
     setDeleting(true);
@@ -476,6 +540,14 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
+
+              <div className="settings-divider" />
+
+              <h3 className="settings-section-title">Your Data</h3>
+              <p className="settings-desc">Download a copy of your goals, posts, messages, connections, and everything else tied to your account, as a JSON file.</p>
+              <button className="settings-avatar-btn" onClick={handleExportData} disabled={exportingData}>
+                {exportingData ? 'Preparing your download…' : 'Download my data'}
+              </button>
             </section>
           )}
 
