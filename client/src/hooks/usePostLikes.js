@@ -43,7 +43,8 @@ export const usePostLikes = (postIds = [], postType = 'tribe') => {
         .eq('post_id', postId)
         .eq('user_id', user.id);
       if (!error) {
-        await supabase.rpc('decrement_post_likes', { p_post_id: postId, p_post_type: postType });
+        const { error: rpcError } = await supabase.rpc('decrement_post_likes', { p_post_id: postId, p_post_type: postType });
+        if (rpcError) onCountChange(postId, currentLikeCount);
       } else {
         // Roll back the optimistic update
         setLikedIds((prev) => new Set([...prev, postId]));
@@ -54,7 +55,8 @@ export const usePostLikes = (postIds = [], postType = 'tribe') => {
         .from('post_likes')
         .insert({ post_id: postId, post_type: postType, user_id: user.id });
       if (!error) {
-        await supabase.rpc('increment_post_likes', { p_post_id: postId, p_post_type: postType });
+        const { error: rpcError } = await supabase.rpc('increment_post_likes', { p_post_id: postId, p_post_type: postType });
+        if (rpcError) onCountChange(postId, currentLikeCount);
         // Notify post owner
         if (postOwnerId) {
           createNotification({

@@ -34,8 +34,8 @@ export default function ReportModal({ postId, reportedUserId, onClose }) {
 
     setSubmitting(false);
     if (error) {
-      // Table may not exist yet — still show success to user
-      console.error('Report error:', error);
+      toast("Couldn't submit your report — please try again.", 'error');
+      return;
     }
     toast('Thank you for your report. Our team will review it shortly.', 'success');
     onClose();

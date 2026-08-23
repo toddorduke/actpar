@@ -99,7 +99,8 @@ export default function ProfileSetupPage() {
       const taglineCheck = checkText(tagline.trim());
       if (!taglineCheck.ok) { toast(taglineCheck.message, 'error'); return; }
     }
-    await updateProfile({ alter_ego_name: alterEgo.trim(), tagline: tagline.trim() || null });
+    const { error } = await updateProfile({ alter_ego_name: alterEgo.trim(), tagline: tagline.trim() || null });
+    if (error) { toast("Couldn't save that — try again.", 'error'); return; }
     setStep(2);
   }
 
@@ -125,10 +126,13 @@ export default function ProfileSetupPage() {
     }
     setSaving(true);
     const reminderUtcHour = goalReminder ? localTimeToUtcHour(goalReminder) : null;
-    const { moderation } = await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1, reminder_utc_hour: reminderUtcHour });
+    const { error: goalError, moderation } = await addGoal(goalTitle.trim(), goalCategory || null, { tier: 1, reminder_utc_hour: reminderUtcHour });
     if (moderation) { toast(moderation.message, 'error'); setSaving(false); return; }
-    await updateProfile({ avatar_url: avatarUrl, profile_setup_complete: true });
-    await supabase.auth.updateUser({ data: { profile_setup_complete: true } });
+    if (goalError) { toast("Couldn't save your goal — try again.", 'error'); setSaving(false); return; }
+    const { error: profileError } = await updateProfile({ avatar_url: avatarUrl, profile_setup_complete: true });
+    const { error: authError } = await supabase.auth.updateUser({ data: { profile_setup_complete: true } });
+    setSaving(false);
+    if (profileError || authError) { toast("Couldn't finish setting up your profile — try again.", 'error'); return; }
     navigate('/', { replace: true });
   }
 

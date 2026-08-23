@@ -50,9 +50,10 @@ export const useCommunities = () => {
     if (!error) {
       track(Events.COMMUNITY_CREATED);
       // Auto-join as admin
-      await supabase
+      const { error: membershipError } = await supabase
         .from('community_memberships')
         .insert({ community_id: data.id, user_id: user.id, role: 'admin' });
+      if (membershipError) return { data, error: membershipError };
       setCommunities((prev) => [data, ...prev]);
       setMyMemberships((prev) => [...prev, data.id]);
     }

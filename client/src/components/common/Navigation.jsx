@@ -5,6 +5,7 @@ import { useNavSlots } from '../../context/NavSlotsContext.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
 import { useProfile } from '../../hooks/useProfile.js';
 import { useConversations } from '../../hooks/useConversations.js';
+import { useToast } from './Toast.jsx';
 import Avatar from './Avatar.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
 import { timeAgoShort } from '../../utils/dateUtils.js';
@@ -107,6 +108,12 @@ const Navigation = () => {
   const { profile } = useProfile();
   const { conversations } = useConversations();
   const unreadMessages = conversations.reduce((sum, c) => sum + (c.unread || 0), 0);
+  const toast = useToast();
+
+  async function handleDeleteNotif(notifId) {
+    const { error } = await deleteNotif(notifId);
+    if (error) toast("Couldn't delete that notification — try again.", 'error');
+  }
 
   const visibleItems = [
     HOME_ITEM,
@@ -192,7 +199,7 @@ const Navigation = () => {
               </div>
               <button
                 className="notif-item-dismiss"
-                onClick={(e) => { e.stopPropagation(); deleteNotif(notif.id); }}
+                onClick={(e) => { e.stopPropagation(); handleDeleteNotif(notif.id); }}
                 aria-label="Dismiss"
               >×</button>
             </div>

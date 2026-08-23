@@ -353,8 +353,11 @@ const HomePage = () => {
     if (unchecked.length === 0) {
       toast("You've already logged everything today ✓", 'success');
     } else {
-      Promise.all(unchecked.map((g) => checkIn(g.id, 'auto'))).then(() => {
-        toast(`✓ ${unchecked.length} goal${unchecked.length !== 1 ? 's' : ''} logged automatically`, 'success', 4000);
+      Promise.all(unchecked.map((g) => checkIn(g.id, 'auto'))).then((results) => {
+        const failCount = results.filter((r) => r.error).length;
+        const okCount = unchecked.length - failCount;
+        if (okCount > 0) toast(`✓ ${okCount} goal${okCount !== 1 ? 's' : ''} logged automatically`, 'success', 4000);
+        if (failCount > 0) toast(`Couldn't log ${failCount} goal${failCount !== 1 ? 's' : ''} — try checking in manually.`, 'error', 5000);
       });
     }
     setSearchParams((p) => { p.delete('auto-checkin'); return p; }, { replace: true });
@@ -471,8 +474,9 @@ const HomePage = () => {
   async function handleJourneyLinkGoal() {
     if (!journeyPickerGoalId || journeyPickerSaving) return;
     setJourneyPickerSaving(true);
-    await linkGoal(journeyGoalPicker.partnershipId, journeyPickerGoalId);
+    const { error } = await linkGoal(journeyGoalPicker.partnershipId, journeyPickerGoalId);
     setJourneyPickerSaving(false);
+    if (error) { toast("Couldn't link that goal — try again.", 'error'); return; }
     setJourneyGoalPicker(null);
     setJourneyPickerGoalId('');
     setJourneyPickerShowNew(false);
@@ -484,21 +488,26 @@ const HomePage = () => {
     const titleCheck = checkText(journeyPickerNewTitle.trim());
     if (!titleCheck.ok) { toast(titleCheck.message, 'error'); return; }
     setJourneyPickerSaving(true);
-    const { data } = await supabase.from('goals').insert({
+    const { data, error: goalError } = await supabase.from('goals').insert({
       user_id: user.id,
       title: journeyPickerNewTitle.trim(),
       tier: journeyPickerNewTier,
       goal_type: 'habit',
       is_active: true,
     }).select('id').single();
-    if (data) {
-      await linkGoal(journeyGoalPicker.partnershipId, data.id);
-    }
+    if (goalError) { toast("Couldn't create that goal — try again.", 'error'); setJourneyPickerSaving(false); return; }
+    const { error: linkError } = await linkGoal(journeyGoalPicker.partnershipId, data.id);
     setJourneyPickerSaving(false);
+    if (linkError) { toast("Goal created, but couldn't link it — try again.", 'error'); return; }
     setJourneyGoalPicker(null);
     setJourneyPickerGoalId('');
     setJourneyPickerShowNew(false);
     setJourneyPickerNewTitle('');
+  }
+
+  async function handleEndJourney(partnershipId) {
+    const { error } = await endJourney(partnershipId);
+    if (error) toast("Couldn't end that journey — try again.", 'error');
   }
 
   // Add goal form
@@ -597,6 +606,7 @@ const HomePage = () => {
   async function handleGoalCheckIn(goalId) {
     const result = await checkIn(goalId);
     if (result?.alreadyDone) return result;
+    if (result?.error) { toast("Couldn't check in — try again.", 'error'); return result; }
     setCheckinHistory((prev) => {
       const existing = prev[goalId] ?? new Set();
       return { ...prev, [goalId]: new Set([...existing, todayStr]) };
@@ -624,23 +634,25 @@ const HomePage = () => {
 
   async function handleNudge(partnerId, goalTitle) {
     const myName = getDisplayName(profile, 'Your partner');
-    await supabase.from('notifications').insert({
+    const { error } = await supabase.from('notifications').insert({
       user_id: partnerId,
       actor_id: user.id,
       type: 'journey_nudge',
       body: `${myName} is checking on you — have you done "${goalTitle}" today? 💪`,
     });
+    if (error) { toast("Couldn't send that nudge — try again.", 'error'); return; }
     setNudgeSent((prev) => new Set([...prev, partnerId]));
   }
 
   async function sendCheer(item) {
     const myName = getDisplayName(user?.user_metadata, 'Your connection');
-    await supabase.from('notifications').insert({
+    const { error } = await supabase.from('notifications').insert({
       user_id: item.profiles.id,
       actor_id: user.id,
       type: 'cheer',
       body: `${myName} cheered your check-in on "${item.title}"! 🔥`,
     });
+    if (error) { toast("Couldn't send that cheer — try again.", 'error'); return; }
     setCheerSent((prev) => new Set([...prev, item.id]));
   }
 
@@ -652,6 +664,8 @@ const HomePage = () => {
     if (!error) {
       setSuggested((prev) => prev.filter((p) => p.id !== profileId));
       toast('Spark sent! ⚡', 'success');
+    } else {
+      toast("Couldn't send that spark — try again.", 'error');
     }
     setSendingTo(null);
   }
@@ -659,8 +673,9 @@ const HomePage = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await updateProfile(editForm);
+    const { error } = await updateProfile(editForm);
     setSaving(false);
+    if (error) { toast("Couldn't save your profile — try again.", 'error'); return; }
     setEditing(false);
   };
 
@@ -670,7 +685,7 @@ const HomePage = () => {
     if (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget)) return;
     setAddingGoal(true);
     const reminderUtcHour = newGoalReminder ? localTimeToUtcHour(newGoalReminder) : null;
-    const { moderation } = await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
+    const { error, moderation } = await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
       goal_type: newGoalType,
       target_value: newGoalType === 'numeric' ? parseFloat(newGoalTarget) : null,
       target_unit: newGoalType === 'numeric' ? newGoalUnit.trim() : null,
@@ -678,6 +693,7 @@ const HomePage = () => {
       reminder_utc_hour: reminderUtcHour,
     });
     if (moderation) { toast(moderation.message, 'error'); setAddingGoal(false); return; }
+    if (error) { toast("Couldn't add that goal — try again.", 'error'); setAddingGoal(false); return; }
     setNewGoalTitle('');
     setNewGoalCategory('');
     setNewGoalUnit('');
@@ -698,13 +714,16 @@ const HomePage = () => {
     if (!error) {
       setAnswers((prev) => ({ ...prev, [index]: '' }));
       toast('Reflection saved! 💫', 'success');
+    } else {
+      toast("Couldn't save that reflection — try again.", 'error');
     }
   }
 
   async function handleSaveQuestions() {
     setSavingQuestions(true);
-    await updateProfile({ reflection_questions: draftQuestions });
+    const { error } = await updateProfile({ reflection_questions: draftQuestions });
     setSavingQuestions(false);
+    if (error) { toast("Couldn't save your questions — try again.", 'error'); return; }
     setEditingQuestions(false);
   }
 
@@ -755,7 +774,8 @@ const HomePage = () => {
   }
 
   async function handleDeletePost(postId) {
-    await supabase.from('tribe_posts').delete().eq('id', postId);
+    const { error } = await supabase.from('tribe_posts').delete().eq('id', postId);
+    if (error) { toast("Couldn't delete that post — try again.", 'error'); return; }
     setMyOwnPosts((prev) => prev.filter((p) => p.id !== postId));
     toast('Post deleted.', 'success');
   }
@@ -789,11 +809,13 @@ const HomePage = () => {
     e.preventDefault();
     if (!journalSubject.trim() || !journalBody.trim()) return;
     setSavingEntry(true);
-    await createEntry({ subject: journalSubject, body: journalBody, is_public: journalPublic });
+    const { error, moderation } = await createEntry({ subject: journalSubject, body: journalBody, is_public: journalPublic });
+    setSavingEntry(false);
+    if (moderation) { toast(moderation.message, 'error'); return; }
+    if (error) { toast("Couldn't save your journal entry — try again.", 'error'); return; }
     setJournalSubject('');
     setJournalBody('');
     setJournalPublic(false);
-    setSavingEntry(false);
   };
 
   function validateFile(file) {
@@ -815,7 +837,9 @@ const HomePage = () => {
     const { error: storageError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '3600', upsert: true });
     if (storageError) { toast(`Upload failed: ${storageError.message}`, 'error'); return; }
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
-    await updateProfile({ avatar_url: urlData.publicUrl });
+    const { error: profileError } = await updateProfile({ avatar_url: urlData.publicUrl });
+    if (profileError) { toast("Photo uploaded but couldn't save it to your profile — try again.", 'error'); return; }
+    toast('Profile photo updated!', 'success');
   }
 
   function handleFileSelect(e) {
@@ -1203,7 +1227,7 @@ const HomePage = () => {
                                 >
                                   {checkingIn[myGoal?.id] ? 'Checking in...' : 'Check in now'}
                                 </button>
-                                <button className="home-journey-inactive-end" onClick={() => endJourney(p.id)}>End Journey</button>
+                                <button className="home-journey-inactive-end" onClick={() => handleEndJourney(p.id)}>End Journey</button>
                               </div>
                             </div>
                           )}

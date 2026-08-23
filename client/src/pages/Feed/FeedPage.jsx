@@ -9,6 +9,7 @@ import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
+import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
@@ -215,6 +216,7 @@ function CommentOverlay({ post, commentState, onClose }) {
 // ── Share sheet ───────────────────────────────────────────────────────────────
 
 function ShareSheet({ post, user, connections, onClose }) {
+  const toast = useToast();
   const [view, setView]     = useState('main'); // 'main' | 'friends'
   const [search, setSearch] = useState('');
   const [sent, setSent]     = useState(new Set());
@@ -230,11 +232,12 @@ function ShareSheet({ post, user, connections, onClose }) {
 
   async function sendToFriend(partnerId) {
     const msg = `Check this out 👀\n"${snippet}"\n${postUrl}`;
-    await supabase.from('direct_messages').insert({
+    const { error } = await supabase.from('direct_messages').insert({
       sender_id: user.id,
       receiver_id: partnerId,
       content: msg,
     });
+    if (error) { toast("Couldn't send that — try again.", 'error'); return; }
     setSent((prev) => new Set([...prev, partnerId]));
   }
 
@@ -571,6 +574,7 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
 
 export default function FeedPage() {
   const { user }                              = useContext(AuthContext);
+  const toast                                 = useToast();
   const { acceptedConnections }               = useConnections();
   const { posts, loading, createPost, deletePost } = useTribePosts(null);
   const postIds                               = useMemo(() => posts.map((p) => p.id), [posts]);
@@ -580,6 +584,10 @@ export default function FeedPage() {
   const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
   const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
+  async function handleRsvp(postId, status) {
+    const { error } = await toggleRsvp(postId, status);
+    if (error) toast("Couldn't update your RSVP — try again.", 'error');
+  }
   const [showSheet, setShowSheet]             = useState(false);
   const [activeCommentPostId, setActiveCommentPostId] = useState(null);
   const [sharePost, setSharePost]             = useState(null);
@@ -750,7 +758,7 @@ export default function FeedPage() {
             onDelete={deletePost}
             rsvpGoingCount={goingCounts[post.id]}
             rsvpMyStatus={myRsvps[post.id] ?? null}
-            onRsvp={toggleRsvp}
+            onRsvp={handleRsvp}
           />
         ))}
       </div>

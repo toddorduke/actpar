@@ -45,13 +45,15 @@ export default function AdminPage() {
   }
 
   async function updateStatus(id, status) {
-    await supabase.from('reports').update({ status }).eq('id', id);
+    const { error } = await supabase.from('reports').update({ status }).eq('id', id);
+    if (error) { toast("Couldn't update that report — try again.", 'error'); return; }
     setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
     toast(`Report marked as ${status}`, 'success');
   }
 
   async function updateIssueStatus(id, status) {
-    await supabase.from('issue_reports').update({ status }).eq('id', id);
+    const { error } = await supabase.from('issue_reports').update({ status }).eq('id', id);
+    if (error) { toast("Couldn't update that issue — try again.", 'error'); return; }
     setIssueReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
     toast(`Issue marked as ${status}`, 'success');
   }

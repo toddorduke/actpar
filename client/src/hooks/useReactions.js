@@ -44,7 +44,15 @@ export function useReactions() {
         ...prev,
         [postId]: { ...prev[postId], [emoji]: Math.max(0, (prev[postId]?.[emoji] ?? 1) - 1) },
       }));
-      await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.id);
+      const { error } = await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.id);
+      if (error) {
+        setMyReactions(prev => ({ ...prev, [postId]: current }));
+        setCounts(prev => ({
+          ...prev,
+          [postId]: { ...prev[postId], [emoji]: (prev[postId]?.[emoji] ?? 0) + 1 },
+        }));
+      }
+      return { error };
     } else {
       // Add or switch
       setMyReactions(prev => ({ ...prev, [postId]: emoji }));
@@ -54,10 +62,20 @@ export function useReactions() {
         if (current) updated[current] = Math.max(0, (cur[current] ?? 1) - 1);
         return { ...prev, [postId]: updated };
       });
-      await supabase.from('post_reactions').upsert(
+      const { error } = await supabase.from('post_reactions').upsert(
         { post_id: postId, user_id: user.id, emoji },
         { onConflict: 'post_id,user_id' }
       );
+      if (error) {
+        setMyReactions(prev => { const n = { ...prev }; if (current) n[postId] = current; else delete n[postId]; return n; });
+        setCounts(prev => {
+          const cur = prev[postId] ?? { fire: 0, muscle: 0, star: 0 };
+          const reverted = { ...cur, [emoji]: Math.max(0, (cur[emoji] ?? 1) - 1) };
+          if (current) reverted[current] = (cur[current] ?? 0) + 1;
+          return { ...prev, [postId]: reverted };
+        });
+        return { error };
+      }
       // Notify post owner (fire-and-forget)
       supabase.from('tribe_posts').select('user_id').eq('id', postId).single().then(({ data: post }) => {
         if (post?.user_id && post.user_id !== user.id) {
@@ -71,6 +89,7 @@ export function useReactions() {
           });
         }
       });
+      return { error: null };
     }
   }, [user, myReactions]);
 

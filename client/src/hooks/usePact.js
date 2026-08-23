@@ -118,7 +118,10 @@ export const usePact = (activePactId = null) => {
       const ruleRows = initialRules
         .filter((r) => r.trim())
         .map((rule_text, position) => ({ pact_id: newPact.id, rule_text, position }));
-      if (ruleRows.length > 0) await supabase.from('pact_rules').insert(ruleRows);
+      if (ruleRows.length > 0) {
+        const { error: rulesError } = await supabase.from('pact_rules').insert(ruleRows);
+        if (rulesError) { await fetchAll(); return { error: rulesError, pactId: newPact.id }; }
+      }
     }
 
     await fetchAll();

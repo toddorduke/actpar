@@ -96,7 +96,8 @@ export const usePushNotifications = () => {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
-        await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+        const { error } = await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+        if (error) throw error;
         await sub.unsubscribe();
       }
       track(Events.PUSH_DISABLED);

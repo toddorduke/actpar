@@ -53,10 +53,10 @@ export const useCommunityChat = (communityId) => {
     if (!content.trim() || !user) return { moderation: null };
     const modResult = checkText(content);
     if (!modResult.ok) return { moderation: modResult };
-    await supabase
+    const { error } = await supabase
       .from('community_messages')
       .insert({ community_id: communityId, user_id: user.id, content: content.trim() });
-    return { moderation: null };
+    return { error, moderation: null };
   }, [communityId, user]);
 
   return { messages, loading, sendMessage };

@@ -20,6 +20,7 @@ const PACT_BADGE_MAP = {
 };
 
 function RulesList({ rules, myRole, onAdd, onUpdate, onDelete }) {
+  const toast = useToast();
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const [addingNew, setAddingNew] = useState(false);
@@ -28,15 +29,24 @@ function RulesList({ rules, myRole, onAdd, onUpdate, onDelete }) {
 
   async function saveEdit() {
     if (!editText.trim()) return;
-    await onUpdate(editingId, editText.trim());
+    const { error, moderation } = await onUpdate(editingId, editText.trim());
+    if (moderation) { toast(moderation.message, 'error'); return; }
+    if (error) { toast("Couldn't save that rule — try again.", 'error'); return; }
     setEditingId(null);
   }
 
   async function saveNew() {
     if (!newRuleText.trim()) return;
-    await onAdd(newRuleText.trim());
+    const { error, moderation } = await onAdd(newRuleText.trim());
+    if (moderation) { toast(moderation.message, 'error'); return; }
+    if (error) { toast("Couldn't add that rule — try again.", 'error'); return; }
     setNewRuleText('');
     setAddingNew(false);
+  }
+
+  async function handleDelete(ruleId) {
+    const { error } = await onDelete(ruleId);
+    if (error) toast("Couldn't delete that rule — try again.", 'error');
   }
 
   return (
@@ -56,7 +66,7 @@ function RulesList({ rules, myRole, onAdd, onUpdate, onDelete }) {
               {canEdit && (
                 <div className="rule-actions">
                   <button className="rule-edit-btn" onClick={() => { setEditingId(rule.id); setEditText(rule.rule_text); }}>✎</button>
-                  <button className="rule-delete-btn" onClick={() => onDelete(rule.id)}>×</button>
+                  <button className="rule-delete-btn" onClick={() => handleDelete(rule.id)}>×</button>
                 </div>
               )}
             </>
@@ -256,12 +266,17 @@ export default function PactPage() {
   async function handleNudge(memberId, memberName) {
     if (nudgedIds.has(memberId)) return;
     setNudgedIds((prev) => new Set([...prev, memberId]));
-    await supabase.from('notifications').insert({
+    const { error } = await supabase.from('notifications').insert({
       user_id: memberId,
       type: 'pact_nudge',
       message: `${user?.user_metadata?.first_name ?? 'A pact member'} is checking in on you — post an update in "${pact?.name ?? 'the pact'}"!`,
       link: '/pact',
     });
+    if (error) {
+      setNudgedIds((prev) => { const n = new Set(prev); n.delete(memberId); return n; });
+      toast("Couldn't send that nudge — try again.", 'error');
+      return;
+    }
     toast(`Nudge sent to ${memberName} 👋`, 'success');
   }
 

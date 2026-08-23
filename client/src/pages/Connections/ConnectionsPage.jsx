@@ -48,7 +48,24 @@ export default function ConnectionsPage() {
         name: getDisplayName(req.profiles, 'Someone'),
         avatarUrl: req.profiles?.avatar_url,
       });
+    } else {
+      toast("Couldn't accept that request — try again.", 'error');
     }
+  }
+
+  async function handleDecline(requesterId) {
+    const { error } = await declineSpark(requesterId);
+    if (error) toast("Couldn't decline that request — try again.", 'error');
+  }
+
+  async function handleCancelRequest(receiverId) {
+    const { error } = await cancelRequest(receiverId);
+    if (error) toast("Couldn't cancel that request — try again.", 'error');
+  }
+
+  async function handleDeclineJourney(partnershipId) {
+    const { error } = await declineJourney(partnershipId);
+    if (error) toast("Couldn't decline that journey — try again.", 'error');
   }
   const {
     browseProfiles,
@@ -91,21 +108,20 @@ export default function ConnectionsPage() {
     const titleCheck = checkText(newGoalTitle.trim());
     if (!titleCheck.ok) { toast(titleCheck.message, 'error'); return; }
     setSavingGoal(true);
-    const { data } = await supabase.from('goals').insert({
+    const { data, error } = await supabase.from('goals').insert({
       user_id: user.id,
       title: newGoalTitle.trim(),
       tier: newGoalTier,
       goal_type: 'habit',
       is_active: true,
     }).select('id, title, goal_type, tier').single();
-    if (data) {
-      setMyGoals((prev) => [...prev, data]);
-      setJourneyGoalId(data.id);
-      setShowNewGoal(false);
-      setNewGoalTitle('');
-      setNewGoalTier(2);
-    }
     setSavingGoal(false);
+    if (error) { toast("Couldn't create that goal — try again.", 'error'); return; }
+    setMyGoals((prev) => [...prev, data]);
+    setJourneyGoalId(data.id);
+    setShowNewGoal(false);
+    setNewGoalTitle('');
+    setNewGoalTier(2);
   }
 
   // Journey modal state
@@ -125,8 +141,9 @@ export default function ConnectionsPage() {
       const opt = DEADLINE_OPTIONS.find((o) => o.localHour === parseInt(journeyDeadlineHour));
       if (opt) { deadlineUtcHour = opt.utcHour; deadlineDisplay = opt.display; }
     }
-    await proposeJourney(journeyModal.partnerId, journeyGoalId || null, deadlineUtcHour, deadlineDisplay);
+    const { error } = await proposeJourney(journeyModal.partnerId, journeyGoalId || null, deadlineUtcHour, deadlineDisplay);
     setProposing(false);
+    if (error) { toast("Couldn't send that journey invite — try again.", 'error'); return; }
     setJourneyModal(null);
     setJourneyGoalId('');
     setJourneyDeadlineHour('');
@@ -137,8 +154,9 @@ export default function ConnectionsPage() {
   async function handleAcceptJourney() {
     if (!acceptModal || accepting) return;
     setAccepting(true);
-    await acceptJourney(acceptModal.partnershipId, journeyGoalId || null);
+    const { error } = await acceptJourney(acceptModal.partnershipId, journeyGoalId || null);
     setAccepting(false);
+    if (error) { toast("Couldn't accept that journey — try again.", 'error'); return; }
     setAcceptModal(null);
     setJourneyGoalId('');
     setJourneyDeadlineHour('');
@@ -193,12 +211,13 @@ export default function ConnectionsPage() {
 
   async function sendCheer(partnerId, partnerName) {
     const myName = getDisplayName(user?.user_metadata, 'Your connection');
-    await supabase.from('notifications').insert({
+    const { error } = await supabase.from('notifications').insert({
       user_id: partnerId,
       actor_id: user.id,
       type: 'cheer',
       body: `${myName} sent you a cheer! Keep it up! 🔥`,
     });
+    if (error) { toast("Couldn't send that cheer — try again.", 'error'); return; }
     setCheerSent((prev) => new Set([...prev, partnerId]));
   }
   const [activeFilter, setActiveFilter] = useState('all');
@@ -228,7 +247,8 @@ export default function ConnectionsPage() {
 
   async function handleConnect() {
     if (!currentProfile) return;
-    await sendSpark(currentProfile.id); // no message = regular connect
+    const { error } = await sendSpark(currentProfile.id); // no message = regular connect
+    if (error) toast("Couldn't send that connection request — try again.", 'error');
   }
 
   function handleOpenSparkModal() {
@@ -455,7 +475,7 @@ export default function ConnectionsPage() {
             <button className="journey-propose-btn" onClick={handleAcceptJourney} disabled={accepting}>
               {accepting ? 'Accepting...' : 'Accept Journey 🚀'}
             </button>
-            <button className="journey-decline-link" onClick={() => { declineJourney(acceptModal.partnershipId); setAcceptModal(null); }}>
+            <button className="journey-decline-link" onClick={() => { handleDeclineJourney(acceptModal.partnershipId); setAcceptModal(null); }}>
               Decline
             </button>
           </div>
@@ -521,7 +541,7 @@ export default function ConnectionsPage() {
                           setAcceptModal({ partnershipId: p.id, partnerName: requesterName, partnerGoalTitle: p.goal1?.title ?? null, deadlineDisplay: p.deadline_display ?? null });
                         }}
                       >Accept</button>
-                      <button className="mn-journey-decline-btn" onClick={() => declineJourney(p.id)}>Decline</button>
+                      <button className="mn-journey-decline-btn" onClick={() => handleDeclineJourney(p.id)}>Decline</button>
                     </div>
                   </div>
                 );
@@ -549,7 +569,7 @@ export default function ConnectionsPage() {
                     </div>
                     <div className="mn-actions">
                       <button className="mn-accept-btn" onClick={() => handleAccept(req)}>Accept</button>
-                      <button className="mn-decline-btn" onClick={() => declineSpark(req.requester_id)}>Decline</button>
+                      <button className="mn-decline-btn" onClick={() => handleDecline(req.requester_id)}>Decline</button>
                     </div>
                   </div>
                 );
@@ -687,7 +707,7 @@ export default function ConnectionsPage() {
                         <span className="mn-sent-msg">"{req.spark_message}"</span>
                       )}
                     </div>
-                    <button className="mn-cancel-btn" onClick={() => cancelRequest(req.receiver_id)} title="Cancel">
+                    <button className="mn-cancel-btn" onClick={() => handleCancelRequest(req.receiver_id)} title="Cancel">
                       ✗
                     </button>
                   </div>
@@ -752,7 +772,7 @@ export default function ConnectionsPage() {
                       </button>
                       <div className="incoming-req-actions">
                         <button className="req-accept-btn" onClick={() => handleAccept(req)} title="Accept">✓</button>
-                        <button className="req-decline-btn" onClick={() => declineSpark(req.requester_id)} title="Decline">✗</button>
+                        <button className="req-decline-btn" onClick={() => handleDecline(req.requester_id)} title="Decline">✗</button>
                       </div>
                     </div>
                   );
@@ -1178,7 +1198,7 @@ export default function ConnectionsPage() {
                     </button>
                     <div className="incoming-req-actions">
                       <button className="req-accept-btn" onClick={() => handleAccept(req)} title="Accept">✓</button>
-                      <button className="req-decline-btn" onClick={() => declineSpark(req.requester_id)} title="Decline">✗</button>
+                      <button className="req-decline-btn" onClick={() => handleDecline(req.requester_id)} title="Decline">✗</button>
                     </div>
                   </div>
                 );

@@ -45,6 +45,10 @@ export default function TribeCommunityPage() {
 
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
   const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
+  async function handleRsvp(postId, status) {
+    const { error } = await toggleRsvp(postId, status);
+    if (error) toast("Couldn't update your RSVP — try again.", 'error');
+  }
 
   const trendingTags = useMemo(() => {
     const now = Date.now();
@@ -303,7 +307,7 @@ export default function TribeCommunityPage() {
                       avatarSize={42}
                       rsvpGoingCount={goingCounts[item.id] ?? 0}
                       rsvpMyStatus={myRsvps[item.id] ?? null}
-                      onRsvp={toggleRsvp}
+                      onRsvp={handleRsvp}
                       reactionCounts={reactionCounts[item.id]}
                       myReaction={myReactions[item.id]}
                       onReact={toggleReaction}
@@ -347,7 +351,7 @@ export default function TribeCommunityPage() {
                 avatarSize={42}
                 rsvpGoingCount={goingCounts[post.id] ?? 0}
                 rsvpMyStatus={myRsvps[post.id] ?? null}
-                onRsvp={toggleRsvp}
+                onRsvp={handleRsvp}
                 reactionCounts={reactionCounts[post.id]}
                 myReaction={myReactions[post.id]}
                 onReact={toggleReaction}

@@ -215,6 +215,8 @@ export default function OnboardingPage() {
       const results = await Promise.all(goalsToSave.map((g) => addGoal(g.title, g.category, { tier: g.tier })));
       const blocked = results.find((r) => r.moderation);
       if (blocked) { toast(blocked.moderation.message, 'error'); return; }
+      const failed = results.find((r) => r.error);
+      if (failed) { toast("Couldn't save your goals — try again.", 'error'); return; }
     }
     setStep(mode === 'quick' ? peopleStep : 4);
   }
@@ -236,7 +238,7 @@ export default function OnboardingPage() {
     if (age) profileUpdate.age = parseInt(age, 10);
     if (city.trim()) profileUpdate.city = city.trim();
 
-    await Promise.all([
+    const [authResult, profileResult] = await Promise.all([
       supabase.auth.updateUser({
         data: {
           onboarding_complete: true,
@@ -251,6 +253,10 @@ export default function OnboardingPage() {
       supabase.from('profiles').update(profileUpdate).eq('id', user.id),
     ]);
     setSaving(false);
+    if (authResult.error || profileResult.error) {
+      toast("Couldn't finish setting up your profile — try again.", 'error');
+      return;
+    }
     // Signal the useEffect to navigate once USER_UPDATED has propagated to React state.
     // Direct navigate('/') here could race against the auth context update.
     setFinishing(true);

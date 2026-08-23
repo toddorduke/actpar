@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications.js';
+import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { getDisplayName } from '../../utils/displayName.js';
 import { timeAgo } from '../../utils/dateUtils.js';
@@ -39,7 +40,13 @@ function groupByDate(notifications) {
 export default function NotificationsPage() {
   const navigate = useNavigate();
   const { notifications, loading, unreadCount, markRead, markAllRead, deleteNotif } = useNotifications();
+  const toast = useToast();
   const [filter, setFilter] = useState('all');
+
+  async function handleDeleteNotif(notifId) {
+    const { error } = await deleteNotif(notifId);
+    if (error) toast("Couldn't delete that notification — try again.", 'error');
+  }
 
   const visible = filter === 'unread' ? notifications.filter((n) => !n.read) : notifications;
   const groups = groupByDate(visible);
@@ -148,7 +155,7 @@ export default function NotificationsPage() {
                       {!notif.read && <div className="np-unread-dot" />}
                       <button
                         className="np-dismiss-btn"
-                        onClick={(e) => { e.stopPropagation(); deleteNotif(notif.id); }}
+                        onClick={(e) => { e.stopPropagation(); handleDeleteNotif(notif.id); }}
                         aria-label="Dismiss"
                       >×</button>
                     </div>

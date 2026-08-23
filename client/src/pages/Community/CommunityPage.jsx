@@ -31,6 +31,10 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
   useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
   const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
+  async function handleRsvp(postId, status) {
+    const { error } = await toggleRsvp(postId, status);
+    if (error) toast("Couldn't update your RSVP — try again.", 'error');
+  }
   const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   function handleLike(id, currentLikes) {
@@ -111,7 +115,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {pinned && (
         <div className="comm-post-card pinned-post">
           <div className="pinned-label">📌 Pinned</div>
-          <PostCard post={pinned} onLike={handleLike} liked={likedIds.has(pinned.id)} isToggling={toggling.has(pinned.id)} likeCount={localLikeCounts[pinned.id] ?? pinned.likes} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[pinned.id]} rsvpMyStatus={myRsvps[pinned.id] ?? null} onRsvp={toggleRsvp} />
+          <PostCard post={pinned} onLike={handleLike} liked={likedIds.has(pinned.id)} isToggling={toggling.has(pinned.id)} likeCount={localLikeCounts[pinned.id] ?? pinned.likes} isAdmin={isAdmin} onPin={onPin} isPinned onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[pinned.id]} myReaction={myReactions[pinned.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[pinned.id]} rsvpMyStatus={myRsvps[pinned.id] ?? null} onRsvp={handleRsvp} />
         </div>
       )}
 
@@ -119,7 +123,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
 
       {feed.map((p) => p.id !== pinnedPostId && (
-        <PostCard key={p.id} post={p} onLike={handleLike} liked={likedIds.has(p.id)} isToggling={toggling.has(p.id)} likeCount={localLikeCounts[p.id] ?? p.likes} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[p.id]} rsvpMyStatus={myRsvps[p.id] ?? null} onRsvp={toggleRsvp} />
+        <PostCard key={p.id} post={p} onLike={handleLike} liked={likedIds.has(p.id)} isToggling={toggling.has(p.id)} likeCount={localLikeCounts[p.id] ?? p.likes} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[p.id]} rsvpMyStatus={myRsvps[p.id] ?? null} onRsvp={handleRsvp} />
       ))}
 
       {visibleCount < posts.length && (
@@ -348,19 +352,27 @@ function EventsTab({ communityId, isAdmin }) {
 }
 
 function EventCard({ event, myStatus, onRsvp, onDelete, past }) {
+  const toast = useToast();
   const going = (event.event_rsvps ?? []).filter((r) => r.status === 'going').length;
   const maybe = (event.event_rsvps ?? []).filter((r) => r.status === 'maybe').length;
   const isPaid = Number(event.price) > 0;
   const isFull = event.max_attendees && going >= event.max_attendees;
 
-  function handleRsvp(status) {
+  async function handleRsvp(status) {
     if (isPaid && status === 'going' && event.stripe_payment_link) {
       // Open Stripe payment link in new tab — RSVP is marked pending until paid
       window.open(event.stripe_payment_link, '_blank', 'noopener,noreferrer');
-      onRsvp(event.id, 'going');
+      const { error } = await onRsvp(event.id, 'going');
+      if (error) toast("Couldn't record your RSVP — try again.", 'error');
       return;
     }
-    onRsvp(event.id, status);
+    const { error } = await onRsvp(event.id, status);
+    if (error) toast("Couldn't update your RSVP — try again.", 'error');
+  }
+
+  async function handleDelete() {
+    const { error } = await onDelete(event.id);
+    if (error) toast("Couldn't delete that event — try again.", 'error');
   }
 
   return (
@@ -413,7 +425,7 @@ function EventCard({ event, myStatus, onRsvp, onDelete, past }) {
               </>
             )}
             {onDelete && (
-              <button className="rsvp-btn rsvp-btn--delete" onClick={() => onDelete(event.id)}>Delete</button>
+              <button className="rsvp-btn rsvp-btn--delete" onClick={handleDelete}>Delete</button>
             )}
           </div>
         )}
@@ -499,6 +511,7 @@ function ChatTab({ communityId }) {
   const { messages, loading, sendMessage } = useCommunityChat(communityId);
   const [text, setText] = useState('');
   const bottomRef = useRef(null);
+  const toast = useToast();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -507,7 +520,9 @@ function ChatTab({ communityId }) {
   async function handleSend(e) {
     e.preventDefault();
     if (!text.trim()) return;
-    await sendMessage(text);
+    const { error, moderation } = await sendMessage(text);
+    if (moderation) { toast(moderation.message, 'error'); return; }
+    if (error) { toast("Couldn't send that message — try again.", 'error'); return; }
     setText('');
   }
 
@@ -773,7 +788,8 @@ export default function CommunityPage() {
   const isActualAdmin = userRole === 'admin' || community?.created_by === user?.id;
 
   async function handlePinPost(postId) {
-    await supabase.from('communities').update({ pinned_post_id: postId }).eq('id', communityId);
+    const { error } = await supabase.from('communities').update({ pinned_post_id: postId }).eq('id', communityId);
+    if (error) { toast("Couldn't update the pinned post — try again.", 'error'); return; }
     refetch();
     toast(postId ? 'Post pinned!' : 'Post unpinned', 'success');
   }
@@ -785,7 +801,8 @@ export default function CommunityPage() {
     const { error } = await supabase.storage.from('media').upload(path, file, { upsert: true });
     if (error) { toast('Upload failed', 'error'); return; }
     const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
-    await supabase.from('communities').update({ cover_url: urlData.publicUrl }).eq('id', communityId);
+    const { error: updateError } = await supabase.from('communities').update({ cover_url: urlData.publicUrl }).eq('id', communityId);
+    if (updateError) { toast("Cover uploaded but couldn't save it — try again.", 'error'); return; }
     refetch();
     toast('Cover updated!', 'success');
   }
@@ -829,11 +846,18 @@ export default function CommunityPage() {
             </button>
           )}
           {isMember ? (
-            <button className="comm-leave-btn" onClick={() => { leaveCommunity(communityId); navigate('/tribe-community'); }}>
+            <button className="comm-leave-btn" onClick={async () => {
+              const { error } = await leaveCommunity(communityId);
+              if (error) { toast("Couldn't leave that community — try again.", 'error'); return; }
+              navigate('/tribe-community');
+            }}>
               Leave
             </button>
           ) : (
-            <button className="comm-join-btn" onClick={() => joinCommunity(communityId)}>
+            <button className="comm-join-btn" onClick={async () => {
+              const { error } = await joinCommunity(communityId);
+              if (error) toast("Couldn't join that community — try again.", 'error');
+            }}>
               Join Community
             </button>
           )}

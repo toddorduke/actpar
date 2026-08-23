@@ -46,7 +46,8 @@ export const AuthProvider = ({ children }) => {
                       if (referrer) {
                         supabase.from('profiles')
                           .update({ referred_by: ref })
-                          .eq('id', session.user.id);
+                          .eq('id', session.user.id)
+                          .then(({ error }) => { if (error) console.error('Referral attribution failed:', error); });
                         track('referral_signup', { referrer_id: ref });
                       }
                     });

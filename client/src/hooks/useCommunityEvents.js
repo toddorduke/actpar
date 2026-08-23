@@ -54,20 +54,23 @@ export const useCommunityEvents = (communityId) => {
 
   const rsvp = useCallback(async (eventId, status) => {
     const existing = rsvps[eventId];
+    let error;
     if (existing === status) {
       // toggle off
-      await supabase.from('event_rsvps').delete().eq('event_id', eventId).eq('user_id', user.id);
-      setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
+      ({ error } = await supabase.from('event_rsvps').delete().eq('event_id', eventId).eq('user_id', user.id));
+      if (!error) setRsvps((prev) => { const n = { ...prev }; delete n[eventId]; return n; });
     } else {
-      await supabase.from('event_rsvps').upsert({ event_id: eventId, user_id: user.id, status });
-      setRsvps((prev) => ({ ...prev, [eventId]: status }));
+      ({ error } = await supabase.from('event_rsvps').upsert({ event_id: eventId, user_id: user.id, status }));
+      if (!error) setRsvps((prev) => ({ ...prev, [eventId]: status }));
     }
-    fetchEvents();
+    if (!error) fetchEvents();
+    return { error };
   }, [rsvps, user, fetchEvents]);
 
   const deleteEvent = useCallback(async (eventId) => {
-    await supabase.from('community_events').delete().eq('id', eventId);
-    setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    const { error } = await supabase.from('community_events').delete().eq('id', eventId);
+    if (!error) setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    return { error };
   }, []);
 
   return { events, rsvps, loading, createEvent, rsvp, deleteEvent, refetch: fetchEvents };

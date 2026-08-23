@@ -167,7 +167,8 @@ export default function TribePage() {
                 <button
                   className="tribe-hub-join-btn"
                   onClick={async () => {
-                    await joinCommunity(c.id);
+                    const { error } = await joinCommunity(c.id);
+                    if (error) { toast("Couldn't join that community — try again.", 'error'); return; }
                     navigate(`/community/${c.id}`);
                   }}
                 >
@@ -254,7 +255,8 @@ export default function TribePage() {
                       </button>
                     ) : (
                       <button className="tribe-browse-join-btn" onClick={async () => {
-                        await joinCommunity(c.id);
+                        const { error } = await joinCommunity(c.id);
+                        if (error) { toast("Couldn't join that community — try again.", 'error'); return; }
                         setShowBrowse(false);
                         navigate(`/community/${c.id}`);
                       }}>

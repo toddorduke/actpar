@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { usePostComments } from '../../hooks/usePostComments.js';
+import { useToast } from './Toast.jsx';
 import Avatar from './Avatar.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
@@ -38,6 +39,7 @@ export function useCommentState(posts = []) {
 export default function CommentPanel({ postId, postType, comments = [], loading, onAdd, onDelete }) {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const toast = useToast();
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [modError, setModError] = useState('');
@@ -53,13 +55,21 @@ export default function CommentPanel({ postId, postType, comments = [], loading,
     setModError('');
     setSubmitting(true);
     const result = await onAdd(postId, postType, text);
+    setSubmitting(false);
     if (result?.moderation) {
       setModError(result.moderation.message);
-      setSubmitting(false);
+      return;
+    }
+    if (result?.error) {
+      toast("Couldn't post your comment — try again.", 'error');
       return;
     }
     setText('');
-    setSubmitting(false);
+  }
+
+  async function handleDelete(commentId) {
+    const { error } = await onDelete(postId, commentId);
+    if (error) toast("Couldn't delete that comment — try again.", 'error');
   }
 
   return (
@@ -89,7 +99,7 @@ export default function CommentPanel({ postId, postType, comments = [], loading,
                 <p className="comment-text">{c.content}</p>
               </div>
               {isOwn && (
-                <button className="comment-delete-btn" onClick={() => onDelete(postId, c.id)} aria-label="Delete">
+                <button className="comment-delete-btn" onClick={() => handleDelete(c.id)} aria-label="Delete">
                   ×
                 </button>
               )}

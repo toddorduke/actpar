@@ -41,14 +41,20 @@ export function useMeetupRsvp(meetupPostIds) {
   }, [meetupPostIds.join(','), user?.id]);
 
   const toggleRsvp = useCallback(async (postId, status) => {
-    if (!user) return;
+    if (!user) return { error: null };
     const current = myRsvps[postId] ?? null;
 
     if (current === status) {
       // Remove RSVP (toggle off)
       setMyRsvps((prev) => { const n = { ...prev }; delete n[postId]; return n; });
       if (status === 'going') setGoingCounts((prev) => ({ ...prev, [postId]: Math.max(0, (prev[postId] ?? 1) - 1) }));
-      await supabase.from('tribe_post_rsvps').delete().eq('post_id', postId).eq('user_id', user.id);
+      const { error } = await supabase.from('tribe_post_rsvps').delete().eq('post_id', postId).eq('user_id', user.id);
+      if (error) {
+        // Roll back the optimistic update
+        setMyRsvps((prev) => ({ ...prev, [postId]: current }));
+        if (status === 'going') setGoingCounts((prev) => ({ ...prev, [postId]: (prev[postId] ?? 0) + 1 }));
+      }
+      return { error };
     } else {
       // Upsert new status
       const wasGoing = current === 'going';
@@ -60,10 +66,21 @@ export function useMeetupRsvp(meetupPostIds) {
         if (nowGoing) c += 1;
         return { ...prev, [postId]: Math.max(0, c) };
       });
-      await supabase.from('tribe_post_rsvps').upsert(
+      const { error } = await supabase.from('tribe_post_rsvps').upsert(
         { post_id: postId, user_id: user.id, status },
         { onConflict: 'post_id,user_id' }
       );
+      if (error) {
+        // Roll back the optimistic update
+        setMyRsvps((prev) => { const n = { ...prev }; if (current) n[postId] = current; else delete n[postId]; return n; });
+        setGoingCounts((prev) => {
+          let c = prev[postId] ?? 0;
+          if (wasGoing) c += 1;
+          if (nowGoing) c -= 1;
+          return { ...prev, [postId]: Math.max(0, c) };
+        });
+      }
+      return { error };
     }
   }, [user, myRsvps]);
 
