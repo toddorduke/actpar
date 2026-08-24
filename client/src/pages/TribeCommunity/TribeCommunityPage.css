@@ -566,13 +566,13 @@
 .meetup-rsvp-btn.cant {
   background: #fff;
   border-color: #9ca3af;
-  color: #ffffff;
+  color: #4b5563;
 }
 .meetup-rsvp-btn.cant:hover,
 .meetup-rsvp-btn.cant.active {
   background: #f3f4f6;
   border-color: #9ca3af;
-  color: #ffffff;
+  color: #374151;
 }
 
 .post-actions {
