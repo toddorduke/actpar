@@ -760,7 +760,7 @@ const TABS = [
   ['challenges', '🎯 Challenges'],
   ['leaderboard', '🏆 Leaderboard'],
   ['members', '👥 Members'],
-  ['chat', '💬 Chat'],
+  // ['chat', '💬 Chat'], -- hidden for now, not removed; see ChatTab below
 ];
 
 export default function CommunityPage() {
