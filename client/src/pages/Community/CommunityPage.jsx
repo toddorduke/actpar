@@ -13,6 +13,7 @@ import CommentPanel, { useCommentState } from '../../components/common/CommentPa
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
 import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
+import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { scanMediaUrl } from '../../utils/contentModeration.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
@@ -884,11 +885,16 @@ export default function CommunityPage() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const toast = useToast();
-  const { communities, myMemberships, joinCommunity, leaveCommunity, refetch } = useCommunities();
+  const { communities, myMemberships, joinCommunity, leaveCommunity, updateCommunity, archiveCommunity, refetch } = useCommunities();
   const [activeTab, setActiveTab] = useState('feed');
   const coverInputRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const promptCoverSetup = searchParams.get('setup') === 'cover';
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const community = communities.find((c) => c.id === communityId);
   const isMember = myMemberships.includes(communityId);
@@ -948,6 +954,30 @@ export default function CommunityPage() {
     toast('Join code copied!', 'success');
   }
 
+  function startEditingDetails() {
+    setEditName(community.name);
+    setEditDescription(community.description ?? '');
+    setEditingDetails(true);
+  }
+
+  async function saveDetails() {
+    if (!editName.trim()) return;
+    setSavingDetails(true);
+    const { error, moderation } = await updateCommunity(communityId, { name: editName, description: editDescription });
+    setSavingDetails(false);
+    if (moderation) { toast(moderation.message, 'error'); return; }
+    if (error) { toast("Couldn't save changes — try again.", 'error'); return; }
+    setEditingDetails(false);
+    toast('Community updated', 'success');
+  }
+
+  async function handleDeleteCommunity() {
+    const { error } = await archiveCommunity(communityId);
+    if (error) { toast("Couldn't delete that community — try again.", 'error'); return; }
+    toast('Community deleted', 'success');
+    navigate('/tribe-community');
+  }
+
   if (!community) {
     return <div style={{ padding: 40, color: '#374151' }}>Loading community...</div>;
   }
@@ -981,15 +1011,51 @@ export default function CommunityPage() {
       <div className="comm-header">
         <div className="comm-header-left">
           <button className="comm-back-btn" onClick={() => navigate('/tribe-community')}>← Back</button>
-          <div>
-            <h1 className="comm-name">{community.name}</h1>
-            {community.description && <p className="comm-description">{community.description}</p>}
-          </div>
+          {editingDetails ? (
+            <div className="comm-edit-details">
+              <input
+                className="comm-edit-name-input"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                maxLength={60}
+                required
+              />
+              <textarea
+                className="comm-edit-desc-input"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Description (optional)"
+                rows={2}
+                maxLength={200}
+              />
+              <div className="comm-edit-details-actions">
+                <button className="comm-edit-save-btn" onClick={saveDetails} disabled={savingDetails || !editName.trim()}>
+                  {savingDetails ? 'Saving...' : 'Save'}
+                </button>
+                <button className="comm-edit-cancel-btn" onClick={() => setEditingDetails(false)}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="comm-name-row">
+                <h1 className="comm-name">{community.name}</h1>
+                {isActualAdmin && (
+                  <button className="comm-edit-details-btn" onClick={startEditingDetails} title="Edit name & description">✏️</button>
+                )}
+              </div>
+              {community.description && <p className="comm-description">{community.description}</p>}
+            </div>
+          )}
         </div>
         <div className="comm-header-right">
           {isActualAdmin && (
             <button className="comm-share-btn" onClick={copyJoinCode} title="Copy invite code">
               🔗 Invite Code: <strong>{community.join_code}</strong>
+            </button>
+          )}
+          {isActualAdmin && (
+            <button className="comm-delete-btn" onClick={() => setShowDeleteConfirm(true)}>
+              Delete
             </button>
           )}
           {isMember ? (
@@ -1036,6 +1102,15 @@ export default function CommunityPage() {
       </div>
       <CommunitySidebar communityId={communityId} onSwitchTab={setActiveTab} />
       </div>
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          message={`Delete "${community.name}"? Members will lose access, but posts and history are kept in case you need to restore it.`}
+          onConfirm={() => { handleDeleteCommunity(); setShowDeleteConfirm(false); }}
+          onCancel={() => setShowDeleteConfirm(false)}
+          confirmLabel="Delete"
+          danger
+        />
+      )}
     </div>
   );
 }

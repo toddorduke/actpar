@@ -18,6 +18,7 @@ export const useCommunities = () => {
       supabase
         .from('communities')
         .select('*, community_memberships(count)')
+        .is('archived_at', null)
         .order('created_at', { ascending: false }),
       supabase
         .from('community_memberships')
@@ -60,6 +61,32 @@ export const useCommunities = () => {
     return { data, error };
   }, [user]);
 
+  const updateCommunity = useCallback(async (communityId, { name, description }) => {
+    const nameCheck = checkText(name);
+    if (!nameCheck.ok) return { data: null, error: null, moderation: nameCheck };
+    if (description) {
+      const descCheck = checkText(description);
+      if (!descCheck.ok) return { data: null, error: null, moderation: descCheck };
+    }
+    const { data, error } = await supabase
+      .from('communities')
+      .update({ name: name.trim(), description: description?.trim() || null })
+      .eq('id', communityId)
+      .select()
+      .single();
+    if (!error) setCommunities((prev) => prev.map((c) => (c.id === communityId ? { ...c, ...data } : c)));
+    return { data, error };
+  }, []);
+
+  const archiveCommunity = useCallback(async (communityId) => {
+    const { error } = await supabase
+      .from('communities')
+      .update({ archived_at: new Date().toISOString() })
+      .eq('id', communityId);
+    if (!error) setCommunities((prev) => prev.filter((c) => c.id !== communityId));
+    return { error };
+  }, []);
+
   const joinCommunity = useCallback(async (communityId) => {
     if (!user) return;
     const { error } = await supabase
@@ -89,6 +116,8 @@ export const useCommunities = () => {
     myMemberships,
     loading,
     createCommunity,
+    updateCommunity,
+    archiveCommunity,
     joinCommunity,
     leaveCommunity,
     refetch: fetchAll,
