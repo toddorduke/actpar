@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useCommunities } from '../../hooks/useCommunities.js';
 import { useTribePosts } from '../../hooks/useTribePosts.js';
@@ -771,6 +771,8 @@ export default function CommunityPage() {
   const { communities, myMemberships, joinCommunity, leaveCommunity, refetch } = useCommunities();
   const [activeTab, setActiveTab] = useState('feed');
   const coverInputRef = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const promptCoverSetup = searchParams.get('setup') === 'cover';
 
   const community = communities.find((c) => c.id === communityId);
   const isMember = myMemberships.includes(communityId);
@@ -820,6 +822,7 @@ export default function CommunityPage() {
     const { error: updateError } = await supabase.from('communities').update({ cover_url: urlData.publicUrl }).eq('id', communityId);
     if (updateError) { toast("Cover uploaded but couldn't save it — try again.", 'error'); return; }
     refetch();
+    setSearchParams({}, { replace: true });
     toast('Cover updated!', 'success');
   }
 
@@ -837,8 +840,18 @@ export default function CommunityPage() {
     <div className="community-page">
       {/* Cover */}
       <div className="comm-cover" style={community.cover_url ? { backgroundImage: `url(${community.cover_url})` } : {}}>
-        {!community.cover_url && <div className="comm-cover-placeholder">🏃</div>}
-        {isActualAdmin && (
+        {!community.cover_url && !(promptCoverSetup && isActualAdmin) && <div className="comm-cover-placeholder">🏃</div>}
+        {!community.cover_url && promptCoverSetup && isActualAdmin && (
+          <div className="comm-cover-setup-prompt">
+            <div className="comm-cover-setup-title">Add a cover photo</div>
+            <p className="comm-cover-setup-sub">Communities with a real photo get more members to join</p>
+            <div className="comm-cover-setup-actions">
+              <button className="comm-cover-setup-btn" onClick={() => coverInputRef.current?.click()}>📷 Upload a photo</button>
+              <button className="comm-cover-setup-skip" onClick={() => setSearchParams({}, { replace: true })}>Skip for now</button>
+            </div>
+          </div>
+        )}
+        {isActualAdmin && !(promptCoverSetup && !community.cover_url) && (
           <button className="comm-cover-edit-btn" onClick={() => coverInputRef.current?.click()}>
             📷 Change Cover
           </button>
@@ -882,10 +895,10 @@ export default function CommunityPage() {
 
       {/* Tabs */}
       <div className="comm-tabs">
-        {TABS.map(([id, label]) => (
+        {TABS.map(([id, label], i) => (
           <button
             key={id}
-            className={`comm-tab${activeTab === id ? ' active' : ''}`}
+            className={`comm-tab${activeTab === id ? ' active' : ''}${i === 0 ? ' comm-tab-primary' : ''}`}
             onClick={() => setActiveTab(id)}
           >
             {label}

@@ -11,7 +11,10 @@
 .comm-cover {
   height: 200px;
   border-radius: 20px;
-  background: var(--gradient-primary);
+  background:
+    radial-gradient(circle at 18% 30%, rgba(255,255,255,0.16) 0%, transparent 38%),
+    radial-gradient(circle at 82% 70%, rgba(255,255,255,0.12) 0%, transparent 42%),
+    var(--gradient-primary);
   background-size: cover;
   background-position: center;
   position: relative;
@@ -22,8 +25,16 @@
 }
 
 .comm-cover-placeholder {
-  font-size: 4rem;
-  opacity: 0.4;
+  font-size: 2.75rem;
+  width: 92px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  backdrop-filter: blur(3px);
 }
 
 .comm-cover-edit-btn {
@@ -42,6 +53,57 @@
 }
 
 .comm-cover-edit-btn:hover { background: rgba(0,0,0,0.7); }
+
+.comm-cover-setup-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 20px;
+}
+
+.comm-cover-setup-title {
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.comm-cover-setup-sub {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+}
+
+.comm-cover-setup-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.comm-cover-setup-btn {
+  padding: 9px 20px;
+  background: #fff;
+  color: var(--color-primary-end);
+  border: none;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.comm-cover-setup-btn:hover { transform: translateY(-1px); }
+
+.comm-cover-setup-skip {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.comm-cover-setup-skip:hover { color: #fff; }
 
 /* ── Header ─────────────────────────────────────────── */
 .comm-header {
@@ -136,7 +198,9 @@
 /* ── Tabs ───────────────────────────────────────────── */
 .comm-tabs {
   display: flex;
+  align-items: center;
   gap: 4px;
+  margin-top: 10px;
   border-bottom: 2px solid #e5e7eb;
   overflow-x: auto;
   scrollbar-width: none;
@@ -145,12 +209,12 @@
 .comm-tabs::-webkit-scrollbar { display: none; }
 
 .comm-tab {
-  padding: 10px 18px;
+  padding: 8px 16px;
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: #6b7280;
   cursor: pointer;
@@ -165,6 +229,16 @@
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
+
+.comm-tab-primary {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: #374151;
+  padding-right: 20px;
+  margin-right: 8px;
+  border-right: 1px solid #e5e7eb;
+}
+.comm-tab-primary.active { color: var(--color-primary); }
 
 /* ── Content ────────────────────────────────────────── */
 .comm-content {

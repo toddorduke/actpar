@@ -69,7 +69,7 @@ export default function TribePage() {
     setCommName('');
     setCommDesc('');
     toast('Community created! 🎉', 'success');
-    if (data) navigate(`/community/${data.id}`);
+    if (data) navigate(`/community/${data.id}?setup=cover`);
   }
 
   return (
