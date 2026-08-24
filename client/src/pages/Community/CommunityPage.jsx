@@ -1054,12 +1054,7 @@ export default function CommunityPage() {
             </div>
           ) : (
             <div>
-              <div className="comm-name-row">
-                <h1 className="comm-name">{community.name}</h1>
-                {isActualAdmin && (
-                  <button className="comm-edit-details-btn" onClick={startEditingDetails} title="Edit name & description">✏️</button>
-                )}
-              </div>
+              <h1 className="comm-name">{community.name}</h1>
               {community.description && <p className="comm-description">{community.description}</p>}
             </div>
           )}
@@ -1068,6 +1063,11 @@ export default function CommunityPage() {
           {isActualAdmin && (
             <button className="comm-share-btn" onClick={copyJoinCode} title="Copy invite code">
               🔗 Invite Code: <strong>{community.join_code}</strong>
+            </button>
+          )}
+          {isActualAdmin && (
+            <button className="comm-edit-details-btn" onClick={startEditingDetails} title="Edit name & description">
+              ✏️ Edit
             </button>
           )}
           {isActualAdmin && (

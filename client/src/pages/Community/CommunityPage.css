@@ -281,12 +281,6 @@
 
 .comm-back-btn:hover { color: #374151; }
 
-.comm-name-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .comm-name {
   font-size: 2rem;
   font-weight: 800;
@@ -295,14 +289,16 @@
 }
 
 .comm-edit-details-btn {
-  background: none;
-  border: none;
-  font-size: 1rem;
+  padding: 8px 14px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #374151;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.15s;
+  transition: background 0.15s;
 }
-.comm-edit-details-btn:hover { opacity: 1; }
+.comm-edit-details-btn:hover { background: #e5e7eb; }
 
 .comm-edit-details {
   display: flex;
