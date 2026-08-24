@@ -19,6 +19,7 @@ import { scanMediaUrl } from '../../utils/contentModeration.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import { getLiveStreak } from '../../utils/streak.js';
+import { guessCommunityEmoji } from '../../utils/communityCategory.js';
 import './CommunityPage.css';
 
 const POST_TRUNCATE = 300;
@@ -986,7 +987,9 @@ export default function CommunityPage() {
     <div className="community-page">
       {/* Cover */}
       <div className="comm-cover" style={community.cover_url ? { backgroundImage: `url(${community.cover_url})` } : {}}>
-        {!community.cover_url && !(promptCoverSetup && isActualAdmin) && <div className="comm-cover-placeholder">🏃</div>}
+        {!community.cover_url && !(promptCoverSetup && isActualAdmin) && (
+          <div className="comm-cover-placeholder">{guessCommunityEmoji(community.name, community.description)}</div>
+        )}
         {!community.cover_url && promptCoverSetup && isActualAdmin && (
           <div className="comm-cover-setup-prompt">
             <div className="comm-cover-setup-title">Add a cover photo</div>
