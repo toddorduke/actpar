@@ -872,10 +872,16 @@ function CommunitySidebar({ communityId, onSwitchTab }) {
 }
 
 // ── Main Community Page ──────────────────────────────────
-const TABS = [
+// Feed and Challenges are the only tabs with no preview elsewhere on the
+// page (Members, Leaderboard, and Events all already have a sidebar
+// widget with a "See all" link), so they're the two that stay primary --
+// everything else collapses into the More menu to cut top-row clutter.
+const PRIMARY_TABS = [
   ['feed', '💬 Feed'],
-  ['events', '📅 Events'],
   ['challenges', '🎯 Challenges'],
+];
+const MORE_TABS = [
+  ['events', '📅 Events'],
   ['leaderboard', '🏆 Leaderboard'],
   ['members', '👥 Members'],
   // ['chat', '💬 Chat'], -- hidden for now, not removed; see ChatTab below
@@ -896,6 +902,14 @@ export default function CommunityPage() {
   const [editDescription, setEditDescription] = useState('');
   const [savingDetails, setSavingDetails] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) setShowMoreMenu(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const community = communities.find((c) => c.id === communityId);
   const isMember = myMemberships.includes(communityId);
@@ -1081,16 +1095,39 @@ export default function CommunityPage() {
       </div>
 
       {/* Tabs */}
-      <div className="comm-tabs">
-        {TABS.map(([id, label], i) => (
+      <div className="comm-tabs-row">
+        <div className="comm-tabs">
+          {PRIMARY_TABS.map(([id, label], i) => (
+            <button
+              key={id}
+              className={`comm-tab${activeTab === id ? ' active' : ''}${i === 0 ? ' comm-tab-primary' : ''}`}
+              onClick={() => setActiveTab(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="comm-tab-more-wrap" ref={moreMenuRef}>
           <button
-            key={id}
-            className={`comm-tab${activeTab === id ? ' active' : ''}${i === 0 ? ' comm-tab-primary' : ''}`}
-            onClick={() => setActiveTab(id)}
+            className={`comm-tab comm-tab-more${MORE_TABS.some(([id]) => id === activeTab) ? ' active' : ''}`}
+            onClick={() => setShowMoreMenu((v) => !v)}
           >
-            {label}
+            {MORE_TABS.find(([id]) => id === activeTab)?.[1] ?? 'More'} ▾
           </button>
-        ))}
+          {showMoreMenu && (
+            <div className="comm-tab-more-menu">
+              {MORE_TABS.map(([id, label]) => (
+                <button
+                  key={id}
+                  className={`comm-tab-more-item${activeTab === id ? ' active' : ''}`}
+                  onClick={() => { setActiveTab(id); setShowMoreMenu(false); }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tab Content */}
