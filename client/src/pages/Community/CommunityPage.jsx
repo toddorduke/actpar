@@ -753,6 +753,122 @@ function LeaderboardTab({ communityId }) {
   );
 }
 
+// ── Sidebar ────────────────────────────────────────────
+function CommunitySidebar({ communityId, onSwitchTab }) {
+  const [members, setMembers] = useState([]);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [topContributors, setTopContributors] = useState([]);
+  const { events, loading: eventsLoading } = useCommunityEvents(communityId);
+
+  useEffect(() => {
+    if (!communityId) return;
+    supabase
+      .from('community_memberships')
+      .select('user_id, profiles(first_name, last_name, alter_ego_name, avatar_url)')
+      .eq('community_id', communityId)
+      .then(({ data }) => {
+        setMembers(data ?? []);
+        setMembersLoading(false);
+      });
+  }, [communityId]);
+
+  useEffect(() => {
+    if (!communityId || members.length === 0) return;
+    async function loadTop() {
+      const ids = members.map((m) => m.user_id);
+      const { data: goals } = await supabase
+        .from('goals')
+        .select('user_id, day_count, last_checked_in, grace_used_week')
+        .in('user_id', ids)
+        .eq('is_active', true);
+      const today = new Date().toISOString().split('T')[0];
+      const totals = {};
+      (goals ?? []).forEach((g) => {
+        totals[g.user_id] = (totals[g.user_id] ?? 0) + getLiveStreak(g, today);
+      });
+      const ranked = members
+        .map((m) => ({
+          user_id: m.user_id,
+          name: getDisplayName(m.profiles),
+          avatar_url: m.profiles?.avatar_url,
+          total_days: totals[m.user_id] ?? 0,
+        }))
+        .filter((r) => r.total_days > 0)
+        .sort((a, b) => b.total_days - a.total_days)
+        .slice(0, 3);
+      setTopContributors(ranked);
+    }
+    loadTop();
+  }, [communityId, members]);
+
+  const nextEvent = events
+    .filter((e) => new Date(e.event_date) >= new Date())
+    .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))[0];
+
+  return (
+    <aside className="comm-sidebar">
+      <div className="comm-sidebar-card">
+        <div className="comm-sidebar-card-header">
+          <h3 className="comm-sidebar-title">Members</h3>
+          <button className="comm-sidebar-link" onClick={() => onSwitchTab('members')}>See all</button>
+        </div>
+        {membersLoading ? (
+          <p className="comm-sidebar-empty">Loading...</p>
+        ) : (
+          <>
+            <div className="comm-sidebar-count">{members.length} member{members.length !== 1 ? 's' : ''}</div>
+            <div className="comm-sidebar-avatar-strip">
+              {members.slice(0, 8).map((m) => (
+                <Avatar key={m.user_id} url={m.profiles?.avatar_url} name={getDisplayName(m.profiles)} size={36} className="comm-sidebar-avatar" />
+              ))}
+              {members.length > 8 && <div className="comm-sidebar-avatar-more">+{members.length - 8}</div>}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="comm-sidebar-card">
+        <div className="comm-sidebar-card-header">
+          <h3 className="comm-sidebar-title">🏆 Top Contributors</h3>
+          <button className="comm-sidebar-link" onClick={() => onSwitchTab('leaderboard')}>See all</button>
+        </div>
+        {topContributors.length === 0 ? (
+          <p className="comm-sidebar-empty">No check-ins logged yet</p>
+        ) : (
+          topContributors.map((r, i) => (
+            <div key={r.user_id} className="comm-sidebar-contributor">
+              <span className="comm-sidebar-contributor-rank">{i + 1}</span>
+              <Avatar url={r.avatar_url} name={r.name} size={30} />
+              <span className="comm-sidebar-contributor-name">{r.name}</span>
+              <span className="comm-sidebar-contributor-days">{r.total_days}d</span>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="comm-sidebar-card">
+        <div className="comm-sidebar-card-header">
+          <h3 className="comm-sidebar-title">📅 Next Event</h3>
+          <button className="comm-sidebar-link" onClick={() => onSwitchTab('events')}>See all</button>
+        </div>
+        {eventsLoading ? (
+          <p className="comm-sidebar-empty">Loading...</p>
+        ) : !nextEvent ? (
+          <p className="comm-sidebar-empty">Nothing scheduled yet</p>
+        ) : (
+          <div className="comm-sidebar-event">
+            <div className="comm-sidebar-event-title">{nextEvent.title}</div>
+            <div className="comm-sidebar-event-date">
+              {new Date(nextEvent.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            </div>
+            {nextEvent.location && <div className="comm-sidebar-event-loc">📍 {nextEvent.location}</div>}
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 // ── Main Community Page ──────────────────────────────────
 const TABS = [
   ['feed', '💬 Feed'],
@@ -859,6 +975,8 @@ export default function CommunityPage() {
         <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverUpload} />
       </div>
 
+      <div className="comm-layout">
+      <div className="comm-main">
       {/* Community Header */}
       <div className="comm-header">
         <div className="comm-header-left">
@@ -914,6 +1032,9 @@ export default function CommunityPage() {
         {activeTab === 'leaderboard' && <LeaderboardTab communityId={communityId} />}
         {activeTab === 'members' && <MembersTab communityId={communityId} isAdmin={isActualAdmin} currentUserId={user?.id} creatorId={community.created_by} />}
         {activeTab === 'chat' && <ChatTab communityId={communityId} />}
+      </div>
+      </div>
+      <CommunitySidebar communityId={communityId} onSwitchTab={setActiveTab} />
       </div>
     </div>
   );
