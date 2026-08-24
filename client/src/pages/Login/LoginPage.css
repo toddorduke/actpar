@@ -99,7 +99,7 @@
 .form-group input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.15);
 }
 
 .login-error {
@@ -126,7 +126,7 @@
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 30px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 18px 30px rgba(255, 122, 0, 0.35);
 }
 
 .login-btn:disabled {
@@ -190,6 +190,6 @@
 .login-remember input[type="checkbox"] {
   width: 15px;
   height: 15px;
-  accent-color: #7c3aed;
+  accent-color: #FF7A00;
   cursor: pointer;
 }

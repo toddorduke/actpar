@@ -32,20 +32,19 @@
 
 .become-coach-btn {
   padding: 12px 24px;
-  background: rgba(255,255,255,0.2);
-  border: 2px solid rgba(255,255,255,0.5);
+  background: #fff;
+  border: none;
   border-radius: 12px;
-  color: white;
+  color: var(--color-primary-end);
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s;
-  backdrop-filter: blur(4px);
+  transition: opacity 0.15s;
   white-space: nowrap;
 }
 
 .become-coach-btn:hover {
-  background: rgba(255,255,255,0.3);
+  opacity: 0.85;
 }
 
 /* ── Search bar ── */

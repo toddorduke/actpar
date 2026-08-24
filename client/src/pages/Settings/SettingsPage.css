@@ -48,12 +48,12 @@
 }
 
 .settings-nav-item:hover {
-  background: rgba(124, 58, 237, 0.07);
+  background: rgba(255, 122, 0, 0.07);
   color: #d97706;
 }
 
 .settings-nav-item.active {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(255, 122, 0, 0.1);
   color: #d97706;
 }
 
@@ -117,7 +117,7 @@
 
 .settings-input {
   padding: 11px 14px;
-  border: 1.5px solid rgba(124, 58, 237, 0.2);
+  border: 1.5px solid rgba(255, 122, 0, 0.2);
   border-radius: 12px;
   font-size: 0.92rem;
   font-family: inherit;
@@ -141,7 +141,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 11px 14px;
-  border: 1.5px solid rgba(124, 58, 237, 0.2);
+  border: 1.5px solid rgba(255, 122, 0, 0.2);
   border-radius: 12px;
   font-size: 0.92rem;
   font-family: inherit;
@@ -152,7 +152,7 @@
   transition: border-color 0.2s;
 }
 
-.settings-city-trigger:hover { border-color: rgba(124, 58, 237, 0.4); }
+.settings-city-trigger:hover { border-color: rgba(255, 122, 0, 0.4); }
 .settings-city-trigger:focus { outline: none; border-color: #d97706; }
 
 .settings-city-placeholder { color: #9ca3af; }
@@ -163,7 +163,7 @@
   left: 0;
   right: 0;
   background: white;
-  border: 1.5px solid rgba(124, 58, 237, 0.2);
+  border: 1.5px solid rgba(255, 122, 0, 0.2);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   z-index: 200;
@@ -174,7 +174,7 @@
   width: 100%;
   padding: 10px 14px;
   border: none;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.12);
+  border-bottom: 1px solid rgba(255, 122, 0, 0.12);
   font-size: 0.9rem;
   font-family: inherit;
   color: #1f2937;
@@ -203,11 +203,11 @@
   transition: background 0.15s;
 }
 
-.settings-city-option:hover { background: #f5f3ff; color: #7c3aed; }
+.settings-city-option:hover { background: #f5f3ff; color: #FF7A00; }
 
-.settings-city-option.selected { background: #ede9fe; color: #7c3aed; font-weight: 600; }
+.settings-city-option.selected { background: #ede9fe; color: #FF7A00; font-weight: 600; }
 
-.settings-city-clear { color: #9ca3af; font-size: 0.82rem; border-bottom: 1px solid rgba(124,58,237,0.08); margin-bottom: 4px; }
+.settings-city-clear { color: #9ca3af; font-size: 0.82rem; border-bottom: 1px solid rgba(255, 122, 0,0.08); margin-bottom: 4px; }
 .settings-city-clear:hover { background: #fef2f2; color: #ef4444; }
 
 .settings-city-empty { padding: 12px 14px; color: #9ca3af; font-size: 0.88rem; }
@@ -250,8 +250,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px;
-  background: rgba(124, 58, 237, 0.05);
-  border: 1px solid rgba(124, 58, 237, 0.15);
+  background: rgba(255, 122, 0, 0.05);
+  border: 1px solid rgba(255, 122, 0, 0.15);
   border-radius: 10px;
   margin-bottom: 20px;
 }
@@ -428,7 +428,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border: 1.5px solid rgba(124, 58, 237, 0.2);
+  border: 1.5px solid rgba(255, 122, 0, 0.2);
   border-radius: 12px;
   background: white;
   font-size: 0.9rem;
@@ -700,7 +700,7 @@
 }
 
 .settings-reminder-select:focus {
-  border-color: #7c3aed;
+  border-color: #FF7A00;
 }
 
 .settings-reminder-tz {
@@ -721,8 +721,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
-  background: rgba(124, 58, 237, 0.04);
-  border: 1.5px solid rgba(124, 58, 237, 0.12);
+  background: rgba(255, 122, 0, 0.04);
+  border: 1.5px solid rgba(255, 122, 0, 0.12);
   border-radius: 10px;
 }
 

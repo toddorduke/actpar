@@ -48,7 +48,7 @@
 
 .create-post-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 10px 20px rgba(255, 122, 0, 0.3);
 }
 
 .btn-icon { width: 22px; height: 22px; }
@@ -76,11 +76,11 @@
 }
 
 .community-list-item:hover {
-  background: rgba(124, 58, 237, 0.06);
+  background: rgba(255, 122, 0, 0.06);
 }
 
 .community-list-item.active {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(255, 122, 0, 0.1);
   border-color: var(--color-primary);
 }
 
@@ -272,7 +272,7 @@
 
 .filter-btn:hover { background: #f3f4f6; }
 .filter-btn.active {
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(255, 122, 0, 0.08);
   border-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 600;
@@ -312,7 +312,7 @@
   display: flex;
   gap: 0;
   margin-bottom: 20px;
-  border-bottom: 2px solid rgba(124, 58, 237, 0.12);
+  border-bottom: 2px solid rgba(255, 122, 0, 0.12);
   padding-bottom: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -349,11 +349,11 @@
 .feed-tab.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(255, 122, 0, 0.05);
 }
 
 .feed-tab-count {
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(255, 122, 0, 0.12);
   color: var(--color-primary);
   font-size: 0.72rem;
   font-weight: 700;
@@ -436,7 +436,7 @@
 }
 
 .load-more-btn:hover {
-  background: rgba(124, 58, 237, 0.06);
+  background: rgba(255, 122, 0, 0.06);
   color: #ffffff;
 }
 
@@ -765,7 +765,7 @@
 }
 
 .modal-content .type-btn.active {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(255, 122, 0, 0.1);
   border-color: var(--color-primary);
   color: #6d28d9;
 }
@@ -813,7 +813,7 @@
 
 .submit-post-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 10px 20px rgba(255, 122, 0, 0.3);
 }
 
 .achievement-fields, .meetup-fields { margin-bottom: 20px; }
@@ -927,7 +927,7 @@
   .mobile-comm-chip {
     padding: 7px 14px;
     background: var(--color-surface);
-    border: 1.5px solid rgba(124, 58, 237, 0.2);
+    border: 1.5px solid rgba(255, 122, 0, 0.2);
     border-radius: 999px;
     font-size: 0.82rem;
     font-weight: 600;
@@ -945,7 +945,7 @@
   }
 
   .mobile-comm-chip--browse {
-    background: rgba(124, 58, 237, 0.08);
+    background: rgba(255, 122, 0, 0.08);
     border-color: var(--color-primary);
     color: var(--color-primary);
   }
@@ -1083,7 +1083,7 @@
 }
 
 .circle-activity-name:hover {
-  color: #7c3aed;
+  color: var(--color-primary-end);
   text-decoration: underline;
 }
 

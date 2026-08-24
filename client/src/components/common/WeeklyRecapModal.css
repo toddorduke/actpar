@@ -34,7 +34,7 @@
 
 /* ── Header ───────────────────────────────────────────── */
 .wr-header {
-  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  background: var(--gradient-primary, linear-gradient(135deg, #FF7A00, #E06400));
   border-radius: 24px 24px 0 0;
   padding: 28px 28px 24px;
   color: white;
@@ -252,7 +252,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(124, 58, 237, 0.06);
+  background: rgba(255, 122, 0, 0.06);
   border-radius: 10px;
   font-size: 0.875rem;
   color: var(--color-text, #111827);
@@ -262,8 +262,8 @@
 .wr-milestone-tag {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--color-primary, #7c3aed);
-  background: rgba(124, 58, 237, 0.1);
+  color: var(--color-primary, #FF7A00);
+  background: rgba(255, 122, 0, 0.1);
   padding: 3px 10px;
   border-radius: 999px;
   white-space: nowrap;
@@ -273,7 +273,7 @@
 .wr-cta {
   width: 100%;
   padding: 14px;
-  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #a855f7));
+  background: var(--gradient-primary, linear-gradient(135deg, #FF7A00, #E06400));
   color: white;
   border: none;
   border-radius: 14px;

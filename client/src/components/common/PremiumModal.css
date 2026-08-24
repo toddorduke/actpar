@@ -11,14 +11,14 @@
 }
 
 .premium-modal {
-  background: #0f172a;
-  border: 1px solid rgba(124, 58, 237, 0.4);
+  background: var(--color-surface);
+  border: 1px solid rgba(30, 58, 95, 0.25);
   border-radius: 24px;
   padding: 40px 36px;
   width: min(480px, 100%);
   position: relative;
   text-align: center;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(124,58,237,0.15);
+  box-shadow: 0 24px 60px rgba(43, 29, 20, 0.25), 0 0 0 1px rgba(30, 58, 95, 0.12);
 }
 
 .premium-close {
@@ -27,16 +27,16 @@
   right: 20px;
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--color-muted);
   font-size: 1.6rem;
   cursor: pointer;
   line-height: 1;
 }
-.premium-close:hover { color: #e2e8f0; }
+.premium-close:hover { color: var(--color-text); }
 
 .premium-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-trust);
   color: #fff;
   font-size: 0.8rem;
   font-weight: 700;
@@ -50,14 +50,14 @@
 .premium-title {
   font-size: 1.75rem;
   font-weight: 800;
-  color: #f1f5f9;
+  color: var(--color-text);
   margin: 0 0 10px;
   line-height: 1.2;
 }
 
 .premium-sub {
   font-size: 0.95rem;
-  color: #94a3b8;
+  color: var(--color-muted);
   margin: 0 0 24px;
   line-height: 1.5;
 }
@@ -76,8 +76,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(124, 58, 237, 0.18);
+  background: rgba(30, 58, 95, 0.06);
+  border: 1px solid rgba(30, 58, 95, 0.15);
   border-radius: 12px;
   padding: 10px 14px;
 }
@@ -87,7 +87,7 @@
 .perk-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--color-text);
 }
 
 .premium-price {
@@ -97,20 +97,20 @@
 .price-amount {
   font-size: 3rem;
   font-weight: 900;
-  color: #f1f5f9;
+  color: var(--color-text);
   line-height: 1;
 }
 
 .price-period {
   font-size: 1rem;
-  color: #64748b;
+  color: var(--color-muted);
   margin-left: 4px;
 }
 
 .premium-cta {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: var(--gradient-trust);
   color: #fff;
   border: none;
   border-radius: 14px;
@@ -128,7 +128,7 @@
 
 .premium-guarantee {
   font-size: 0.8rem;
-  color: #475569;
+  color: var(--color-muted);
   margin: 0;
 }
 

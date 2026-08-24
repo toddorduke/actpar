@@ -189,17 +189,17 @@
   bottom: 12px;
   right: 12px;
   padding: 7px 14px;
-  background: rgba(0,0,0,0.5);
-  color: white;
+  background: #fff;
+  color: var(--color-primary-end);
   border: none;
   border-radius: 999px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: opacity 0.15s;
 }
 
-.comm-cover-edit-btn:hover { background: rgba(0,0,0,0.7); }
+.comm-cover-edit-btn:hover { opacity: 0.85; }
 
 .comm-cover-setup-prompt {
   display: flex;
@@ -628,7 +628,7 @@
 .compose-type-btn.active {
   border-color: var(--color-primary);
   color: var(--color-primary);
-  background: rgba(124,58,237,0.07);
+  background: rgba(255, 122, 0,0.07);
 }
 
 .compose-textarea {
@@ -799,7 +799,7 @@
 .comm-like-btn:hover { border-color: #f87171; color: #ef4444; }
 
 .comm-comment-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-.comm-comment-btn.active { border-color: var(--color-primary); color: var(--color-primary); background: rgba(124, 58, 237, 0.06); }
+.comm-comment-btn.active { border-color: var(--color-primary); color: var(--color-primary); background: rgba(255, 122, 0, 0.06); }
 
 .load-more-btn {
   padding: 12px;
@@ -1019,7 +1019,7 @@
 
 .member-info { flex: 1; min-width: 0; }
 .member-name { font-weight: 700; font-size: 0.92rem; color: #1f2937; }
-.member-alter-ego { font-size: 0.78rem; color: #7c3aed; font-weight: 600; margin-top: 2px; }
+.member-alter-ego { font-size: 0.78rem; color: #FF7A00; font-weight: 600; margin-top: 2px; }
 .member-city { font-size: 0.75rem; color: #4b5563; margin-top: 2px; }
 
 .member-role-badge {
@@ -1035,7 +1035,7 @@
 }
 
 .member-role-badge.admin {
-  background: rgba(124,58,237,0.1);
+  background: rgba(255, 122, 0,0.1);
   color: var(--color-primary);
 }
 
