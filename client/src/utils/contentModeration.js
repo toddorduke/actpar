@@ -168,7 +168,7 @@ export function validateFileType(file) {
  */
 export function validateFileSize(file) {
   const MAX_IMAGE = 10 * 1024 * 1024;  // 10 MB
-  const MAX_VIDEO = 200 * 1024 * 1024; // 200 MB
+  const MAX_VIDEO = 50 * 1024 * 1024; // 50 MB — Supabase project's actual enforced ceiling regardless of dashboard-displayed limit
   const isVideo = file.type.startsWith('video/');
   const limit = isVideo ? MAX_VIDEO : MAX_IMAGE;
 

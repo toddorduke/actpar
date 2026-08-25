@@ -19,7 +19,7 @@ import './FeedPage.css';
 const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const ALLOWED_VIDEO = ['video/mp4', 'video/quicktime', 'video/webm', 'video/mov'];
 const MAX_IMAGE = 10 * 1024 * 1024;
-const MAX_VIDEO = 200 * 1024 * 1024;
+const MAX_VIDEO = 50 * 1024 * 1024;
 
 const CARD_GRADIENTS = [
   'linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
@@ -394,7 +394,7 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
     const isVideo = ALLOWED_VIDEO.includes(file.type);
     if (!isImage && !isVideo) { setError('Unsupported file type.'); return; }
     if (isImage && file.size > MAX_IMAGE) { setError('Photo too large (max 10 MB).'); return; }
-    if (isVideo && file.size > MAX_VIDEO) { setError('Video too large (max 200 MB).'); return; }
+    if (isVideo && file.size > MAX_VIDEO) { setError('Video too large (max 50 MB).'); return; }
     setError('');
     setMediaFile(file);
     setPreviewUrl(URL.createObjectURL(file));

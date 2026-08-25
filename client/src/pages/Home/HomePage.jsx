@@ -583,7 +583,7 @@ const HomePage = () => {
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm', 'video/mov'];
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-  const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
+  const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
   const fileInputRef = useRef(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadFile_, setUploadFile_] = useState(null);
@@ -867,7 +867,7 @@ const HomePage = () => {
     const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
     if (!isImage && !isVideo) { toast('Unsupported file type.', 'error'); return false; }
     if (isImage && file.size > MAX_IMAGE_SIZE) { toast('Photo too large. Max 10 MB.', 'error'); return false; }
-    if (isVideo && file.size > MAX_VIDEO_SIZE) { toast('Video too large. Max 200 MB.', 'error'); return false; }
+    if (isVideo && file.size > MAX_VIDEO_SIZE) { toast('Video too large. Max 50 MB.', 'error'); return false; }
     return true;
   }
 
