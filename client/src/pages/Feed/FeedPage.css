@@ -97,7 +97,7 @@
 /* ── Author row — top left ── */
 .feed-top {
   position: absolute;
-  top: 16px;
+  top: 70px; /* clears the fixed .feed-top-bar sort toggle (ends ~116px from viewport top; card content starts ~54px after nav, so 70px here lands right below it) */
   left: 16px;
   right: 80px;
   display: flex;
@@ -390,7 +390,7 @@
 }
 
 .feed-pulse {
-  background: rgba(0,0,0,0.55);
+  background: rgba(15,12,15,0.92);
   backdrop-filter: blur(8px);
   color: #fbbf24;
   font-size: 0.78rem;
@@ -403,7 +403,7 @@
 
 .feed-sort-toggle {
   display: flex;
-  background: rgba(0,0,0,0.55);
+  background: rgba(15,12,15,0.92);
   backdrop-filter: blur(8px);
   border-radius: 999px;
   padding: 3px;
