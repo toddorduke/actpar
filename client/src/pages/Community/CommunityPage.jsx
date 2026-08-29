@@ -19,7 +19,52 @@ import { scanMediaUrl } from '../../utils/contentModeration.js';
 import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import { getLiveStreak } from '../../utils/streak.js';
-import { guessCommunityEmoji } from '../../utils/communityCategory.js';
+import { guessCommunityEmoji, guessCommunityCategory } from '../../utils/communityCategory.js';
+
+const CHALLENGE_PRESETS = {
+  fitness: [
+    { label: '🏃 100 Miles This Month', title: '100 Miles This Month', target_value: 100, unit: 'miles', days: 30 },
+    { label: '💪 1,000 Reps Challenge', title: '1,000 Reps Challenge', target_value: 1000, unit: 'reps', days: 30 },
+    { label: '🏋️ 20 Workouts', title: '20 Workouts', target_value: 20, unit: 'workouts', days: 30 },
+  ],
+  sobriety: [
+    { label: '🌱 30 Days Clean', title: '30 Days Clean', target_value: 30, unit: 'days', days: 30 },
+    { label: '🧾 90-Day Milestone', title: '90-Day Milestone', target_value: 90, unit: 'days', days: 90 },
+  ],
+  faith: [
+    { label: '📖 30 Days of Scripture', title: '30 Days of Scripture Reading', target_value: 30, unit: 'days read', days: 30 },
+    { label: '🙏 21-Day Prayer Streak', title: '21-Day Prayer Streak', target_value: 21, unit: 'days prayed', days: 21 },
+  ],
+  mindfulness: [
+    { label: '🧘 30 Days of Meditation', title: '30 Days of Meditation', target_value: 30, unit: 'sessions', days: 30 },
+  ],
+  nutrition: [
+    { label: '🥗 30 Clean Meals Logged', title: '30 Clean Meals Logged', target_value: 30, unit: 'meals', days: 30 },
+  ],
+  mental_health: [
+    { label: '💭 21 Days of Journaling', title: '21 Days of Journaling', target_value: 21, unit: 'entries', days: 21 },
+  ],
+  finance: [
+    { label: '💰 $1,000 Saved', title: '$1,000 Saved', target_value: 1000, unit: 'dollars saved', days: 60 },
+    { label: '🚫 No-Spend Days', title: 'No-Spend Days', target_value: 30, unit: 'no-spend days', days: 30 },
+  ],
+  relationships: [
+    { label: '❤️ 30 Quality Time Check-ins', title: '30 Quality Time Check-ins', target_value: 30, unit: 'check-ins', days: 30 },
+  ],
+  learning: [
+    { label: '📚 Read 1 Book', title: 'Read 1 Book', target_value: 1, unit: 'books', days: 30 },
+    { label: '📖 500 Pages', title: '500 Pages', target_value: 500, unit: 'pages', days: 30 },
+  ],
+  career: [
+    { label: '💼 20 Networking Touches', title: '20 Networking Touches', target_value: 20, unit: 'connections made', days: 30 },
+  ],
+};
+
+const LOG_TYPE_CHIPS = {
+  fitness: ['Squat', 'Bench', 'Deadlift', 'Push-ups', 'Running', 'Other'],
+  career: ['Applied', 'Networked', 'Interview', 'Follow-up', 'Skill Practice'],
+  finance: ['No-Spend Day', 'Debt Payment', 'Saved', 'Skipped Purchase', 'Side Income'],
+};
 import './CommunityPage.css';
 
 const POST_TRUNCATE = 300;
@@ -565,7 +610,7 @@ function ChatTab({ communityId }) {
 }
 
 // ── Challenges Tab ───────────────────────────────────────
-function ChallengesTab({ communityId }) {
+function ChallengesTab({ communityId, communityName, communityDescription }) {
   const { user } = useContext(AuthContext);
   const { challenges, loading, createChallenge, logEntry } = useCommunityChallenges(communityId);
   const toast = useToast();
@@ -573,6 +618,23 @@ function ChallengesTab({ communityId }) {
   const [form, setForm] = useState({ title: '', description: '', target_value: '', unit: 'miles', start_date: '', end_date: '' });
   const [saving, setSaving] = useState(false);
   const [logForms, setLogForms] = useState({});
+  const category = guessCommunityCategory(communityName, communityDescription);
+  const presets = CHALLENGE_PRESETS[category] ?? [];
+
+  function applyPreset(preset) {
+    const start = new Date();
+    const end = new Date(start);
+    end.setDate(end.getDate() + preset.days);
+    setForm({
+      title: preset.title,
+      description: '',
+      target_value: String(preset.target_value),
+      unit: preset.unit,
+      start_date: start.toISOString().slice(0, 10),
+      end_date: end.toISOString().slice(0, 10),
+    });
+    setShowForm(true);
+  }
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -602,6 +664,19 @@ function ChallengesTab({ communityId }) {
           {showForm ? 'Cancel' : '+ New Challenge'}
         </button>
       </div>
+
+      {showForm && presets.length > 0 && (
+        <div className="challenge-presets">
+          <div className="challenge-presets-label">Quick start for this group:</div>
+          <div className="challenge-presets-row">
+            {presets.map((preset) => (
+              <button key={preset.label} type="button" className="challenge-preset-chip" onClick={() => applyPreset(preset)}>
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <form className="event-form" onSubmit={handleCreate}>
@@ -656,6 +731,17 @@ function ChallengesTab({ communityId }) {
 
             <div className="challenge-my">My contribution: <strong>{myTotal} {ch.unit}</strong></div>
 
+            {myEntries.length > 0 && (
+              <div className="challenge-my-entries">
+                {[...myEntries].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at)).slice(0, 5).map((e, i) => (
+                  <div key={i} className="challenge-my-entry">
+                    {e.note && <span className="challenge-my-entry-note">{e.note}</span>}
+                    <span className="challenge-my-entry-val">{e.value} {ch.unit}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {leaderboard.length > 0 && (
               <div className="challenge-leaderboard">
                 {leaderboard.map((l, i) => (
@@ -668,6 +754,20 @@ function ChallengesTab({ communityId }) {
               </div>
             )}
 
+            {LOG_TYPE_CHIPS[category] && (
+              <div className="challenge-exercise-row">
+                {LOG_TYPE_CHIPS[category].map((ex) => (
+                  <button
+                    key={ex}
+                    type="button"
+                    className={`challenge-exercise-chip${logForms[ch.id]?.note === ex ? ' active' : ''}`}
+                    onClick={() => setLogForms((p) => ({ ...p, [ch.id]: { ...p[ch.id], note: ex } }))}
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="challenge-log">
               <input
                 className="comm-input"
@@ -678,7 +778,7 @@ function ChallengesTab({ communityId }) {
               />
               <input
                 className="comm-input"
-                placeholder="Note (optional)"
+                placeholder={LOG_TYPE_CHIPS[category] ? 'Type / note (optional)' : 'Note (optional)'}
                 value={logForms[ch.id]?.note ?? ''}
                 onChange={(e) => setLogForms((p) => ({ ...p, [ch.id]: { ...p[ch.id], note: e.target.value } }))}
               />
@@ -696,7 +796,33 @@ function ChallengesTab({ communityId }) {
 // ── Leaderboard Tab ──────────────────────────────────────
 function LeaderboardTab({ communityId }) {
   const [rows, setRows] = useState([]);
+  const [challengeRows, setChallengeRows] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!communityId) return;
+    async function loadChallengeActivity() {
+      const { data: challenges } = await supabase
+        .from('community_challenges')
+        .select('id')
+        .eq('community_id', communityId);
+      const challengeIds = (challenges ?? []).map((c) => c.id);
+      if (challengeIds.length === 0) { setChallengeRows([]); return; }
+
+      const { data: entries } = await supabase
+        .from('challenge_entries')
+        .select('user_id, profiles(first_name, last_name, avatar_url)')
+        .in('challenge_id', challengeIds);
+
+      const counts = {};
+      (entries ?? []).forEach((e) => {
+        if (!counts[e.user_id]) counts[e.user_id] = { user_id: e.user_id, name: getDisplayName(e.profiles), avatar_url: e.profiles?.avatar_url, log_count: 0 };
+        counts[e.user_id].log_count += 1;
+      });
+      setChallengeRows(Object.values(counts).sort((a, b) => b.log_count - a.log_count));
+    }
+    loadChallengeActivity();
+  }, [communityId]);
 
   useEffect(() => {
     if (!communityId) return;
@@ -738,11 +864,24 @@ function LeaderboardTab({ communityId }) {
   }, [communityId]);
 
   if (loading) return <div className="comm-empty">Loading leaderboard...</div>;
-  if (rows.length === 0) return <div className="comm-empty">No data yet — start checking in on your goals!</div>;
 
   return (
     <div className="leaderboard-tab">
+      <h3 className="tab-section-title">Challenge Activity</h3>
+      <p className="leaderboard-subtitle">Ranked by progress logged in this community's challenges</p>
+      {challengeRows.length === 0 && <div className="comm-empty">No challenge activity yet — log progress on a challenge to show up here.</div>}
+      {challengeRows.map((r, i) => (
+        <div key={r.user_id} className={`lb-row${i < 3 ? ` lb-top-${i + 1}` : ''}`}>
+          <div className="lb-rank">{i + 1}</div>
+          <Avatar url={r.avatar_url} name={r.name} size={40} />
+          <div className="lb-name">{r.name}</div>
+          <div className="lb-score">{r.log_count} <span>{r.log_count === 1 ? 'log' : 'logs'}</span></div>
+        </div>
+      ))}
+
+      <h3 className="tab-section-title leaderboard-section-spacer">Goal Streaks</h3>
       <p className="leaderboard-subtitle">Ranked by total goal check-in days across all active goals</p>
+      {rows.length === 0 && <div className="comm-empty">No data yet — start checking in on your goals!</div>}
       {rows.map((r, i) => (
         <div key={r.user_id} className={`lb-row${i < 3 ? ` lb-top-${i + 1}` : ''}`}>
           <div className="lb-rank">{i + 1}</div>
@@ -1134,7 +1273,7 @@ export default function CommunityPage() {
       <div className="comm-content">
         {activeTab === 'feed' && <FeedTab communityId={communityId} isAdmin={isActualAdmin} pinnedPostId={community.pinned_post_id} onPin={handlePinPost} />}
         {activeTab === 'events' && <EventsTab communityId={communityId} isAdmin={isActualAdmin} />}
-        {activeTab === 'challenges' && <ChallengesTab communityId={communityId} />}
+        {activeTab === 'challenges' && <ChallengesTab communityId={communityId} communityName={community?.name} communityDescription={community?.description} />}
         {activeTab === 'leaderboard' && <LeaderboardTab communityId={communityId} />}
         {activeTab === 'members' && <MembersTab communityId={communityId} isAdmin={isActualAdmin} currentUserId={user?.id} creatorId={community.created_by} />}
         {activeTab === 'chat' && <ChatTab communityId={communityId} />}

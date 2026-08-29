@@ -1238,6 +1238,70 @@
   flex-wrap: wrap;
 }
 
+.challenge-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.challenge-presets-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.challenge-presets-row,
+.challenge-exercise-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.challenge-preset-chip,
+.challenge-exercise-chip {
+  padding: 6px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 999px;
+  background: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.challenge-preset-chip:hover,
+.challenge-exercise-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.challenge-exercise-chip.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.07);
+}
+
+.challenge-my-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.challenge-my-entry {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  padding: 4px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.challenge-my-entry-note { font-weight: 600; color: var(--color-text); }
+.challenge-my-entry-val { font-weight: 600; }
+
 .challenge-log .comm-input { flex: 1; min-width: 100px; }
 
 /* ── Leaderboard Tab ────────────────────────────────── */
@@ -1247,6 +1311,10 @@
   font-size: 0.85rem;
   color: #4b5563;
   margin: 0 0 8px;
+}
+
+.leaderboard-section-spacer {
+  margin-top: 28px;
 }
 
 .lb-row {
