@@ -247,6 +247,74 @@ function BecomeCoachModal({ onClose, userId }) {
   );
 }
 
+function RequestCoachModal({ onClose, userId }) {
+  const toast = useToast();
+  const [specialty, setSpecialty] = useState('');
+  const [note, setNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!specialty.trim()) return;
+    if (note.trim()) {
+      const noteCheck = checkText(note);
+      if (!noteCheck.ok) { toast(noteCheck.message, 'error'); return; }
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from('coach_requests').insert({
+      user_id: userId,
+      specialty: specialty.trim(),
+      note: note.trim() || null,
+    });
+    setSubmitting(false);
+    if (error) { toast(`Couldn't submit: ${error.message}`, 'error'); return; }
+    setSubmitted(true);
+  }
+
+  return (
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="coach-apply-modal">
+        <div className="coach-apply-header">
+          <h2 className="coach-apply-title">{submitted ? '🙌 Thanks!' : '🔎 Request a Coach'}</h2>
+          <button className="close-modal" onClick={onClose}>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {submitted ? (
+          <div className="coach-apply-success">
+            <div className="success-icon">📬</div>
+            <h3>Request sent</h3>
+            <p>We'll use this to help decide which coaches to bring onto the platform next.</p>
+            <button className="coach-apply-btn" onClick={onClose}>Back to Coaches</button>
+          </div>
+        ) : (
+          <form className="coach-apply-body" onSubmit={handleSubmit}>
+            <div className="apply-step">
+              <p className="step-heading" style={{ marginBottom: 4 }}>Don't see the kind of coach you need?</p>
+              <p className="coach-apply-sub" style={{ marginBottom: 16 }}>Tell us what you're looking for and we'll factor it into who we recruit next.</p>
+              <div className="apply-form-group">
+                <label>What specialty are you looking for? *</label>
+                <input className="apply-input" placeholder="e.g. Postpartum fitness, ADHD coaching…" value={specialty} onChange={(e) => setSpecialty(e.target.value)} required />
+              </div>
+              <div className="apply-form-group">
+                <label>Anything else? <span className="label-optional">(optional)</span></label>
+                <textarea className="apply-input apply-textarea" placeholder="Whatever would help us understand what you need…" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+              </div>
+              <button type="submit" className="coach-apply-btn" disabled={!specialty.trim() || submitting}>
+                {submitting ? 'Submitting…' : 'Send Request'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CoachDiscoveryPage() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -257,6 +325,7 @@ export default function CoachDiscoveryPage() {
   const [priceRange, setPriceRange] = useState(0);
   const [sortBy, setSortBy] = useState('rating');
   const [showApply, setShowApply] = useState(false);
+  const [showRequest, setShowRequest] = useState(false);
 
   const { coaches: realCoaches, loading: coachesLoading } = useCoaches();
 
@@ -297,9 +366,14 @@ export default function CoachDiscoveryPage() {
           <h1 className="discovery-title">Find Your Coach</h1>
           <p className="discovery-subtitle">Connect with certified coaches who match your goals</p>
         </div>
-        <button className="become-coach-btn" onClick={() => setShowApply(true)}>
-          ✨ Become a Coach
-        </button>
+        <div className="discovery-header-actions">
+          <button className="request-coach-btn" onClick={() => setShowRequest(true)}>
+            🔎 Request a Coach
+          </button>
+          <button className="become-coach-btn" onClick={() => setShowApply(true)}>
+            ✨ Become a Coach
+          </button>
+        </div>
       </section>
 
       <div className="discovery-search-bar">
@@ -361,6 +435,7 @@ export default function CoachDiscoveryPage() {
             <div className="no-results">
               <div className="no-results-icon">🔍</div>
               <p>No coaches match your filters. Try adjusting your search.</p>
+              <button className="request-coach-btn" onClick={() => setShowRequest(true)}>🔎 Request a Coach</button>
             </div>
           )}
 
@@ -412,6 +487,9 @@ export default function CoachDiscoveryPage() {
 
       {showApply && (
         <BecomeCoachModal onClose={() => setShowApply(false)} userId={user?.id} />
+      )}
+      {showRequest && (
+        <RequestCoachModal onClose={() => setShowRequest(false)} userId={user?.id} />
       )}
     </div>
   );
