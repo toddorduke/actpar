@@ -29,10 +29,10 @@ export function useConnectionActivity(acceptedConnections) {
 
     const cutoff = daysAgoStr(3);
     const { data } = await supabase
-      .from('goals')
+      .from('goals_v2')
       .select('id, title, day_count, last_checked_in, updated_at, user_id, profiles(id, first_name, last_name, avatar_url, alter_ego_name)')
       .in('user_id', connectionIds)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .gte('last_checked_in', cutoff)
       .not('last_checked_in', 'is', null)
       .order('updated_at', { ascending: false })

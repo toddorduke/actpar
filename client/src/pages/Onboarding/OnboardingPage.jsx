@@ -143,10 +143,10 @@ export default function OnboardingPage() {
 
       if (profiles.length < 6 && primaryCategory) {
         const { data: goalRows } = await supabase
-          .from('goals')
+          .from('goals_v2')
           .select('user_id')
-          .eq('category', primaryCategory)
-          .eq('is_active', true)
+          .eq('tag', primaryCategory)
+          .eq('status', 'active')
           .neq('user_id', user.id)
           .limit(12);
 
@@ -176,10 +176,10 @@ export default function OnboardingPage() {
 
       if (profiles.length > 0) {
         const { data: goals } = await supabase
-          .from('goals')
+          .from('goals_v2')
           .select('user_id, title')
           .in('user_id', profiles.map((p) => p.id))
-          .eq('is_active', true);
+          .eq('status', 'active');
         const goalMap = {};
         (goals ?? []).forEach((g) => { if (!goalMap[g.user_id]) goalMap[g.user_id] = g.title; });
         profiles = profiles.map((p) => ({ ...p, goalTitle: goalMap[p.id] ?? null }));

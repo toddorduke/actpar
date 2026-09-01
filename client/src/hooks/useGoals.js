@@ -21,8 +21,8 @@ export const useGoals = () => {
     if (!user) return;
     setLoading(true);
     const [{ data: active }, { data: completed }] = await Promise.all([
-      supabase.from('goals').select('*').eq('user_id', user.id).eq('is_active', true).order('created_at', { ascending: true }),
-      supabase.from('goals').select('*').eq('user_id', user.id).eq('is_active', false).not('completed_at', 'is', null).order('completed_at', { ascending: false }),
+      supabase.from('goals_v2').select('*').eq('user_id', user.id).eq('status', 'active').order('created_at', { ascending: true }),
+      supabase.from('goals_v2').select('*').eq('user_id', user.id).eq('status', 'completed').order('completed_at', { ascending: false }),
     ]);
     setGoals(active ?? []);
     setCompletedGoals(completed ?? []);
@@ -41,12 +41,13 @@ export const useGoals = () => {
       if (!whyCheck.ok) return { data: null, error: null, moderation: whyCheck };
     }
     const { data, error } = await supabase
-      .from('goals')
+      .from('goals_v2')
       .insert({
         user_id: user.id,
         title,
-        category,
+        tag: category ?? 'custom',
         goal_type,
+        frequency: goal_type === 'numeric' ? null : 'daily',
         tier: tier ?? null,
         target_value: target_value ?? null,
         target_unit: target_unit ?? null,
@@ -56,12 +57,16 @@ export const useGoals = () => {
       })
       .select()
       .single();
-    if (!error) {
-      setGoals((prev) => [...prev, data]);
-      track(Events.GOAL_CREATED, { tier: tier ?? null, category, goal_type });
-      awardXP(user.id, XP_VALUES.GOAL_CREATED);
+    if (error) {
+      if (error.message?.includes('ACTIVE_GOAL_CAP_REACHED')) {
+        return { data: null, error: { code: 'CAP_REACHED' } };
+      }
+      return { data: null, error };
     }
-    return { data, error };
+    setGoals((prev) => [...prev, data]);
+    track(Events.GOAL_CREATED, { tier: tier ?? null, category, goal_type });
+    awardXP(user.id, XP_VALUES.GOAL_CREATED);
+    return { data, error: null };
   }, [user]);
 
   // Check in for today — only once per day
@@ -75,12 +80,12 @@ export const useGoals = () => {
     const now = new Date().toISOString();
     const [{ error: goalError }, { error: logError }] = await Promise.all([
       supabase
-        .from('goals')
+        .from('goals_v2')
         .update({ day_count: newCount, last_checked_in: today, grace_used_week: graceUsedWeek, updated_at: now })
         .eq('id', goalId),
       supabase
-        .from('checkin_logs')
-        .insert({ user_id: user.id, goal_id: goalId, checked_in_at: now, log_type: logType, note: note?.trim() || null }),
+        .from('goal_checkins_v2')
+        .upsert({ user_id: user.id, goal_id: goalId, date: today, done: true }, { onConflict: 'goal_id,date' }),
     ]);
     const error = goalError ?? logError;
 
@@ -141,30 +146,27 @@ export const useGoals = () => {
   const backdatedCheckIn = useCallback(async (goalId, dateStr, note = null) => {
     const goal = goals.find((g) => g.id === goalId);
     if (!goal) return { error: new Error('Goal not found') };
-    // Check for duplicate log on that date
     const { data: existing } = await supabase
-      .from('checkin_logs')
+      .from('goal_checkins_v2')
       .select('id')
       .eq('goal_id', goalId)
-      .gte('checked_in_at', `${dateStr}T00:00:00.000Z`)
-      .lt('checked_in_at', `${dateStr}T23:59:59.999Z`)
+      .eq('date', dateStr)
       .maybeSingle();
     if (existing) return { alreadyLogged: true };
     const { error } = await supabase
-      .from('checkin_logs')
+      .from('goal_checkins_v2')
       .insert({
         user_id: user.id,
         goal_id: goalId,
-        checked_in_at: `${dateStr}T12:00:00.000Z`,
-        log_type: 'backdated',
-        note: note?.trim() || null,
+        date: dateStr,
+        done: true,
       });
     return { error };
   }, [goals, user]);
 
   const updateTier = useCallback(async (goalId, tier) => {
     const { error } = await supabase
-      .from('goals')
+      .from('goals_v2')
       .update({ tier, updated_at: new Date().toISOString() })
       .eq('id', goalId);
     if (!error) setGoals((prev) => prev.map((g) => (g.id === goalId ? { ...g, tier } : g)));
@@ -173,7 +175,7 @@ export const useGoals = () => {
 
   const updateProgress = useCallback(async (goalId, progress) => {
     const { error } = await supabase
-      .from('goals')
+      .from('goals_v2')
       .update({ progress, updated_at: new Date().toISOString() })
       .eq('id', goalId);
     if (!error) setGoals((prev) => prev.map((g) => (g.id === goalId ? { ...g, progress } : g)));
@@ -182,8 +184,8 @@ export const useGoals = () => {
 
   const deleteGoal = useCallback(async (goalId) => {
     const { error } = await supabase
-      .from('goals')
-      .update({ is_active: false })
+      .from('goals_v2')
+      .update({ status: 'archived' })
       .eq('id', goalId);
     if (!error) setGoals((prev) => prev.filter((g) => g.id !== goalId));
     return { error };
@@ -194,13 +196,13 @@ export const useGoals = () => {
     if (!goal) return { error: new Error('Goal not found') };
     const now = new Date().toISOString();
     const { error } = await supabase
-      .from('goals')
-      .update({ is_active: false, completed_at: now })
+      .from('goals_v2')
+      .update({ status: 'completed', completed_at: now })
       .eq('id', goalId);
     if (!error) {
-      track(Events.GOAL_COMPLETED, { day_count: goal.day_count ?? 0, category: goal.category });
+      track(Events.GOAL_COMPLETED, { day_count: goal.day_count ?? 0, category: goal.tag });
       setGoals((prev) => prev.filter((g) => g.id !== goalId));
-      setCompletedGoals((prev) => [{ ...goal, is_active: false, completed_at: now }, ...prev]);
+      setCompletedGoals((prev) => [{ ...goal, status: 'completed', completed_at: now }, ...prev]);
     }
     return { error };
   }, [goals]);

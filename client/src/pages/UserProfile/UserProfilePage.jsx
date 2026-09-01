@@ -66,10 +66,10 @@ export default function UserProfilePage() {
         .eq('id', userId)
         .single(),
       supabase
-        .from('goals')
+        .from('goals_v2')
         .select('id, title, tier, day_count, last_checked_in, grace_used_week, progress, goal_type, target_value, target_unit, target_period')
         .eq('user_id', userId)
-        .eq('is_active', true)
+        .eq('status', 'active')
         .order('tier'),
       supabase
         .from('tribe_posts')

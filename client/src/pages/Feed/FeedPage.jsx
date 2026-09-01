@@ -611,7 +611,7 @@ export default function FeedPage() {
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     supabase
-      .from('goals')
+      .from('goals_v2')
       .select('id', { count: 'exact', head: true })
       .eq('last_checked_in', today)
       .then(({ count }) => setTodayCheckins(count ?? 0));

@@ -64,7 +64,7 @@ export function usePartnerships() {
       track(Events.JOURNEY_PROPOSED, { has_goal: !!goalId });
       setPartnerships((prev) => [data, ...prev]);
       const goalTitle = goalId
-        ? (await supabase.from('goals').select('title').eq('id', goalId).single()).data?.title
+        ? (await supabase.from('goals_v2').select('title').eq('id', goalId).single()).data?.title
         : null;
       const myName = getDisplayName(user?.user_metadata, 'Someone');
       createNotification({

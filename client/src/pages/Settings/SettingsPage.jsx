@@ -437,8 +437,8 @@ export default function SettingsPage() {
         connectionsRes, mediaRes, notificationsRes, blockedRes, membershipsRes,
         issueReportsRes,
       ] = await Promise.all([
-        supabase.from('goals').select('*').eq('user_id', uid),
-        supabase.from('checkin_logs').select('*').eq('user_id', uid),
+        supabase.from('goals_v2').select('*').eq('user_id', uid),
+        supabase.from('goal_checkins_v2').select('*').eq('user_id', uid),
         supabase.from('journal_entries').select('*').eq('user_id', uid),
         supabase.from('reflections').select('*').eq('user_id', uid),
         supabase.from('tribe_posts').select('*').eq('user_id', uid),

@@ -100,7 +100,7 @@ function PactLeaderboard({ members }) {
     monday.setHours(0, 0, 0, 0);
 
     supabase
-      .from('goal_progress')
+      .from('goal_progress_v2')
       .select('user_id')
       .in('user_id', userIds)
       .gte('logged_at', monday.toISOString())

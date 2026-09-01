@@ -75,10 +75,10 @@ export const ConnectionsProvider = ({ children }) => {
     // Fetch their goals + current user's profile/goals in parallel
     const [goalsResult, myProfResult, myGoalsResult] = await Promise.all([
       profileList.length > 0
-        ? supabase.from('goals').select('user_id, title, tier').in('user_id', profileList.map((p) => p.id)).eq('is_active', true)
+        ? supabase.from('goals_v2').select('user_id, title, tier').in('user_id', profileList.map((p) => p.id)).eq('status', 'active')
         : Promise.resolve({ data: [] }),
       supabase.from('profiles').select('looking_for, city, accountability_style, checkin_frequency').eq('id', user.id).single(),
-      supabase.from('goals').select('title').eq('user_id', user.id).eq('is_active', true),
+      supabase.from('goals_v2').select('title').eq('user_id', user.id).eq('status', 'active'),
     ]);
 
     for (const g of goalsResult.data ?? []) {

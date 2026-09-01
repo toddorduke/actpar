@@ -837,10 +837,10 @@ function LeaderboardTab({ communityId }) {
 
       const ids = members.map((m) => m.user_id);
       const { data: goals } = await supabase
-        .from('goals')
+        .from('goals_v2')
         .select('user_id, day_count, last_checked_in, grace_used_week')
         .in('user_id', ids)
-        .eq('is_active', true);
+        .eq('status', 'active');
 
       const today = new Date().toISOString().split('T')[0];
       const totals = {};
@@ -918,10 +918,10 @@ function CommunitySidebar({ communityId, onSwitchTab }) {
     async function loadTop() {
       const ids = members.map((m) => m.user_id);
       const { data: goals } = await supabase
-        .from('goals')
+        .from('goals_v2')
         .select('user_id, day_count, last_checked_in, grace_used_week')
         .in('user_id', ids)
-        .eq('is_active', true);
+        .eq('status', 'active');
       const today = new Date().toISOString().split('T')[0];
       const totals = {};
       (goals ?? []).forEach((g) => {

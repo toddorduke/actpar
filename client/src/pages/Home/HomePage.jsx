@@ -148,8 +148,8 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
           {goal.description && (
             <p className="goal-why">{goal.description}</p>
           )}
-          {goal.category && (
-            <span className="goal-category-badge">{CATEGORY_LABELS[goal.category] ?? goal.category}</span>
+          {CATEGORY_LABELS[goal.tag] && (
+            <span className="goal-category-badge">{CATEGORY_LABELS[goal.tag]}</span>
           )}
         </div>
         <div className="goal-meta">
@@ -417,18 +417,17 @@ const HomePage = () => {
   useEffect(() => {
     const habitGoalIds = goals.filter((g) => g.goal_type !== 'numeric').map((g) => g.id);
     if (!habitGoalIds.length) { setCheckinHistory({}); return; }
-    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
     supabase
-      .from('checkin_logs')
-      .select('goal_id, checked_in_at')
+      .from('goal_checkins_v2')
+      .select('goal_id, date')
       .in('goal_id', habitGoalIds)
-      .gte('checked_in_at', since)
+      .gte('date', since)
       .then(({ data }) => {
         const map = {};
         for (const row of data ?? []) {
-          const dateStr = row.checked_in_at.slice(0, 10);
           if (!map[row.goal_id]) map[row.goal_id] = new Set();
-          map[row.goal_id].add(dateStr);
+          map[row.goal_id].add(row.date);
         }
         setCheckinHistory(map);
       });
@@ -522,13 +521,19 @@ const HomePage = () => {
     const titleCheck = checkText(journeyPickerNewTitle.trim());
     if (!titleCheck.ok) { toast(titleCheck.message, 'error'); return; }
     setJourneyPickerSaving(true);
-    const { data, error: goalError } = await supabase.from('goals').insert({
+    const { data, error: goalError } = await supabase.from('goals_v2').insert({
       user_id: user.id,
       title: journeyPickerNewTitle.trim(),
       tier: journeyPickerNewTier,
       goal_type: 'habit',
-      is_active: true,
+      tag: 'custom',
+      frequency: 'daily',
     }).select('id').single();
+    if (goalError?.message?.includes('ACTIVE_GOAL_CAP_REACHED')) {
+      toast(`You've got ${goals.length} active. Finish or pause one to add another.`, 'warning', 6000);
+      setJourneyPickerSaving(false);
+      return;
+    }
     if (goalError) { toast("Couldn't create that goal — try again.", 'error'); setJourneyPickerSaving(false); return; }
     const { error: linkError } = await linkGoal(journeyGoalPicker.partnershipId, data.id);
     setJourneyPickerSaving(false);
@@ -731,6 +736,17 @@ const HomePage = () => {
       description: newGoalWhy.trim() || null,
     });
     if (moderation) { toast(moderation.message, 'error'); setAddingGoal(false); return; }
+    if (error?.code === 'CAP_REACHED') {
+      toast(
+        profile?.is_premium
+          ? `You've got ${goals.length} active. Finish or pause one to add another.`
+          : `You've got ${goals.length} active. Finish or pause one to add another, or upgrade to Member Pro for more.`,
+        'warning',
+        6000
+      );
+      setAddingGoal(false);
+      return;
+    }
     if (error) { toast("Couldn't add that goal — try again.", 'error'); setAddingGoal(false); return; }
     setNewGoalTitle('');
     setNewGoalCategory('');

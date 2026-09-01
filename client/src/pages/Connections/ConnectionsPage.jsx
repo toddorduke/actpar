@@ -93,7 +93,7 @@ export default function ConnectionsPage() {
   const [myGoals, setMyGoals] = useState([]);
   const fetchMyGoals = () => {
     if (!user) return;
-    supabase.from('goals').select('id, title, goal_type, tier').eq('user_id', user.id).eq('is_active', true)
+    supabase.from('goals_v2').select('id, title, goal_type, tier').eq('user_id', user.id).eq('status', 'active')
       .then(({ data }) => setMyGoals(data ?? []));
   };
   useEffect(() => { fetchMyGoals(); }, [user]);
@@ -109,14 +109,19 @@ export default function ConnectionsPage() {
     const titleCheck = checkText(newGoalTitle.trim());
     if (!titleCheck.ok) { toast(titleCheck.message, 'error'); return; }
     setSavingGoal(true);
-    const { data, error } = await supabase.from('goals').insert({
+    const { data, error } = await supabase.from('goals_v2').insert({
       user_id: user.id,
       title: newGoalTitle.trim(),
       tier: newGoalTier,
       goal_type: 'habit',
-      is_active: true,
+      tag: 'custom',
+      frequency: 'daily',
     }).select('id, title, goal_type, tier').single();
     setSavingGoal(false);
+    if (error?.message?.includes('ACTIVE_GOAL_CAP_REACHED')) {
+      toast("You've hit your active goal limit. Finish or pause one to add another.", 'warning', 6000);
+      return;
+    }
     if (error) { toast("Couldn't create that goal — try again.", 'error'); return; }
     setMyGoals((prev) => [...prev, data]);
     setJourneyGoalId(data.id);
@@ -182,10 +187,10 @@ export default function ConnectionsPage() {
     const partnerIds = acceptedConnections.map((c) => c.partnerId).filter(Boolean);
     if (partnerIds.length === 0) return;
     supabase
-      .from('goals')
+      .from('goals_v2')
       .select('user_id, day_count, last_checked_in, grace_used_week')
       .in('user_id', partnerIds)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .then(({ data }) => {
         const today = new Date().toISOString().split('T')[0];
         const stats = {};

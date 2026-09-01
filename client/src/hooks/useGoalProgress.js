@@ -36,7 +36,7 @@ export function useGoalProgress(goals) {
     since.setDate(since.getDate() - 35);
 
     const { data } = await supabase
-      .from('goal_progress')
+      .from('goal_progress_v2')
       .select('*')
       .in('goal_id', goalIds)
       .eq('user_id', user.id)
@@ -68,7 +68,7 @@ export function useGoalProgress(goals) {
       if (!noteCheck.ok) return { data: null, error: null, moderation: noteCheck };
     }
     const { data, error } = await supabase
-      .from('goal_progress')
+      .from('goal_progress_v2')
       .insert({ goal_id: goalId, user_id: user.id, value, note: note.trim() || null })
       .select()
       .single();

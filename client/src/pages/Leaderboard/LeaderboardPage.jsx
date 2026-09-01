@@ -51,9 +51,9 @@ export default function LeaderboardPage() {
       if (city) setSelectedCity(city);
 
       const { data: goalData } = await supabase
-        .from('goals')
-        .select('user_id, day_count, last_checked_in, grace_used_week, goal_type, category, title, is_active, progress, target_value, profiles!goals_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city, total_xp, milestones_count)')
-        .eq('is_active', true);
+        .from('goals_v2')
+        .select('user_id, day_count, last_checked_in, grace_used_week, goal_type, tag, title, status, progress, target_value, profiles!goals_v2_user_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name, city, total_xp, milestones_count)')
+        .eq('status', 'active');
 
       const todayStr = new Date().toISOString().split('T')[0];
       const userMap = {};
@@ -62,7 +62,7 @@ export default function LeaderboardPage() {
       for (const g of goalData ?? []) {
         const p = g.profiles;
         if (!p) continue;
-        const cat = g.category ?? 'other';
+        const cat = g.tag ?? 'other';
         if (cat) catSet.add(cat);
 
         if (!userMap[g.user_id]) {
