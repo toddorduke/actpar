@@ -1,7 +1,8 @@
 import React, { useContext, useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl, TextInput } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useGoalsV2 } from '../hooks/useGoalsV2';
+import { useGoalProgressV2 } from '../hooks/useGoalProgressV2';
 import { INTEREST_CONFIG } from '../lib/contentSources';
 import { durationLabel } from '../lib/goalDurations';
 import AddGoalModal from './AddGoalModal';
@@ -9,6 +10,7 @@ import EditGoalModal from './EditGoalModal';
 import GoalEndPromptModal from './GoalEndPromptModal';
 import NudgeModal from '../components/NudgeModal';
 import ConfirmModal from '../components/ConfirmModal';
+import { getLiveStreak } from '../lib/streak';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -27,12 +29,23 @@ export default function GoalsScreen() {
     createGoal, checkIn, pauseGoal, resumeGoal, completeGoal, archiveGoal, extendGoal, editGoal, refetch,
   } = useGoalsV2(userId);
 
+  const numericGoals = useMemo(() => activeGoals.filter((g) => g.goal_type === 'numeric'), [activeGoals]);
+  const { progressMap, logProgress } = useGoalProgressV2(userId, numericGoals);
+  const [progressInputs, setProgressInputs] = useState({});
+
   const [showAdd, setShowAdd] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [nudge, setNudge] = useState(null);
   const [archiveTarget, setArchiveTarget] = useState(null);
   const [showUpgradeNudge, setShowUpgradeNudge] = useState(false);
+
+  async function handleLogProgress(goalId) {
+    const value = parseFloat(progressInputs[goalId]);
+    if (!value && value !== 0) return;
+    const { error } = await logProgress(goalId, value);
+    if (!error) setProgressInputs((prev) => ({ ...prev, [goalId]: '' }));
+  }
 
   const endedGoal = useMemo(() => {
     const today = todayStr();
@@ -109,26 +122,68 @@ export default function GoalsScreen() {
       )}
 
       {activeGoals.map((goal) => {
-        const checkedIn = isCheckedInToday(goal.id);
+        const isNumeric = goal.goal_type === 'numeric';
+        const checkedIn = !isNumeric && isCheckedInToday(goal.id);
+        const streak = isNumeric ? null : getLiveStreak(goal, todayStr());
+        const progress = progressMap[goal.id];
+        const total = progress?.total ?? 0;
+        const pct = goal.target_value ? Math.min((total / goal.target_value) * 100, 100) : 0;
+
         return (
           <View key={goal.id} style={styles.card}>
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardTitle}>{goal.title}</Text>
               <Text style={styles.cardTag}>{tagLabel(goal.tag)}</Text>
             </View>
-            <Text style={styles.cardMeta}>
-              {goal.frequency === '3x_week' ? '3x / week' : goal.frequency} · {durationLabel(goal.duration_days)}
-            </Text>
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={[styles.checkInBtn, checkedIn && styles.checkInBtnDone]}
-                onPress={() => checkIn(goal.id)}
-                disabled={checkedIn}
-              >
-                <Text style={[styles.checkInBtnText, checkedIn && styles.checkInBtnTextDone]}>
-                  {checkedIn ? '✓ Checked in' : 'Check In'}
+
+            {isNumeric ? (
+              <>
+                <Text style={styles.cardMeta}>
+                  {total} / {goal.target_value} {goal.target_unit} ({goal.target_period === 'total' ? 'total' : goal.target_period === 'weekly' ? 'this week' : 'this month'})
                 </Text>
-              </TouchableOpacity>
+                <View style={styles.progressBarTrack}>
+                  <View style={[styles.progressBarFill, { width: `${pct}%` }]} />
+                </View>
+                <View style={styles.progressLogRow}>
+                  <TextInput
+                    style={styles.progressInput}
+                    value={progressInputs[goal.id] ?? ''}
+                    onChangeText={(v) => setProgressInputs((prev) => ({ ...prev, [goal.id]: v }))}
+                    placeholder={`Log ${goal.target_unit ?? ''}...`}
+                    keyboardType="numeric"
+                  />
+                  <TouchableOpacity style={styles.logBtn} onPress={() => handleLogProgress(goal.id)}>
+                    <Text style={styles.logBtnText}>Log</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.cardMeta}>
+                  {goal.frequency === '3x_week' ? '3x / week' : goal.frequency} · {durationLabel(goal.duration_days)}
+                </Text>
+                {streak !== null && (
+                  <View style={styles.streakRow}>
+                    <Text style={styles.streakFire}>🔥</Text>
+                    <Text style={styles.streakCount}>{streak}</Text>
+                    <Text style={styles.streakLabel}>day streak</Text>
+                  </View>
+                )}
+              </>
+            )}
+
+            <View style={styles.actionRow}>
+              {!isNumeric && (
+                <TouchableOpacity
+                  style={[styles.checkInBtn, checkedIn && styles.checkInBtnDone]}
+                  onPress={() => checkIn(goal.id)}
+                  disabled={checkedIn}
+                >
+                  <Text style={[styles.checkInBtnText, checkedIn && styles.checkInBtnTextDone]}>
+                    {checkedIn ? '✓ Checked in' : 'Check In'}
+                  </Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity onPress={() => setEditingGoal(goal)}><Text style={styles.actionLink}>Edit</Text></TouchableOpacity>
               <TouchableOpacity onPress={() => pauseGoal(goal.id)}><Text style={styles.actionLink}>Pause</Text></TouchableOpacity>
               <TouchableOpacity onPress={() => completeGoal(goal.id)}><Text style={styles.actionLink}>Complete</Text></TouchableOpacity>
@@ -231,6 +286,16 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#2B1D14', flex: 1 },
   cardTag: { fontSize: 11, fontWeight: '700', color: '#E06400', backgroundColor: 'rgba(255,122,0,0.08)', paddingVertical: 3, paddingHorizontal: 8, borderRadius: 999 },
   cardMeta: { fontSize: 12, color: '#7A6F63', marginTop: 6 },
+  streakRow: { flexDirection: 'row', alignItems: 'baseline', gap: 5, marginTop: 10 },
+  streakFire: { fontSize: 16 },
+  streakCount: { fontSize: 20, fontWeight: '800', color: '#FF7A00' },
+  streakLabel: { fontSize: 12, fontWeight: '600', color: '#7A6F63' },
+  progressBarTrack: { height: 8, backgroundColor: '#f3f4f6', borderRadius: 999, marginTop: 10, overflow: 'hidden' },
+  progressBarFill: { height: '100%', backgroundColor: '#FF7A00', borderRadius: 999 },
+  progressLogRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  progressInput: { flex: 1, borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, fontSize: 13 },
+  logBtn: { backgroundColor: '#FF7A00', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 18, justifyContent: 'center' },
+  logBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 14, flexWrap: 'wrap' },
   checkInBtn: { backgroundColor: '#FF7A00', borderRadius: 999, paddingVertical: 8, paddingHorizontal: 16 },
   checkInBtnDone: { backgroundColor: '#f3f4f6' },

@@ -9,11 +9,21 @@ const FREQUENCIES = [
   ['weekly', 'Weekly'],
 ];
 
+const PERIODS = [
+  ['weekly', 'Weekly'],
+  ['monthly', 'Monthly'],
+  ['total', 'One-Time'],
+];
+
 export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPremium }) {
+  const [goalType, setGoalType] = useState('habit');
   const [title, setTitle] = useState('');
   const [tag, setTag] = useState(null);
   const [frequency, setFrequency] = useState(null);
   const [durationDays, setDurationDays] = useState(undefined); // undefined = not yet set
+  const [targetValue, setTargetValue] = useState('');
+  const [targetUnit, setTargetUnit] = useState('');
+  const [targetPeriod, setTargetPeriod] = useState('weekly');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -25,14 +35,26 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
   }
 
   function reset() {
-    setTitle(''); setTag(null); setFrequency(null); setDurationDays(undefined); setError(null);
+    setGoalType('habit'); setTitle(''); setTag(null); setFrequency(null); setDurationDays(undefined);
+    setTargetValue(''); setTargetUnit(''); setTargetPeriod('weekly'); setError(null);
   }
 
+  const isNumeric = goalType === 'numeric';
+  const canSubmit = isNumeric
+    ? title.trim() && tag && targetValue && targetUnit.trim()
+    : title.trim() && tag && frequency;
+
   async function handleSubmit() {
-    if (!title.trim() || !tag || !frequency) return;
+    if (!canSubmit) return;
     setSubmitting(true);
     setError(null);
-    const { error: createError } = await onCreate({ title: title.trim(), tag, frequency, durationDays });
+    const { error: createError } = await onCreate({
+      title: title.trim(), tag, goalType,
+      frequency, durationDays,
+      targetValue: isNumeric ? parseFloat(targetValue) : undefined,
+      targetUnit: isNumeric ? targetUnit.trim() : undefined,
+      targetPeriod: isNumeric ? targetPeriod : undefined,
+    });
     setSubmitting(false);
     if (createError?.code === 'CAP_REACHED') {
       setError(
@@ -66,8 +88,17 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
           </View>
         )}
 
+        <View style={styles.row}>
+          <TouchableOpacity style={[styles.pill, goalType === 'habit' && styles.pillActive]} onPress={() => setGoalType('habit')}>
+            <Text style={[styles.pillText, goalType === 'habit' && styles.pillTextActive]}>✓ Habit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.pill, goalType === 'numeric' && styles.pillActive]} onPress={() => setGoalType('numeric')}>
+            <Text style={[styles.pillText, goalType === 'numeric' && styles.pillTextActive]}>📊 Progress Goal</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.label}>What's the goal?</Text>
-        <TextInput style={styles.input} placeholder="e.g. Walk 20 minutes" value={title} onChangeText={setTitle} />
+        <TextInput style={styles.input} placeholder={isNumeric ? 'e.g. Save $500' : 'e.g. Walk 20 minutes'} value={title} onChangeText={setTitle} />
 
         <Text style={styles.label}>Category</Text>
         <View style={styles.tagGrid}>
@@ -84,7 +115,7 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
           ))}
         </View>
 
-        {tag && (
+        {tag && !isNumeric && (
           <>
             <Text style={styles.label}>How often?</Text>
             <View style={styles.row}>
@@ -117,19 +148,53 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
               })}
             </View>
             {config.durationHint && <Text style={styles.hint}>{config.durationHint}</Text>}
-
-            {showDisclaimer && (
-              <Text style={styles.disclaimer}>{INTEREST_CONFIG[tag].disclaimer}</Text>
-            )}
           </>
+        )}
+
+        {tag && isNumeric && (
+          <>
+            <Text style={styles.label}>Target</Text>
+            <View style={styles.row}>
+              <TextInput
+                style={[styles.input, styles.targetInput]}
+                placeholder="Target (e.g. 500)"
+                keyboardType="numeric"
+                value={targetValue}
+                onChangeText={setTargetValue}
+              />
+              <TextInput
+                style={[styles.input, styles.targetInput]}
+                placeholder="unit (miles, lbs, $…)"
+                value={targetUnit}
+                onChangeText={setTargetUnit}
+              />
+            </View>
+
+            <Text style={styles.label}>Resets</Text>
+            <View style={styles.row}>
+              {PERIODS.map(([val, lbl]) => (
+                <TouchableOpacity
+                  key={val}
+                  style={[styles.pill, targetPeriod === val && styles.pillActive]}
+                  onPress={() => setTargetPeriod(val)}
+                >
+                  <Text style={[styles.pillText, targetPeriod === val && styles.pillTextActive]}>{lbl}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
+        {tag && showDisclaimer && (
+          <Text style={styles.disclaimer}>{INTEREST_CONFIG[tag].disclaimer}</Text>
         )}
 
         {error && <Text style={styles.error}>{error}</Text>}
 
         <TouchableOpacity
-          style={[styles.submitBtn, (!title.trim() || !tag) && styles.submitBtnDisabled]}
+          style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
           onPress={handleSubmit}
-          disabled={!title.trim() || !tag || submitting}
+          disabled={!canSubmit || submitting}
         >
           <Text style={styles.submitBtnText}>{submitting ? 'Adding...' : 'Add Goal'}</Text>
         </TouchableOpacity>
@@ -147,6 +212,7 @@ const styles = StyleSheet.create({
   capBannerText: { color: '#2B1D14', fontSize: 13, fontWeight: '600' },
   label: { fontSize: 13, fontWeight: '700', color: '#2B1D14', marginTop: 18, marginBottom: 8 },
   input: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', padding: 14, fontSize: 15 },
+  targetInput: { flex: 1 },
   tagGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tagChip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1.5, borderColor: '#e5e7eb', backgroundColor: '#fff' },
   tagChipActive: { borderColor: '#FF7A00', backgroundColor: 'rgba(255,122,0,0.08)' },

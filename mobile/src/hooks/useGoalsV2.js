@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { computeCheckInStreak } from '../lib/streak';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -49,8 +50,9 @@ export function useGoalsV2(userId) {
   const archivedGoals = goals.filter((g) => g.status === 'archived');
   const atCap = activeGoals.length >= activeCap;
 
-  async function createGoal({ title, tag, frequency, durationDays }) {
-    const endsAt = durationDays
+  async function createGoal({ title, tag, frequency, durationDays, goalType = 'habit', targetValue, targetUnit, targetPeriod }) {
+    const isNumeric = goalType === 'numeric';
+    const endsAt = !isNumeric && durationDays
       ? new Date(Date.now() + durationDays * 86400000).toISOString()
       : null;
     const { data, error } = await supabase
@@ -59,10 +61,14 @@ export function useGoalsV2(userId) {
         user_id: userId,
         title,
         tag,
-        frequency,
-        duration_days: durationDays,
+        goal_type: goalType,
+        frequency: isNumeric ? null : frequency,
+        duration_days: isNumeric ? null : durationDays,
         ends_at: endsAt,
         status: 'active',
+        target_value: isNumeric ? targetValue : null,
+        target_unit: isNumeric ? targetUnit : null,
+        target_period: isNumeric ? targetPeriod : null,
       })
       .select()
       .single();
@@ -78,9 +84,22 @@ export function useGoalsV2(userId) {
   }
 
   async function checkIn(goalId) {
-    const { error } = await supabase
-      .from('goal_checkins_v2')
-      .upsert({ goal_id: goalId, user_id: userId, date: todayStr(), done: true }, { onConflict: 'goal_id,date' });
+    const today = todayStr();
+    const goal = goals.find((g) => g.id === goalId);
+    if (!goal) return { error: { message: 'Goal not found' } };
+    if (goal.last_checked_in === today) return { error: null }; // already checked in today
+
+    const { newCount, graceUsedWeek } = computeCheckInStreak(goal, today);
+    const [{ error: goalError }, { error: checkinError }] = await Promise.all([
+      supabase
+        .from('goals_v2')
+        .update({ day_count: newCount, last_checked_in: today, grace_used_week: graceUsedWeek })
+        .eq('id', goalId),
+      supabase
+        .from('goal_checkins_v2')
+        .upsert({ goal_id: goalId, user_id: userId, date: today, done: true }, { onConflict: 'goal_id,date' }),
+    ]);
+    const error = goalError ?? checkinError;
     if (!error) await fetchAll();
     return { error };
   }
