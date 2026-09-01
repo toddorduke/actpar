@@ -1,9 +1,10 @@
 import 'react-native-gesture-handler';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, ActivityIndicator } from 'react-native';
+import * as Notifications from 'expo-notifications';
 
 import HomeScreen from './src/screens/HomeScreen';
 import ConnectionsScreen from './src/screens/ConnectionsScreen';
@@ -11,8 +12,13 @@ import TribeScreen from './src/screens/TribeScreen';
 import PactScreen from './src/screens/PactScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import GoalsScreen from './src/screens/GoalsScreen';
+import NotificationsScreen from './src/screens/NotificationsScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
+import { registerForPushNotifications } from './src/lib/pushNotifications';
+import { useNotificationsV2 } from './src/hooks/useNotificationsV2';
+import ConnectionMatchModal from './src/components/ConnectionMatchModal';
+import { getDisplayName } from './src/lib/displayName';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,6 +28,7 @@ const icons = {
   Connections: '⚡',
   Tribe: '👥',
   Pact: '🔐',
+  Notifications: '🔔',
   Profile: '👤',
 };
 
@@ -49,8 +56,46 @@ function MainTabs() {
       <Tab.Screen name="Connections" component={ConnectionsScreen} />
       <Tab.Screen name="Tribe" component={TribeScreen} options={{ title: 'Tribe' }} />
       <Tab.Screen name="Pact" component={PactScreen} options={{ title: 'The Pact' }} />
+      <Tab.Screen name="Notifications" component={NotificationsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+}
+
+function AuthedApp({ userId }) {
+  const [matchNotif, setMatchNotif] = useState(null);
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotifications(userId);
+  }, [userId]);
+
+  // Tapping a push notification (app backgrounded/closed) -- surface the
+  // match modal for connection_accepted the same way the realtime listener
+  // does when the app is already open.
+  useEffect(() => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      const title = response.notification.request.content.title;
+      if (title === "🎉 It's a Spark!") {
+        setMatchNotif({ actor: { first_name: 'Your', last_name: 'partner' } });
+      }
+    });
+    return () => responseListener.current?.remove();
+  }, []);
+
+  const handleConnectionAccepted = useRef((notif) => setMatchNotif(notif)).current;
+  useNotificationsV2(userId, handleConnectionAccepted);
+
+  return (
+    <>
+      <MainTabs />
+      <ConnectionMatchModal
+        visible={!!matchNotif}
+        otherName={getDisplayName(matchNotif?.actor, 'your new connection')}
+        onMessage={() => setMatchNotif(null)}
+        onClose={() => setMatchNotif(null)}
+      />
+    </>
   );
 }
 
@@ -63,7 +108,7 @@ function Root() {
       </View>
     );
   }
-  return session ? <MainTabs /> : <LoginScreen />;
+  return session ? <AuthedApp userId={session.user.id} /> : <LoginScreen />;
 }
 
 export default function App() {

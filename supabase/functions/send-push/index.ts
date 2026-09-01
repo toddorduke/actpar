@@ -118,6 +118,55 @@ async function concatBytes(...arrays: Uint8Array[]): Promise<Uint8Array> {
   return out;
 }
 
+// ── notification copy ───────────────────────────────────────────────────────
+
+// Titles per the designed notification set. connection_accepted is the one
+// "match moment" -- its title leans into that; everything else stays
+// honest/specific rather than curiosity-gap. Batched types (count > 1) get
+// an "and N others" suffix on the body already assembled by the caller.
+const TITLES: Record<string, string> = {
+  connection_accepted: "🎉 It's a Spark!",
+  connection_request: 'New Spark',
+  streak_milestone: 'Streak Milestone',
+  progress_complete: 'Goal Hit',
+  journey_invite: 'Journey Invite',
+  journey_accepted: "You're Partnered Up",
+  journey_checkin: 'Accountability Check-In',
+  journey_nudge: 'Accountability Check-In',
+  new_message: 'New Message',
+  post_like: 'New Like',
+  cheer: 'New Cheer',
+  pact_joined: 'The Pact',
+  pact_post: 'The Pact',
+};
+
+function buildTitle(type: string): string {
+  return TITLES[type] ?? 'ActPar';
+}
+
+function buildBody(record: { body?: string; type?: string; count?: number }): string {
+  const base = record.body ?? 'You have a new notification.';
+  if ((record.count ?? 1) > 1 && ['post_like', 'cheer'].includes(record.type ?? '')) {
+    const others = (record.count ?? 1) - 1;
+    // record.body is already the latest single-actor phrasing (e.g. "Sarah liked your post");
+    // turn it into the aggregate form.
+    return base.replace(/\.$/, '') + ` and ${others} other${others === 1 ? '' : 's'}`;
+  }
+  return base;
+}
+
+// ── Expo push (mobile) ──────────────────────────────────────────────────────
+
+async function sendExpoPush(tokens: string[], title: string, body: string) {
+  if (!tokens.length) return;
+  const messages = tokens.map((to) => ({ to, title, body, sound: 'default' }));
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(messages),
+  }).catch(() => {}); // best-effort; Expo's service handles retries/receipts on its side
+}
+
 // ── handler ───────────────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
@@ -131,20 +180,20 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  const { data: subs } = await supabase
-    .from('push_subscriptions')
-    .select('endpoint, p256dh, auth')
-    .eq('user_id', record.user_id);
+  const title = buildTitle(record.type);
+  const body = buildBody(record);
 
-  if (!subs?.length) return new Response('No subscriptions', { status: 200 });
+  const [{ data: subs }, { data: expoTokens }] = await Promise.all([
+    supabase.from('push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', record.user_id),
+    supabase.from('expo_push_tokens').select('token').eq('user_id', record.user_id),
+  ]);
 
-  const payload = JSON.stringify({
-    title: 'ActPar',
-    body: record.body ?? 'You have a new notification.',
-    url: '/',
-  });
+  const webPayload = JSON.stringify({ title, body, url: '/' });
 
-  await Promise.allSettled(subs.map((sub) => sendWebPush(sub, payload)));
+  await Promise.allSettled([
+    ...(subs ?? []).map((sub) => sendWebPush(sub, webPayload)),
+    sendExpoPush((expoTokens ?? []).map((t) => t.token), title, body),
+  ]);
 
   return new Response('Sent', { status: 200 });
 });
