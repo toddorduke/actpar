@@ -8,21 +8,20 @@ const VAPID_SUBJECT = 'mailto:hello@actpar.com';
 async function sendWebPush(subscription: { endpoint: string; p256dh: string; auth: string }, payload: string) {
   const { endpoint, p256dh, auth } = subscription;
 
-  // Import VAPID keys
-  const privateKeyBytes = base64UrlDecode(VAPID_PRIVATE_KEY);
+  // WebCrypto's importKey('raw', ...) only supports EC *public* keys -- a
+  // private key scalar can only be imported as 'jwk' or 'pkcs8'. VAPID keys
+  // are generated/stored as raw base64url (private = the 32-byte `d` scalar,
+  // public = the 65-byte 0x04|x|y point), so reconstruct a JWK from those
+  // raw bytes rather than attempting a 'raw' import (which always throws for
+  // any private key, valid or not, and previously crashed silently here on
+  // every single call before the JWT was ever built).
   const publicKeyBytes = base64UrlDecode(VAPID_PUBLIC_KEY);
-
-  const privateKey = await crypto.subtle.importKey(
-    'raw', privateKeyBytes,
-    { name: 'ECDH', namedCurve: 'P-256' },
-    false, ['deriveKey', 'deriveBits']
-  ).catch(() =>
-    crypto.subtle.importKey(
-      'pkcs8', privateKeyBytes,
-      { name: 'ECDH', namedCurve: 'P-256' },
-      false, ['deriveKey', 'deriveBits']
-    )
-  );
+  const vapidJwk = {
+    kty: 'EC', crv: 'P-256', ext: true,
+    d: VAPID_PRIVATE_KEY,
+    x: base64UrlEncode(publicKeyBytes.slice(1, 33)),
+    y: base64UrlEncode(publicKeyBytes.slice(33, 65)),
+  };
 
   // Build VAPID JWT
   const url = new URL(endpoint);
@@ -31,7 +30,7 @@ async function sendWebPush(subscription: { endpoint: string; p256dh: string; aut
   const header = base64UrlEncode(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));
   const claims = base64UrlEncode(JSON.stringify({ aud: audience, exp: expiry, sub: VAPID_SUBJECT }));
   const signingKey = await crypto.subtle.importKey(
-    'raw', privateKeyBytes,
+    'jwk', vapidJwk,
     { name: 'ECDSA', namedCurve: 'P-256' },
     false, ['sign']
   );
@@ -92,7 +91,7 @@ function base64UrlDecode(s: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 }
 
-function base64UrlEncode(input: ArrayBuffer | string): string {
+function base64UrlEncode(input: ArrayBuffer | Uint8Array | string): string {
   const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : new Uint8Array(input);
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }

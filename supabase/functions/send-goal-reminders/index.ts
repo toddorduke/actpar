@@ -17,12 +17,14 @@ Deno.serve(async () => {
     const currentUtcHour = new Date().getUTCHours();
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // Find all active goals due for a reminder that haven't been checked in today
+    // Find all active goals due for a reminder that haven't been checked in
+    // today. goals_v2 is now the shared source of truth for both apps
+    // (web's goals table is legacy, kept only as a migration rollback net).
     const { data: goals, error: goalsError } = await supabase
-      .from('goals')
+      .from('goals_v2')
       .select('id, title, day_count, user_id')
       .eq('reminder_utc_hour', currentUtcHour)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .neq('last_checked_in', todayStr);
 
     if (goalsError) throw goalsError;
