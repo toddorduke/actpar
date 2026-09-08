@@ -256,9 +256,11 @@
   border-left: 4px solid;
 }
 
-.up-goal-card.tier-1 { border-color: #7c3aed; }
-.up-goal-card.tier-2 { border-color: #10b981; }
-.up-goal-card.tier-3 { border-color: #6b7280; }
+/* Same tier scheme as ProfilePage.css -- orange intensity for priority,
+   not an unrelated hue per tier. */
+.up-goal-card.tier-1 { border-color: var(--color-primary); }
+.up-goal-card.tier-2 { border-color: rgba(255, 122, 0, 0.55); }
+.up-goal-card.tier-3 { border-color: var(--color-muted); }
 
 .up-goal-header {
   display: flex;

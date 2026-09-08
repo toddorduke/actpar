@@ -910,25 +910,25 @@
   transform: translateY(-3px);
 }
 
-/* Tier 1 = gold (top, most important) */
+/* Tier is priority intensity, not a distinct category -- expressed as
+   orange intensity per the 3-color system, not three unrelated hues.
+   Matches the same scheme in UserProfilePage.css. */
 .goal-card.tier-1 {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #fbbf24;
-  box-shadow: 0 12px 30px rgba(251, 191, 36, 0.3);
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.14) 0%, rgba(224, 100, 0, 0.10) 100%);
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 12px 30px rgba(255, 122, 0, 0.25);
 }
 
-/* Tier 2 = orange-warm (important) */
 .goal-card.tier-2 {
-  background: linear-gradient(135deg, #fff1eb 0%, #fde8d8 100%);
-  border: 1px solid #fb923c;
-  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.2);
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.08) 0%, rgba(255, 122, 0, 0.05) 100%);
+  border: 1px solid rgba(255, 122, 0, 0.45);
+  box-shadow: 0 12px 30px rgba(255, 122, 0, 0.12);
 }
 
-/* Tier 3 = violet (foundation) */
 .goal-card.tier-3 {
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-  border: 1px solid #a78bfa;
-  box-shadow: 0 12px 30px rgba(255, 122, 0, 0.15);
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 122, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
 .tier-select {
