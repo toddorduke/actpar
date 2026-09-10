@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getDisplayName } from '../../utils/displayName.js';
 import './AdminPage.css';
 
@@ -14,6 +14,7 @@ export default function AdminPage() {
   const toast = useToast();
   const [reports, setReports] = useState([]);
   const [issueReports, setIssueReports] = useState([]);
+  const [coachRequests, setCoachRequests] = useState([]);
   const [auditLog, setAuditLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState('content');
@@ -25,8 +26,15 @@ export default function AdminPage() {
     if (!isAdmin) { navigate('/'); return; }
     fetchReports();
     fetchIssueReports();
+    fetchCoachRequests();
     fetchAuditLog();
   }, [isAdmin]);
+
+  // Switching sections resets to a tab that section actually has --
+  // coach requests use pending/contacted/dismissed, not reviewed.
+  useEffect(() => {
+    setTab('pending');
+  }, [section]);
 
   async function fetchAuditLog() {
     const { data } = await supabase
@@ -55,6 +63,14 @@ export default function AdminPage() {
     setIssueReports(data ?? []);
   }
 
+  async function fetchCoachRequests() {
+    const { data } = await supabase
+      .from('coach_requests')
+      .select('*, requester:user_id(id, first_name, last_name, alter_ego_name, avatar_url)')
+      .order('created_at', { ascending: false });
+    setCoachRequests(data ?? []);
+  }
+
   async function logAdminAction(action, targetType, targetId, details) {
     await supabase.from('admin_audit_log').insert({
       admin_id: user.id,
@@ -81,6 +97,14 @@ export default function AdminPage() {
     toast(`Issue marked as ${status}`, 'success');
   }
 
+  async function updateCoachRequestStatus(id, status) {
+    const { error } = await supabase.from('coach_requests').update({ status }).eq('id', id);
+    if (error) { toast("Couldn't update that request — try again.", 'error'); return; }
+    setCoachRequests((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+    logAdminAction('update_coach_request_status', 'coach_request', id, { status });
+    toast(`Request marked as ${status}`, 'success');
+  }
+
   async function banUser(userId) {
     if (!window.confirm('Ban this user? They will be locked out immediately; their data and posts are kept.')) return;
     const { data: { session } } = await supabase.auth.getSession();
@@ -104,7 +128,9 @@ export default function AdminPage() {
 
   const filtered = reports.filter((r) => r.status === tab);
   const filteredIssues = issueReports.filter((r) => r.status === tab);
-  const activeCounts = section === 'content' ? reports : issueReports;
+  const filteredCoachRequests = coachRequests.filter((r) => r.status === tab);
+  const activeCounts = section === 'content' ? reports : section === 'issues' ? issueReports : coachRequests;
+  const coachTabs = ['pending', 'contacted', 'dismissed'];
 
   if (!isAdmin) return null;
 
@@ -129,6 +155,15 @@ export default function AdminPage() {
             </span>
           </button>
           <button
+            className={`admin-tab${section === 'coaches' ? ' active' : ''}`}
+            onClick={() => setSection('coaches')}
+          >
+            🧑‍🏫 Coach Requests
+            <span className="admin-tab-count">
+              {coachRequests.filter((r) => r.status === 'pending').length}
+            </span>
+          </button>
+          <button
             className={`admin-tab${section === 'audit' ? ' active' : ''}`}
             onClick={() => setSection('audit')}
           >
@@ -136,7 +171,7 @@ export default function AdminPage() {
           </button>
         </div>
         {section !== 'audit' && <div className="admin-tabs">
-          {['pending', 'reviewed', 'dismissed'].map((t) => (
+          {(section === 'coaches' ? coachTabs : ['pending', 'reviewed', 'dismissed']).map((t) => (
             <button
               key={t}
               className={`admin-tab${tab === t ? ' active' : ''}`}
@@ -207,6 +242,38 @@ export default function AdminPage() {
                     </button>
                   )}
                 </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : section === 'coaches' ? (
+        filteredCoachRequests.length === 0 ? (
+          <div className="admin-empty">No {tab} coach requests.</div>
+        ) : (
+          <div className="admin-reports">
+            {filteredCoachRequests.map((r) => (
+              <div key={r.id} className="admin-report-card">
+                <div className="report-meta">
+                  <span className="report-reason">{r.specialty}</span>
+                  <span className="report-date">{new Date(r.created_at).toLocaleDateString()}</span>
+                </div>
+                {r.note && <p className="report-details">"{r.note}"</p>}
+                <div className="report-parties">
+                  <div>
+                    <span className="report-label">From:</span>{' '}
+                    <Link to={`/profile/${r.user_id}`}>{getDisplayName(r.requester, 'Unknown')}</Link>
+                  </div>
+                </div>
+                {r.status === 'pending' && (
+                  <div className="report-actions">
+                    <button className="report-btn reviewed" onClick={() => updateCoachRequestStatus(r.id, 'contacted')}>
+                      ✓ Mark Contacted
+                    </button>
+                    <button className="report-btn dismiss" onClick={() => updateCoachRequestStatus(r.id, 'dismissed')}>
+                      Dismiss
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

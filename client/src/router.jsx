@@ -35,6 +35,12 @@ const PageLoader = () => (
   <div style={{ minHeight: '100dvh', background: 'var(--color-background)' }} />
 );
 
+// The coach marketplace (browse, coach profiles, "Request a Coach") isn't
+// ready for a public rollout yet -- flip this back to true when it is.
+// There's no nav entry point into it already, but the routes themselves
+// were still directly reachable by URL, which isn't real hiding.
+const COACH_MARKETPLACE_ENABLED = false;
+
 // Redirects already-logged-in users away from auth pages
 const PublicOnlyRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -67,8 +73,12 @@ export const AppRoutes = () => (
       <Route path="/pact" element={<ProtectedRoute><PactPage /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
       <Route path="/profile/:userId" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
-      <Route path="/coaches" element={<ProtectedRoute><CoachDiscoveryPage /></ProtectedRoute>} />
-      <Route path="/coach/:coachId" element={<ProtectedRoute><CoachProfilePage /></ProtectedRoute>} />
+      {COACH_MARKETPLACE_ENABLED && (
+        <>
+          <Route path="/coaches" element={<ProtectedRoute><CoachDiscoveryPage /></ProtectedRoute>} />
+          <Route path="/coach/:coachId" element={<ProtectedRoute><CoachProfilePage /></ProtectedRoute>} />
+        </>
+      )}
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
       <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
