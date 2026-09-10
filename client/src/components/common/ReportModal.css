@@ -84,18 +84,18 @@
 
 .report-reason input { display: none; }
 
-.report-reason:hover { border-color: #f59e0b; color: #111827; }
+.report-reason:hover { border-color: var(--color-primary); color: #111827; }
 
 .report-reason.selected {
-  border-color: #f59e0b;
-  background: #fffbeb;
+  border-color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.05);
   color: #111827;
   font-weight: 700;
 }
 
 .report-reason.selected::before {
   content: '✓';
-  color: #f59e0b;
+  color: var(--color-primary);
   font-weight: 800;
   margin-right: -4px;
 }
@@ -111,7 +111,7 @@
   transition: border-color 0.15s;
 }
 
-.report-details:focus { border-color: #f59e0b; }
+.report-details:focus { border-color: var(--color-primary); }
 
 .report-submit-btn {
   padding: 12px;

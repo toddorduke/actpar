@@ -536,10 +536,10 @@
 }
 
 .up-affirmation-card {
-  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.12), rgba(255, 122, 0, 0.05));
   border-radius: 16px;
   padding: 20px;
-  border: 1px solid #fde68a;
+  border: 1px solid rgba(255, 122, 0, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;

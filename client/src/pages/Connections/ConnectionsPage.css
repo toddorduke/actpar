@@ -94,8 +94,8 @@
 }
 
 .sent-count-num.spark {
-  background: #fef3c7;
-  color: #d97706;
+  background: rgba(255, 122, 0, 0.12);
+  color: var(--color-primary-end);
 }
 
 .sent-count-num.connect {
@@ -252,7 +252,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #f59e0b;
+  border-color: var(--color-primary);
 }
 
 .spark-card {
@@ -299,7 +299,7 @@
 
 .spark-info { flex: 1; }
 .spark-name { font-weight: 600; color: #1f2937; }
-.spark-alter-ego { font-size: 0.85em; color: #f59e0b; font-weight: 500; }
+.spark-alter-ego { font-size: 0.85em; color: var(--color-primary); font-weight: 500; }
 
 .spark-actions { display: flex; gap: 8px; }
 
@@ -1004,7 +1004,7 @@
   }
 
   .mob-search-input::placeholder { color: #9ca3af; }
-  .mob-search-input:focus { border-color: #f59e0b; }
+  .mob-search-input:focus { border-color: var(--color-primary); }
 
   .mob-filter-chip {
     padding: 6px 10px;
@@ -1021,8 +1021,8 @@
   }
 
   .mob-filter-chip.active {
-    background: #f59e0b;
-    border-color: #f59e0b;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
   }
 
@@ -1263,8 +1263,8 @@
 }
 
 .mn-row-spark {
-  border-color: rgba(245, 158, 11, 0.3);
-  background: rgba(245, 158, 11, 0.04);
+  border-color: rgba(255, 122, 0, 0.3);
+  background: rgba(255, 122, 0, 0.04);
 }
 
 .mn-avatar-btn {
@@ -1331,7 +1331,7 @@
   width: fit-content;
 }
 
-.mn-badge.spark-badge { background: rgba(245,158,11,0.12); color: #d97706; }
+.mn-badge.spark-badge { background: rgba(255, 122, 0, 0.12); color: var(--color-primary-end); }
 .mn-badge.connect-badge { background: rgba(16,185,129,0.1); color: #059669; }
 
 .mn-sent-msg, .mn-spark-msg-blur {
@@ -1389,7 +1389,7 @@
 
 .mn-premium-btn {
   padding: 6px 12px;
-  background: linear-gradient(135deg, #f59e0b, #f97316);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: white;
   border: none;
   border-radius: 8px;
@@ -1466,7 +1466,7 @@
 .mn-conn-ego {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #d97706;
+  color: var(--color-primary-end);
 }
 
 .mn-conn-pill {
@@ -1478,7 +1478,7 @@
   padding: 2px 8px;
 }
 
-.mn-conn-pill--streak { background: #fef3c7; color: #b45309; }
+.mn-conn-pill--streak { background: rgba(255, 122, 0, 0.12); color: #b45309; }
 .mn-conn-pill--today  { background: #d1fae5; color: #065f46; }
 
 /* Right actions */
@@ -1491,7 +1491,7 @@
 
 .mn-conn-cheer-btn {
   padding: 6px 12px;
-  background: linear-gradient(135deg, #f59e0b, #f97316);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   border: none;
   border-radius: 20px;
   font-size: 0.78rem;
@@ -1679,7 +1679,7 @@
   flex-shrink: 0;
 }
 .mn-legend-dot--connected { background: #10b981; }
-.mn-legend-dot--waiting   { background: #f59e0b; }
+.mn-legend-dot--waiting   { background: var(--color-primary); }
 .mn-legend-dot--journey   { background: var(--color-primary-end); }
 
 .mn-section-hint {

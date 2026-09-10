@@ -7,6 +7,7 @@
   --color-surface: #ffffff;
   --color-primary: #FF7A00;
   --color-primary-end: #E06400;
+  --color-primary-light: #FFA64D;
   --color-secondary: #b45309;
   --color-accent: #d97706;
   --color-text: #2B1D14;
@@ -17,7 +18,6 @@
   --color-trust: #1E3A5F;
   --color-trust-end: #16293F;
   --gradient-primary: linear-gradient(135deg, #FF7A00 0%, #E06400 100%);
-  --gradient-secondary: linear-gradient(135deg, #fbbf24 0%, #FF7A00 100%);
   --gradient-trust: linear-gradient(135deg, #1E3A5F 0%, #16293F 100%);
   --radius-large: 24px;
   --radius-medium: 16px;

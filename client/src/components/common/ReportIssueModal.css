@@ -74,7 +74,7 @@
   transition: border-color 0.15s;
 }
 
-.report-details:focus { border-color: #f59e0b; }
+.report-details:focus { border-color: var(--color-primary); }
 
 .issue-screenshot-add-btn {
   padding: 12px 14px;
@@ -89,7 +89,7 @@
   transition: all 0.15s;
 }
 
-.issue-screenshot-add-btn:hover { border-color: #f59e0b; color: #d97706; background: #fffbeb; }
+.issue-screenshot-add-btn:hover { border-color: var(--color-primary); color: var(--color-primary-end); background: rgba(255, 122, 0, 0.05); }
 
 .issue-screenshot-preview {
   position: relative;
@@ -123,7 +123,7 @@
 
 .report-submit-btn {
   padding: 12px;
-  background: #f59e0b;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 12px;
@@ -133,5 +133,5 @@
   transition: all 0.15s;
 }
 
-.report-submit-btn:hover { background: #d97706; }
+.report-submit-btn:hover { background: var(--color-primary-end); }
 .report-submit-btn:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }

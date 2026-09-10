@@ -8,7 +8,7 @@ Three colors. Everything else is neutral. Tokens live in [client/src/assets/styl
 
 | Color | Tokens | Job |
 |---|---|---|
-| **Orange** | `--color-primary` #FF7A00, `--color-primary-end` #E06400 | Action. Anything the user taps to make something happen: submit, save, add, follow, spark, streak fire, progress fill. If it's asking for a tap, it's orange. |
+| **Orange** | `--color-primary` #FF7A00, `--color-primary-end` #E06400, `--color-primary-light` #FFA64D | Action. Anything the user taps to make something happen: submit, save, add, follow, spark, streak fire, progress fill. If it's asking for a tap, it's orange. `--color-primary-light` is a lighter tint for highlights/glows/shimmer within an otherwise-orange gradient — not a second color, just a lighter stop of the same one. |
 | **Espresso + cream** | `--color-text` #2B1D14, `--color-background` #FBF6EE, `--color-surface` #fff, `--color-muted` #7A6F63 | Foundation. Body text, page background, card surfaces, secondary/disabled text. This is "the app," not a decision the user is making. |
 | **Ink-blue** | `--color-trust` #1E3A5F, `--color-trust-end` #16293F | Trust. Reserved for moments where the user hands something over: payment/upgrade CTAs, verified badges, saving a journal/reflection entry. If it's not asking someone to trust the app with money or a private entry, it isn't this color. |
 
@@ -16,10 +16,13 @@ Three colors. Everything else is neutral. Tokens live in [client/src/assets/styl
 
 `--color-secondary` (#b45309) and `--color-accent` (#d97706) are legacy near-duplicates of orange from before this system existed (2 uses total, in TribeCommunityPage.css). Don't build new work on them — use `--color-primary`/`--color-primary-end` instead.
 
+Separately, raw-hex amber literals (`#f59e0b`, `#d97706`, `#fbbf24`, `#f97316`, `#ffd23f`, and their light tints `#fef3c7`/`#fde68a`/`#fffbeb`) used to be scattered across ~30 files standing in for `--color-primary`/`--color-primary-end`/`--color-primary-light` directly, not through any token — genuine brand drift, not an exception. Swept to tokens 2026-09-09; don't reintroduce them.
+
 ### Exceptions (already decided — don't relitigate per-component)
 
 - **Explore** (`/feed`, routed through `NAV_POOL.explore`, styled in [client/src/pages/Feed/FeedPage.css](client/src/pages/Feed/FeedPage.css)) is full-bleed dark reels-style media chrome, `#000` background. Deliberate departure from the light foundation, not a bug — this is a media viewer, not app chrome.
 - **Fixed semantic/status colors** carry meaning independent of brand color and are not to be reassigned to orange or blue: pact post-type badges in [PactPage.css](client/src/pages/Pact/PactPage.css) (`.badge-update` blue, `.badge-win` green, `.badge-challenge` red, `.badge-event` orange) and the notification-type legend in [NotificationsPage.css](client/src/pages/Notifications/NotificationsPage.css).
+- **Leaderboard podium rank colors** (gold/silver/bronze) in [CommunityPage.css](client/src/pages/Community/CommunityPage.css) (`.lb-top-1/2/3`) and [LeaderboardPage.css](client/src/pages/Leaderboard/LeaderboardPage.css) (`.lb-podium-bar-1/2/3`) are a universal 1st/2nd/3rd-place medal metaphor, independent of brand color — don't convert these to orange. Keep them consistent with each other if either changes.
 
 ### Enforcement
 

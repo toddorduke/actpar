@@ -147,7 +147,7 @@
 
 .gs-result-ego {
   font-size: 0.78rem;
-  color: #f59e0b;
+  color: var(--color-primary);
   font-weight: 600;
 }
 

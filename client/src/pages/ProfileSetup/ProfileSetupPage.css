@@ -21,7 +21,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #f59e0b;
+  color: var(--color-primary);
   margin-bottom: 4px;
 }
 
@@ -245,7 +245,7 @@
 }
 
 .psu-progress-step.done:not(:last-child)::after {
-  background: #f59e0b;
+  background: var(--color-primary);
 }
 
 .psu-progress-dot {
@@ -265,9 +265,9 @@
 }
 
 .psu-progress-step.active .psu-progress-dot {
-  background: #f59e0b;
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 0 0 4px rgba(245,158,11,0.2);
+  box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.2);
 }
 
 .psu-progress-step.done .psu-progress-dot {
@@ -283,7 +283,7 @@
   white-space: nowrap;
 }
 
-.psu-progress-step.active .psu-progress-label { color: #f59e0b; }
+.psu-progress-step.active .psu-progress-label { color: var(--color-primary); }
 .psu-progress-step.done .psu-progress-label { color: #10b981; }
 
 /* Step wrapper */
@@ -345,7 +345,7 @@
 
 /* Make primary button amber instead of purple */
 .profile-setup-btn:not(.ghost) {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   flex: 1;
 }
 

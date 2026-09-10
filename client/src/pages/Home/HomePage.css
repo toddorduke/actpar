@@ -13,7 +13,7 @@
 
 /* ── Welcome Banner ── */
 .home-welcome {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-end) 100%);
   border-radius: 20px;
   padding: 28px 32px;
   color: white;
@@ -30,7 +30,7 @@
   margin: 0 0 4px;
 }
 
-.home-welcome-name { color: #fde68a; }
+.home-welcome-name { color: rgba(255, 122, 0, 0.3); }
 
 .home-welcome-sub {
   font-size: 0.92rem;
@@ -96,13 +96,13 @@
 .home-card-icon {
   width: 20px;
   height: 20px;
-  color: #f59e0b;
+  color: var(--color-primary);
 }
 
 .home-card-link {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #f59e0b;
+  color: var(--color-primary);
   background: none;
   border: none;
   cursor: pointer;
@@ -160,8 +160,8 @@
 }
 
 .checkin-card:not(.checkin-card--done):hover {
-  border-color: rgba(245, 158, 11, 0.3);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+  border-color: rgba(255, 122, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 122, 0, 0.08);
 }
 
 .checkin-card--done {
@@ -174,7 +174,7 @@
   flex-direction: column;
   align-items: center;
   min-width: 44px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   border-radius: 10px;
   padding: 6px 4px;
   flex-shrink: 0;
@@ -211,7 +211,7 @@
 
 .checkin-card-milestone {
   font-size: 0.75rem;
-  color: #f59e0b;
+  color: var(--color-primary);
   font-weight: 600;
   margin-top: 2px;
 }
@@ -219,7 +219,7 @@
 .checkin-card-btn {
   flex-shrink: 0;
   padding: 7px 16px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: white;
   border: none;
   border-radius: 10px;
@@ -268,12 +268,12 @@
   transition: border-color 0.2s;
 }
 
-.home-reflection-input:focus { border-color: #f59e0b; background: white; }
+.home-reflection-input:focus { border-color: var(--color-primary); background: white; }
 
 .home-reflection-submit {
   margin-top: 10px;
   padding: 9px 20px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: white;
   border: none;
   border-radius: 10px;
@@ -305,8 +305,8 @@
 
 .home-activity-item:hover { background: #f9fafb; }
 
-.home-activity-item--milestone { background: #fef3c7; }
-.home-activity-item--milestone:hover { background: #fde68a; }
+.home-activity-item--milestone { background: rgba(255, 122, 0, 0.12); }
+.home-activity-item--milestone:hover { background: rgba(255, 122, 0, 0.3); }
 
 .home-activity-body { flex: 1; min-width: 0; }
 
@@ -326,7 +326,7 @@
 
 .home-activity-milestone-badge {
   flex-shrink: 0;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: white;
   font-size: 0.7rem;
   font-weight: 800;
@@ -336,8 +336,8 @@
 
 /* ── Getting Started card ── */
 .home-getting-started {
-  border: 2px solid #f59e0b !important;
-  background: linear-gradient(135deg, #fffbeb, #fef3c7) !important;
+  border: 2px solid var(--color-primary) !important;
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.05), rgba(255, 122, 0, 0.12)) !important;
 }
 
 .home-gs-header {
@@ -350,8 +350,8 @@
 .home-gs-progress {
   font-size: 0.8rem;
   font-weight: 800;
-  color: #f59e0b;
-  background: rgba(245,158,11,0.1);
+  color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.1);
   padding: 3px 10px;
   border-radius: 20px;
 }
@@ -393,7 +393,7 @@
 .home-gs-step-btn {
   flex-shrink: 0;
   padding: 7px 14px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: white;
   border: none;
   border-radius: 8px;
@@ -415,12 +415,12 @@
   line-height: 1;
 }
 .home-activity-cheer-btn:hover:not(:disabled) {
-  background: #fef3c7;
-  border-color: #f59e0b;
+  background: rgba(255, 122, 0, 0.12);
+  border-color: var(--color-primary);
 }
 .home-activity-cheer-btn.sent {
-  border-color: #f59e0b;
-  background: #fef3c7;
+  border-color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.12);
   cursor: default;
 }
 
@@ -482,14 +482,14 @@
 
 .home-suggested-meta {
   font-size: 0.76rem;
-  color: #d97706;
+  color: var(--color-primary-end);
   font-weight: 600;
 }
 
 .home-spark-btn {
   flex-shrink: 0;
   padding: 6px 14px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: white;
   border: none;
   border-radius: 999px;
@@ -519,7 +519,7 @@
 .home-stat-value {
   font-size: 1.6rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -556,9 +556,9 @@
 }
 
 .home-quick-btn:hover {
-  background: rgba(245, 158, 11, 0.06);
-  border-color: #f59e0b;
-  color: #f59e0b;
+  background: rgba(255, 122, 0, 0.06);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* ── Active Goals ── */
@@ -593,7 +593,7 @@
 .home-goal-day {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #f59e0b;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -607,7 +607,7 @@
 .home-goal-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   transition: width 0.4s ease;
 }
 
@@ -632,8 +632,8 @@
 }
 
 .lb-tab.active {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  border-color: #f59e0b;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
+  border-color: var(--color-primary);
   color: white;
 }
 
@@ -683,7 +683,7 @@
 
 .lb-ego {
   font-size: 0.72rem;
-  color: #d97706;
+  color: var(--color-primary-end);
   font-weight: 600;
 }
 
@@ -695,7 +695,7 @@
 .lb-score-num {
   font-size: 1rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

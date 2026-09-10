@@ -680,12 +680,12 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-.pinned-post { border-color: #fbbf24; background: #fffbeb; }
+.pinned-post { border-color: var(--color-primary-light); background: rgba(255, 122, 0, 0.05); }
 
 .pinned-label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #d97706;
+  color: var(--color-primary-end);
   letter-spacing: 0.3px;
 }
 
@@ -711,7 +711,7 @@
   transition: all 0.15s;
 }
 
-.pin-btn:hover { border-color: #fbbf24; color: #d97706; }
+.pin-btn:hover { border-color: var(--color-primary-light); color: var(--color-primary-end); }
 
 .comm-post-text {
   font-size: 0.95rem;
@@ -735,8 +735,8 @@
 .comm-post-milestone {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #d97706;
-  background: #fef3c7;
+  color: var(--color-primary-end);
+  background: rgba(255, 122, 0, 0.12);
   padding: 6px 12px;
   border-radius: 8px;
 }
@@ -1465,13 +1465,13 @@
 }
 
 .comm-reaction-chip:hover {
-  border-color: #f59e0b;
-  background: #fffbeb;
+  border-color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.05);
 }
 
 .comm-reaction-chip.active {
-  border-color: #f59e0b;
-  background: #fef3c7;
+  border-color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.12);
   color: #92400e;
   font-weight: 600;
 }

@@ -46,7 +46,7 @@
 .ms-close:hover { background: rgba(255,255,255,0.2); }
 
 .ms-xp-badge {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #000;
   font-size: 1rem;
   font-weight: 800;
@@ -83,7 +83,7 @@
 .ms-share-btn {
   flex: 1;
   padding: 14px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #000;
   border: none;
   border-radius: 12px;

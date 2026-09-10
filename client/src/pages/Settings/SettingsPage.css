@@ -49,12 +49,12 @@
 
 .settings-nav-item:hover {
   background: rgba(255, 122, 0, 0.07);
-  color: #d97706;
+  color: var(--color-primary-end);
 }
 
 .settings-nav-item.active {
   background: rgba(255, 122, 0, 0.1);
-  color: #d97706;
+  color: var(--color-primary-end);
 }
 
 .settings-nav-item.danger { color: #ef4444; }
@@ -127,7 +127,7 @@
   transition: border-color 0.2s;
 }
 
-.settings-input:focus { border-color: #d97706; }
+.settings-input:focus { border-color: var(--color-primary-end); }
 .settings-input.disabled { background: #f9fafb; color: #9ca3af; cursor: not-allowed; }
 
 /* City dropdown */
@@ -153,7 +153,7 @@
 }
 
 .settings-city-trigger:hover { border-color: rgba(255, 122, 0, 0.4); }
-.settings-city-trigger:focus { outline: none; border-color: #d97706; }
+.settings-city-trigger:focus { outline: none; border-color: var(--color-primary-end); }
 
 .settings-city-placeholder { color: #9ca3af; }
 
@@ -290,7 +290,7 @@
   padding: 0;
 }
 
-.toggle-switch.on { background: #d97706; }
+.toggle-switch.on { background: var(--color-primary-end); }
 
 .toggle-knob {
   position: absolute;
@@ -396,10 +396,10 @@
 
 .settings-avatar-btn {
   padding: 9px 18px;
-  border: 1.5px solid #d97706;
+  border: 1.5px solid var(--color-primary-end);
   border-radius: 10px;
   background: transparent;
-  color: #d97706;
+  color: var(--color-primary-end);
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
@@ -408,7 +408,7 @@
 }
 
 .settings-avatar-btn:hover:not(:disabled) {
-  background: #d97706;
+  background: var(--color-primary-end);
   color: white;
 }
 
@@ -439,12 +439,12 @@
 }
 
 .settings-radio-option input[type="radio"] {
-  accent-color: #d97706;
+  accent-color: var(--color-primary-end);
 }
 
 .settings-radio-option.selected {
-  border-color: #d97706;
-  background: #d97706;
+  border-color: var(--color-primary-end);
+  background: var(--color-primary-end);
   color: white;
 }
 
@@ -468,7 +468,7 @@
   transition: border-color 0.15s;
 }
 .settings-lf-search::placeholder { color: #9ca3af; }
-.settings-lf-search:focus { border-color: #d97706; background: #fff; }
+.settings-lf-search:focus { border-color: var(--color-primary-end); background: #fff; }
 
 .settings-lf-search-clear {
   position: absolute;
@@ -510,7 +510,7 @@
   text-align: left;
   transition: all 0.12s;
 }
-.settings-lf-suggestion:hover { border-color: #d97706; color: #d97706; }
+.settings-lf-suggestion:hover { border-color: var(--color-primary-end); color: var(--color-primary-end); }
 
 .settings-lf-badge {
   font-size: 0.65rem;
@@ -521,25 +521,25 @@
   margin-left: 8px;
 }
 .settings-lf-active { background: rgba(16,185,129,0.12); color: #059669; }
-.settings-lf-pending { background: rgba(245,158,11,0.12); color: #d97706; }
+.settings-lf-pending { background: rgba(255, 122, 0, 0.12); color: var(--color-primary-end); }
 
 .settings-lf-create {
   display: block;
   width: 100%;
   padding: 7px 10px;
   background: transparent;
-  border: 1.5px dashed #d97706;
+  border: 1.5px dashed var(--color-primary-end);
   border-radius: 8px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #d97706;
+  color: var(--color-primary-end);
   cursor: pointer;
   text-align: left;
   transition: all 0.12s;
 }
-.settings-lf-create:hover { background: rgba(217,119,6,0.06); border-style: solid; }
+.settings-lf-create:hover { background: rgba(224, 100, 0, 0.06); border-style: solid; }
 
-.settings-lf-custom { border-color: #d97706; }
+.settings-lf-custom { border-color: var(--color-primary-end); }
 
 .settings-lf-chips {
   display: flex;
@@ -560,13 +560,13 @@
 }
 
 .settings-lf-chip:hover {
-  border-color: #d97706;
-  color: #d97706;
+  border-color: var(--color-primary-end);
+  color: var(--color-primary-end);
 }
 
 .settings-lf-chip.selected {
-  border-color: #d97706;
-  background: #d97706;
+  border-color: var(--color-primary-end);
+  background: var(--color-primary-end);
   color: white;
 }
 
@@ -594,9 +594,9 @@
 }
 
 .settings-about-link:hover {
-  border-color: #d97706;
-  color: #d97706;
-  background: #fffbeb;
+  border-color: var(--color-primary-end);
+  color: var(--color-primary-end);
+  background: rgba(255, 122, 0, 0.05);
 }
 
 .settings-about-version {
@@ -754,20 +754,20 @@
 }
 
 .settings-tour-btn:hover {
-  border-color: #f59e0b;
+  border-color: var(--color-primary);
   background: #fffbf0;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+  box-shadow: 0 2px 8px rgba(255, 122, 0, 0.12);
 }
 
 .settings-tour-btn.primary {
   background: #fffbf0;
-  border-color: #f59e0b;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(255, 122, 0, 0.12);
 }
 
 .settings-tour-btn.primary:hover {
   background: #fff8e1;
-  border-color: #d97706;
+  border-color: var(--color-primary-end);
 }
 
 .settings-tour-icon {
@@ -808,7 +808,7 @@
 .referral-copy-btn {
   flex-shrink: 0;
   padding: 8px 16px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -841,8 +841,8 @@
   gap: 6px;
 }
 .referral-share-btn:hover {
-  border-color: #f59e0b;
-  background: rgba(245,158,11,0.06);
+  border-color: var(--color-primary);
+  background: rgba(255, 122, 0, 0.06);
   color: #92400e;
 }
 
@@ -853,11 +853,11 @@
 .pro-perk-label { font-size: 0.95rem; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
 .pro-perk-desc { font-size: 0.82rem; color: #94a3b8; line-height: 1.4; }
 .pro-price-row { display: flex; align-items: baseline; gap: 4px; margin: 24px 0 12px; }
-.pro-price-amount { font-size: 2.5rem; font-weight: 900; color: #f59e0b; }
+.pro-price-amount { font-size: 2.5rem; font-weight: 900; color: var(--color-primary); }
 .pro-price-period { font-size: 1rem; color: #94a3b8; }
 .pro-upgrade-btn {
   width: 100%; padding: 14px; border-radius: 12px; border: none;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #000; font-size: 1rem; font-weight: 800; cursor: pointer;
   transition: opacity 0.15s;
 }

@@ -164,8 +164,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1.5px solid rgba(245, 158, 11, 0.25);
+  background: rgba(255, 122, 0, 0.08);
+  border: 1.5px solid rgba(255, 122, 0, 0.25);
   border-radius: 14px;
   padding: 14px 16px;
 }
@@ -177,7 +177,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #d97706;
+  color: var(--color-primary-end);
   margin-bottom: 3px;
 }
 

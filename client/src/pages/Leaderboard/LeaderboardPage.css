@@ -317,7 +317,7 @@
 
 .lb-row-ego {
   font-size: 0.75rem;
-  color: #d97706;
+  color: var(--color-primary-end);
   font-weight: 600;
 }
 

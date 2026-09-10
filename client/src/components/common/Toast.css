@@ -35,8 +35,8 @@
 
 .toast-success { background: #b45309; }
 .toast-error   { background: #dc2626; }
-.toast-warning { background: #d97706; }
-.toast-info    { background: #d97706; }
+.toast-warning { background: var(--color-primary-end); }
+.toast-info    { background: var(--color-primary-end); }
 
 .toast-icon { font-size: 1rem; flex-shrink: 0; }
 

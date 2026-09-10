@@ -64,7 +64,7 @@
   transform: translate(-50%, -50%) scaleY(0);
   transform-origin: top center;
   fill: #ffe066;
-  filter: drop-shadow(0 0 14px #fff6c8) drop-shadow(0 0 28px #ffd23f);
+  filter: drop-shadow(0 0 14px #fff6c8) drop-shadow(0 0 28px var(--color-primary-light));
   animation: connected-bolt-strike 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
 }
 
@@ -125,7 +125,7 @@
 
 .connected-avatar-left,
 .connected-avatar-right {
-  border: 3px solid #ffd23f;
+  border: 3px solid var(--color-primary-light);
   box-shadow: 0 0 18px rgba(255, 210, 63, 0.55);
 }
 
@@ -183,7 +183,7 @@
 }
 
 .connected-btn-primary {
-  background: linear-gradient(135deg, #ffd23f, #f59e0b);
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
   color: #1a1a1a;
 }
 

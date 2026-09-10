@@ -627,10 +627,10 @@
 }
 
 .coaches-coming-soon-banner {
-  background: rgba(245, 158, 11, 0.1);
-  border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+  background: rgba(255, 122, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 122, 0, 0.25);
   padding: 12px 20px;
   font-size: 0.88rem;
-  color: #f59e0b;
+  color: var(--color-primary);
   text-align: center;
 }

@@ -367,9 +367,9 @@
   line-height: 1;
 }
 
-.notif-type-badge.spark { background: #f59e0b; }
+.notif-type-badge.spark { background: var(--color-primary); }
 .notif-type-badge.connect { background: #10b981; color: white; font-size: 0.65rem; }
-.notif-type-badge.milestone { background: #f97316; }
+.notif-type-badge.milestone { background: var(--color-primary-end); }
 
 .notif-see-all {
   display: block;

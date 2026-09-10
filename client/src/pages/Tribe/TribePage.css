@@ -18,7 +18,7 @@
 .tribe-hub-title {
   font-size: 2rem;
   font-weight: 900;
-  color: #f59e0b;
+  color: var(--color-primary);
   margin: 0 0 2px;
 }
 
@@ -30,7 +30,7 @@
 
 .tribe-hub-create-btn {
   padding: 10px 20px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -63,7 +63,7 @@
 .tribe-hub-stat-number {
   font-size: 1.6rem;
   font-weight: 900;
-  color: #f59e0b;
+  color: var(--color-primary);
 }
 
 .tribe-hub-stat-label {
@@ -95,12 +95,12 @@
 .tribe-hub-browse-link {
   background: none;
   border: none;
-  color: #d97706;
+  color: var(--color-primary-end);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
 }
-.tribe-hub-browse-link:hover { color: #f59e0b; }
+.tribe-hub-browse-link:hover { color: var(--color-primary); }
 
 /* ── Empty state ── */
 .tribe-hub-empty {
@@ -125,7 +125,7 @@
 
 .tribe-hub-join-prompt {
   padding: 9px 20px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -157,15 +157,15 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .tribe-hub-comm-card:hover {
-  border-color: #f59e0b;
-  box-shadow: 0 2px 12px rgba(245,158,11,0.12);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 12px rgba(255, 122, 0, 0.12);
 }
 
 .tribe-hub-comm-avatar {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   font-weight: 800;
   font-size: 1.1rem;
@@ -198,7 +198,7 @@
 }
 
 .tribe-hub-comm-arrow {
-  color: #d97706;
+  color: var(--color-primary-end);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -248,7 +248,7 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   font-weight: 800;
   font-size: 1rem;
@@ -283,9 +283,9 @@
 .tribe-hub-join-btn {
   padding: 6px 16px;
   border-radius: 20px;
-  border: 1.5px solid #f59e0b;
+  border: 1.5px solid var(--color-primary);
   background: transparent;
-  color: #d97706;
+  color: var(--color-primary-end);
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -293,7 +293,7 @@
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.tribe-hub-join-btn:hover { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border-color: transparent; }
+.tribe-hub-join-btn:hover { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end)); color: #fff; border-color: transparent; }
 
 /* ── Modals ── */
 .tribe-modal-overlay {
@@ -311,7 +311,7 @@
 .tribe-modal {
   background: #1f2937;
   border-radius: 20px;
-  border: 1px solid rgba(245,158,11,0.2);
+  border: 1px solid rgba(255, 122, 0, 0.2);
   padding: 28px 24px;
   width: 100%;
   max-width: 440px;
@@ -380,14 +380,14 @@
   box-sizing: border-box;
 }
 .tribe-modal-input:focus,
-.tribe-modal-textarea:focus { border-color: #f59e0b; }
+.tribe-modal-textarea:focus { border-color: var(--color-primary); }
 .tribe-modal-input::placeholder,
 .tribe-modal-textarea::placeholder { color: #6b7280; }
 .tribe-modal-textarea { resize: vertical; }
 
 .tribe-modal-btn {
   padding: 12px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -422,7 +422,7 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   color: #fff;
   font-weight: 800;
   font-size: 1rem;
@@ -457,9 +457,9 @@
 .tribe-browse-join-btn {
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1.5px solid #f59e0b;
+  border: 1.5px solid var(--color-primary);
   background: transparent;
-  color: #f59e0b;
+  color: var(--color-primary);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
@@ -467,7 +467,7 @@
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.tribe-browse-join-btn:hover { background: #f59e0b; color: #fff; }
+.tribe-browse-join-btn:hover { background: var(--color-primary); color: #fff; }
 
 .tribe-browse-open-btn {
   padding: 6px 14px;

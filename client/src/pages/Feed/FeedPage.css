@@ -16,7 +16,7 @@
 .feed-upload-bar-fill {
   height: 3px;
   border-radius: 3px;
-  background: #f59e0b;
+  background: var(--color-primary);
   transition: width 0.25s ease, background 0.3s;
 }
 
@@ -144,8 +144,8 @@
 .feed-avatar-ring {
   border-radius: 50%;
   padding: 2px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24, #f59e0b);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light), var(--color-primary));
+  box-shadow: 0 0 10px rgba(255, 122, 0, 0.5);
   flex-shrink: 0;
 }
 
@@ -178,9 +178,9 @@
 }
 
 .feed-type-achievement {
-  background: rgba(245, 158, 11, 0.25);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(255, 122, 0, 0.25);
+  color: var(--color-primary-light);
+  border: 1px solid rgba(255, 122, 0, 0.4);
 }
 
 .feed-type-meetup {
@@ -211,8 +211,8 @@
 .feed-action-avatar-ring {
   border-radius: 50%;
   padding: 2px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.55);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  box-shadow: 0 0 12px rgba(255, 122, 0, 0.55);
 }
 
 /* Like burst animation */
@@ -283,9 +283,9 @@
 
 .feed-milestone {
   display: inline-block;
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
+  background: rgba(255, 122, 0, 0.2);
+  border: 1px solid rgba(255, 122, 0, 0.35);
+  color: var(--color-primary-light);
   font-size: 0.78rem;
   font-weight: 700;
   padding: 4px 10px;
@@ -364,8 +364,8 @@
 
 .feed-reaction-chip:hover { background: rgba(255,255,255,0.22); }
 .feed-reaction-chip.active {
-  background: rgba(245, 158, 11, 0.35);
-  border-color: rgba(245, 158, 11, 0.6);
+  background: rgba(255, 122, 0, 0.35);
+  border-color: rgba(255, 122, 0, 0.6);
   transform: scale(1.08);
 }
 
@@ -392,12 +392,12 @@
 .feed-pulse {
   background: rgba(15,12,15,0.92);
   backdrop-filter: blur(8px);
-  color: #fbbf24;
+  color: var(--color-primary-light);
   font-size: 0.78rem;
   font-weight: 700;
   padding: 5px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(245,158,11,0.3);
+  border: 1px solid rgba(255, 122, 0, 0.3);
   pointer-events: auto;
 }
 
@@ -462,7 +462,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid rgba(255, 255, 255, 0.15);
-  border-top-color: #f59e0b;
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: feedSpin 0.7s linear infinite;
 }
@@ -586,7 +586,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--color-primary);
   color: #000;
   font-size: 28px;
   font-weight: 400;
@@ -596,14 +596,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 122, 0, 0.5);
   z-index: 60;
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .feed-fab:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 28px rgba(245, 158, 11, 0.65);
+  box-shadow: 0 6px 28px rgba(255, 122, 0, 0.65);
 }
 
 /* ── Post creation sheet ── */
@@ -626,7 +626,7 @@
   animation: feedSheetUp 0.28s cubic-bezier(0.32, 0.72, 0, 1);
   max-height: 90dvh;
   overflow-y: auto;
-  border-top: 3px solid #f59e0b;
+  border-top: 3px solid var(--color-primary);
   box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
 }
 
@@ -679,9 +679,9 @@
 }
 
 .feed-post-type-btn.active {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: rgba(245, 158, 11, 0.5);
-  color: #f59e0b;
+  background: rgba(255, 122, 0, 0.15);
+  border-color: rgba(255, 122, 0, 0.5);
+  color: var(--color-primary);
 }
 
 .feed-post-milestone-input {
@@ -812,7 +812,7 @@
 .feed-post-submit-btn {
   flex: 1;
   padding: 11px;
-  background: #f59e0b;
+  background: var(--color-primary);
   color: #000;
   font-weight: 700;
   font-size: 0.95rem;
@@ -838,7 +838,7 @@
   font-weight: 600;
   z-index: 300;
   pointer-events: none;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(255, 122, 0, 0.3);
 }
 
 /* ── Desktop: phone-like centered column ── */
@@ -1046,21 +1046,21 @@
 
 .fss-friend-info { flex: 1; min-width: 0; }
 .fss-friend-name { font-size: 0.88rem; font-weight: 600; color: #fff; }
-.fss-friend-ego  { font-size: 0.74rem; color: #f59e0b; }
+.fss-friend-ego  { font-size: 0.74rem; color: var(--color-primary); }
 
 .fss-send-btn {
   padding: 7px 16px;
   border-radius: 20px;
-  border: 1.5px solid #f59e0b;
+  border: 1.5px solid var(--color-primary);
   background: transparent;
-  color: #f59e0b;
+  color: var(--color-primary);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.fss-send-btn:hover { background: #f59e0b; color: #000; }
+.fss-send-btn:hover { background: var(--color-primary); color: #000; }
 .fss-send-btn.sent {
   border-color: #10b981;
   color: #10b981;
