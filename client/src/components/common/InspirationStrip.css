@@ -1,0 +1,74 @@
+.inspiration-strip {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  border: 1px dashed rgba(255, 122, 0, 0.3);
+}
+
+.inspiration-strip-label {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inspiration-strip-row {
+  display: flex;
+  gap: 10px;
+}
+
+.inspiration-strip-photo {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  display: block;
+}
+
+.inspiration-strip-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.inspiration-strip-video {
+  position: relative;
+}
+
+.inspiration-strip-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--color-text);
+}
+
+.inspiration-strip-mute-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.inspiration-strip-credit {
+  margin: 8px 0 0;
+  font-size: 0.68rem;
+  color: var(--color-muted);
+  text-align: right;
+}

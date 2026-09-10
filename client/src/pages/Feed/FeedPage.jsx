@@ -584,7 +584,7 @@ export default function FeedPage() {
   const { user }                              = useContext(AuthContext);
   const toast                                 = useToast();
   const { acceptedConnections }               = useConnections();
-  const { posts, loading, createPost, deletePost } = useTribePosts(null);
+  const { posts, loading, loadingMore, hasMore, loadMore, createPost, deletePost } = useTribePosts(null, { paginate: true, pageSize: 20 });
   const postIds                               = useMemo(() => posts.map((p) => p.id), [posts]);
   const { likedIds, toggleLike, toggling }    = usePostLikes(postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
@@ -616,6 +616,21 @@ export default function FeedPage() {
       .eq('last_checked_in', today)
       .then(({ count }) => setTodayCheckins(count ?? 0));
   }, []);
+
+  // Infinite scroll: fetch the next page once the sentinel at the bottom
+  // of the loaded list scrolls into view.
+  const loadMoreRef = useRef(null);
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: '800px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   // Ranked feed: engagement score with recency decay
   const rankedPosts = useMemo(() => {
@@ -769,6 +784,11 @@ export default function FeedPage() {
             onRsvp={handleRsvp}
           />
         ))}
+        {hasMore && (
+          <div ref={loadMoreRef} className="feed-load-more-sentinel">
+            {loadingMore && <div className="feed-loading-spinner feed-loading-spinner--inline" />}
+          </div>
+        )}
       </div>
 
       {/* Comment overlay */}

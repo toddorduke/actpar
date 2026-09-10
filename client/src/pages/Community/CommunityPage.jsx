@@ -7,6 +7,9 @@ import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useCommunityEvents } from '../../hooks/useCommunityEvents.js';
 import { useCommunityChat } from '../../hooks/useCommunityChat.js';
 import { useCommunityChallenges } from '../../hooks/useCommunityChallenges.js';
+import { useGoals } from '../../hooks/useGoals.js';
+import InspirationStrip from '../../components/common/InspirationStrip.jsx';
+import { getInspirationQuery } from '../../lib/inspiration.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
@@ -70,9 +73,14 @@ import './CommunityPage.css';
 const POST_TRUNCATE = 300;
 
 // ── Feed Tab ─────────────────────────────────────────────
-function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
+function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory }) {
   const { user } = useContext(AuthContext);
   const { posts, loading, createPost } = useTribePosts(communityId);
+  const { goals } = useGoals();
+  const inspiration = useMemo(
+    () => getInspirationQuery({ goals, communityCategory }),
+    [goals, communityCategory]
+  );
   const toast = useToast();
   const commentState = useCommentState(posts);
   const postIds = useMemo(() => posts.map(p => p.id), [posts]);
@@ -169,7 +177,12 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin }) {
       )}
 
       {loading && <div className="comm-empty">Loading posts...</div>}
-      {!loading && posts.length === 0 && <div className="comm-empty">No posts yet — start the conversation above!</div>}
+      {!loading && posts.length === 0 && (
+        <>
+          <div className="comm-empty">No posts yet — start the conversation above!</div>
+          {inspiration && <InspirationStrip query={inspiration.query} label={inspiration.label} />}
+        </>
+      )}
 
       {feed.map((p) => p.id !== pinnedPostId && (
         <PostCard key={p.id} post={p} onLike={handleLike} liked={likedIds.has(p.id)} isToggling={toggling.has(p.id)} likeCount={localLikeCounts[p.id] ?? p.likes} isAdmin={isAdmin} onPin={onPin} isPinned={false} onReport={(pid, uid) => { setReportPostId(pid); setReportedUserId(uid); }} currentUserId={user?.id} commentState={commentState} reactionCounts={reactionCounts[p.id]} myReaction={myReactions[p.id]} onReact={toggleReaction} rsvpGoingCount={goingCounts[p.id]} rsvpMyStatus={myRsvps[p.id] ?? null} onRsvp={handleRsvp} />
@@ -1271,7 +1284,7 @@ export default function CommunityPage() {
 
       {/* Tab Content */}
       <div className="comm-content">
-        {activeTab === 'feed' && <FeedTab communityId={communityId} isAdmin={isActualAdmin} pinnedPostId={community.pinned_post_id} onPin={handlePinPost} />}
+        {activeTab === 'feed' && <FeedTab communityId={communityId} isAdmin={isActualAdmin} pinnedPostId={community.pinned_post_id} onPin={handlePinPost} communityCategory={guessCommunityCategory(community.name, community.description)} />}
         {activeTab === 'events' && <EventsTab communityId={communityId} isAdmin={isActualAdmin} />}
         {activeTab === 'challenges' && <ChallengesTab communityId={communityId} communityName={community?.name} communityDescription={community?.description} />}
         {activeTab === 'leaderboard' && <LeaderboardTab communityId={communityId} />}

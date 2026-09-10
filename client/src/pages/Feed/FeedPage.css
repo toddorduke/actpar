@@ -467,6 +467,20 @@
   animation: feedSpin 0.7s linear infinite;
 }
 
+.feed-load-more-sentinel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  scroll-snap-align: none;
+}
+
+.feed-loading-spinner--inline {
+  width: 28px;
+  height: 28px;
+  border-width: 2px;
+}
+
 @keyframes feedSpin {
   to { transform: rotate(360deg); }
 }
