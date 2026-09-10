@@ -103,11 +103,14 @@ export default function UserProfilePage() {
         .eq('user_id', userId)
         .eq('is_public', true)
         .order('created_at', { ascending: false }),
+      // No visibility filter here -- RLS is the real gate (everyone-visible
+      // media, plus "My Sparks" media if the viewer is an accepted
+      // connection), so this naturally returns more for connections than
+      // for strangers without any client-side connection-status branching.
       supabase
         .from('media')
         .select('id, file_url, file_type, caption, created_at')
         .eq('user_id', userId)
-        .eq('visibility', 'everyone')
         .order('created_at', { ascending: false }),
     ]);
 
