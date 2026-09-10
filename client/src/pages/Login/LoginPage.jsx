@@ -5,6 +5,45 @@ import './LoginPage.css';
 
 const INITIAL_FORM = { email: '', password: '' };
 
+// Floating background affirmations -- each gets a scattered position and a
+// staggered drift animation (see LoginPage.css) so they read as ambient
+// motion behind the card, not as a grid.
+const AFFIRMATIONS = [
+  'You’ve got this 💪',
+  'One day at a time',
+  'Small steps, big wins',
+  'Progress > perfection',
+  'Show up for you',
+  'Keep the streak alive 🔥',
+  'You’re stronger than you think',
+  'Today counts',
+  'Consistency wins',
+  'Trust the process',
+  'Every check-in counts',
+  'Be proud of today',
+];
+
+// Fixed layout so bubbles are spread out and don't overlap the card --
+// randomizing on every render would also restart CSS animations.
+// `mobileOk` bubbles sit in the gap above the bottom-sheet card on narrow
+// screens (see the max-width: 640px rule in LoginPage.css) -- everything
+// else would land under or behind the full-width sheet there, so only the
+// handful anchored near the very top stay visible on mobile.
+const BUBBLE_LAYOUT = [
+  { top: '6%',  left: '20%', size: 'sm', duration: 11, mobileOk: true  },
+  { top: '10%', left: '68%', size: 'md', duration: 13, mobileOk: true  },
+  { top: '82%', left: '13%', size: 'md', duration: 12, mobileOk: false },
+  { top: '86%', left: '66%', size: 'sm', duration: 10, mobileOk: false },
+  { top: '15%', left: '42%', size: 'sm', duration: 14, mobileOk: true  },
+  { top: '92%', left: '40%', size: 'sm', duration: 11, mobileOk: false },
+  { top: '46%', left: '24%', size: 'sm', duration: 9,  mobileOk: false },
+  { top: '30%', left: '90%', size: 'md', duration: 15, mobileOk: false },
+  { top: '62%', left: '90%', size: 'sm', duration: 12, mobileOk: false },
+  { top: '54%', left: '10%', size: 'sm', duration: 10, mobileOk: false },
+  { top: '24%', left: '88%', size: 'sm', duration: 13, mobileOk: false },
+  { top: '16%', left: '84%', size: 'sm', duration: 9,  mobileOk: false },
+];
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,6 +88,17 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
+      <div className="login-bubbles" aria-hidden="true">
+        {BUBBLE_LAYOUT.map((pos, i) => (
+          <span
+            key={i}
+            className={`login-bubble login-bubble--${pos.size}${pos.mobileOk ? ' login-bubble--mobile-ok' : ''}`}
+            style={{ top: pos.top, left: pos.left, animationDuration: `${pos.duration}s` }}
+          >
+            {AFFIRMATIONS[i]}
+          </span>
+        ))}
+      </div>
       <div className="login-container">
         <section className="login-box">
           <div className="login-logo">ActPar</div>
