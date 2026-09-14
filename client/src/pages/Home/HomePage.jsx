@@ -12,6 +12,7 @@ import { useConnections } from '../../hooks/useConnections.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
 import { useGoalProgress } from '../../hooks/useGoalProgress.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
+import { usePushNotifications } from '../../hooks/usePushNotifications.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
 import { shouldShowRecap, dismissRecap, computeRecap, getPrevGrade } from '../../hooks/useWeeklyRecap.js';
 import WeeklyRecapModal from '../../components/common/WeeklyRecapModal.jsx';
@@ -434,6 +435,7 @@ const HomePage = () => {
   }, [goals.length]);
 
   const [activeTab, setActiveTab] = useState('overview');
+  const { supported: pushSupported, subscribed: pushSubscribed, permission: pushPermission, subscribe: subscribePush } = usePushNotifications();
 
   // — My own posts (direct query, not limited by global feed) —
   useEffect(() => {
@@ -1138,7 +1140,11 @@ const HomePage = () => {
                 const hasGoal       = goals.length > 0;
                 const hasConnection = acceptedConnections.length > 0;
                 const hasProfile    = !!(profile?.avatar_url && profile?.tagline);
-                const hasReminders  = !!(profile?.notification_prefs?.daily_reminder);
+                // Real push-enablement, not the daily_reminder in-app
+                // preference -- that defaults to true for everyone, so it
+                // was marking this step "done" for users who had never
+                // actually turned on notifications.
+                const hasReminders  = !pushSupported || pushSubscribed;
                 const allDone = hasGoal && hasConnection && hasProfile && hasReminders;
                 if (allDone) return null;
                 const steps = [
@@ -1167,8 +1173,11 @@ const HomePage = () => {
                     done: hasReminders,
                     title: 'Enable daily reminders',
                     desc: 'Never miss a check-in',
-                    cta: 'Set up →',
-                    action: () => navigate('/settings'),
+                    // Blocked-in-browser needs the site-settings instructions
+                    // that live on the Settings page; otherwise trigger the
+                    // real browser permission prompt right here, no detour.
+                    cta: pushPermission === 'denied' ? 'Fix →' : 'Enable →',
+                    action: () => pushPermission === 'denied' ? navigate('/settings') : subscribePush(),
                   },
                 ];
                 const completedCount = steps.filter((s) => s.done).length;
