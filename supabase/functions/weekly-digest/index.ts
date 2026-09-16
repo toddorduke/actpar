@@ -16,6 +16,7 @@ Deno.serve(async () => {
   try {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const weekAgoDate = weekAgo.split('T')[0];
 
     // Get all users with push subscriptions
     const { data: subs } = await supabase
@@ -42,19 +43,24 @@ Deno.serve(async () => {
       connMap.get(c.receiver_id)!.add(c.requester_id);
     }
 
-    // Get check-ins from the past week
+    // Get check-ins from the past week. goals_v2/goal_checkins_v2 are now
+    // the shared source of truth for both apps (the pre-migration goals/
+    // checkin_logs tables are legacy, kept only as a rollback net) -- this
+    // function silently found nothing from either stale table since that
+    // migration, so the weekly recap push has never actually fired.
     const { data: checkins } = await supabase
-      .from('checkin_logs')
-      .select('user_id, goal_id, checked_in_at, goals!checkin_logs_goal_id_fkey(title)')
-      .gte('checked_in_at', weekAgo);
+      .from('goal_checkins_v2')
+      .select('user_id, goal_id, date')
+      .eq('done', true)
+      .gte('date', weekAgoDate);
 
     // Get milestones (goals that hit a milestone day this week)
     const { data: milestoneGoals } = await supabase
-      .from('goals')
-      .select('user_id, title, day_count, profiles!goals_user_id_fkey(first_name, alter_ego_name)')
+      .from('goals_v2')
+      .select('user_id, title, day_count, profiles!goals_v2_user_id_fkey(first_name, alter_ego_name)')
       .in('day_count', [7, 30, 60, 90])
       .gte('updated_at', weekAgo)
-      .eq('is_active', true);
+      .eq('status', 'active');
 
     // Build per-user check-in counts
     const checkinsByUser = new Map<string, number>();

@@ -67,6 +67,13 @@ const LOG_TYPE_CHIPS = {
   fitness: ['Squat', 'Bench', 'Deadlift', 'Push-ups', 'Running', 'Other'],
   career: ['Applied', 'Networked', 'Interview', 'Follow-up', 'Skill Practice'],
   finance: ['No-Spend Day', 'Debt Payment', 'Saved', 'Skipped Purchase', 'Side Income'],
+  sobriety: ['Stayed Clean', 'Meeting Attended', 'Sponsor Call', 'Journaled', 'Exercised Instead', 'Other'],
+  faith: ['Scripture Read', 'Prayed', 'Devotional', 'Church / Service', 'Worship', 'Other'],
+  mindfulness: ['Meditation', 'Breathwork', 'Yoga', 'Journaling', 'Nature Walk', 'Other'],
+  nutrition: ['Home-Cooked Meal', 'Meal Prep', 'Hit Protein Goal', 'Skipped Junk Food', 'Hydration Goal', 'Other'],
+  mental_health: ['Journaled', 'Therapy Session', 'Gratitude List', 'Self-Care', 'Reached Out', 'Other'],
+  relationships: ['Quality Time', 'Deep Conversation', 'Date Night', 'Called Family', 'Resolved Conflict', 'Other'],
+  learning: ['Read a Chapter', 'Finished a Book', 'Online Course', 'Practiced Skill', 'Took Notes', 'Other'],
 };
 import './CommunityPage.css';
 
