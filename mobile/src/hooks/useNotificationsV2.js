@@ -1,6 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+// actorId = null means a system/milestone notification (always fires, even
+// for self). actorId = a real user id blocks self-notifications (don't
+// notify yourself for social actions). Mirrors the standalone export in
+// client/src/hooks/useNotifications.js.
+export async function createNotificationV2({ userId, actorId, type, refId, body }) {
+  if (!userId) return;
+  if (actorId && userId === actorId) return;
+  await supabase.from('notifications').insert({
+    user_id: userId,
+    actor_id: actorId ?? null,
+    type,
+    ref_id: refId ?? null,
+    body,
+  });
+}
+
 // Mirrors client/src/hooks/useNotifications.js. onConnectionAccepted lets
 // the caller trigger the match-moment modal the instant one arrives while
 // the app is open (the push notification covers the case where it isn't).
