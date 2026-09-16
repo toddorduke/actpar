@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import { supabase } from './supabase';
 
 Notifications.setNotificationHandler({
@@ -26,7 +27,13 @@ export async function registerForPushNotifications(userId) {
   }
   if (finalStatus !== 'granted') return null;
 
-  const { data: token } = await Notifications.getExpoPushTokenAsync();
+  // Modern Expo (SDK 49+) ties a push token to an EAS project -- without
+  // this, getExpoPushTokenAsync() has nothing to register against and
+  // fails. Read it from app.json (via eas init) rather than hardcoding it.
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  if (!projectId) return null;
+
+  const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
   if (!token) return null;
 
   await supabase.from('expo_push_tokens').upsert(
