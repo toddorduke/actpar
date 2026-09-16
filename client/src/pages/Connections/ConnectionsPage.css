@@ -1624,7 +1624,7 @@
 .journey-skip-hint { font-size: 0.78rem; color: var(--color-muted); margin: -8px 0 0; font-style: italic; }
 .journey-propose-btn {
   padding: 12px; border-radius: 12px; border: none;
-  background: linear-gradient(135deg, var(--color-primary-end), #4f46e5);
+  background: var(--gradient-primary);
   color: #fff; font-size: 0.95rem; font-weight: 800; cursor: pointer;
   transition: opacity 0.15s;
 }

@@ -951,7 +951,7 @@
 .stripe-help-link {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #6366f1;
+  color: var(--color-primary);
   text-decoration: underline;
 }
 

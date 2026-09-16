@@ -456,8 +456,8 @@
   transition: background 0.3s;
 }
 
-.progress-step.done { background: var(--color-primary, #6366f1); }
-.progress-step.active { background: var(--color-primary, #6366f1); opacity: 0.5; }
+.progress-step.done { background: var(--color-primary); }
+.progress-step.active { background: var(--color-primary); opacity: 0.5; }
 
 .coach-apply-body {
   padding: 20px 28px 28px;
@@ -511,7 +511,7 @@
 
 .apply-input:focus {
   outline: none;
-  border-color: var(--color-primary, #6366f1);
+  border-color: var(--color-primary);
   background: white;
 }
 
@@ -544,16 +544,16 @@
   text-align: center;
 }
 
-.apply-option-btn:hover { border-color: var(--color-primary, #6366f1); }
+.apply-option-btn:hover { border-color: var(--color-primary); }
 .apply-option-btn.active {
-  border-color: var(--color-primary, #6366f1);
+  border-color: var(--color-primary);
   background: #eef2ff;
-  color: var(--color-primary, #6366f1);
+  color: var(--color-primary);
 }
 
 .coach-apply-btn {
   padding: 12px 24px;
-  background: var(--gradient-primary, #6366f1);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: 10px;

@@ -38,7 +38,7 @@
 .lp-nav-logo {
   font-size: 1.25rem;
   font-weight: 900;
-  background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -126,7 +126,7 @@
 .lp-glow-left {
   top: -100px;
   left: -100px;
-  background: #7c3aed;
+  background: var(--color-primary);
 }
 .lp-glow-right {
   top: 50px;
@@ -284,7 +284,7 @@
 .lp-mini-logo {
   font-size: 0.8rem;
   font-weight: 900;
-  background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -306,10 +306,10 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(255, 122, 0, 0.08);
   border-radius: 10px;
   padding: 7px 8px;
-  border: 1px solid rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(255, 122, 0, 0.15);
 }
 
 .lp-mini-avatar {
@@ -326,7 +326,7 @@
 }
 
 .lp-avatar-m { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end)); }
-.lp-avatar-d { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; }
+.lp-avatar-d { background: linear-gradient(135deg, var(--color-trust), var(--color-trust-end)); color: #fff; }
 .lp-avatar-j { background: linear-gradient(135deg, #10b981, #059669); }
 
 .lp-mini-card-info { flex: 1; min-width: 0; }
@@ -605,7 +605,7 @@
   transition: border-color 0.2s, transform 0.2s;
 }
 .lp-testimonial-card:hover {
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(255, 122, 0, 0.3);
   transform: translateY(-2px);
 }
 
@@ -709,7 +709,7 @@
 
 .lp-cta-box {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 122, 0, 0.08) 0%, rgba(124,58,237,0.08) 100%);
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.12) 0%, rgba(224, 100, 0, 0.08) 100%);
   border: 1px solid rgba(255, 122, 0, 0.18);
   border-radius: 28px;
   padding: 72px 40px;
@@ -772,7 +772,7 @@
 .lp-footer-logo {
   font-size: 1.3rem;
   font-weight: 900;
-  background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
