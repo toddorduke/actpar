@@ -4,9 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { useTribePostsV2 } from '../hooks/useTribePostsV2';
 import { usePostLikesV2 } from '../hooks/usePostLikesV2';
+import { usePostCommentsV2 } from '../hooks/usePostCommentsV2';
+import { useMeetupRsvpV2 } from '../hooks/useMeetupRsvpV2';
 import { getDisplayName } from '../lib/displayName';
 import { timeAgo } from '../lib/timeAgo';
 import NudgeModal from '../components/NudgeModal';
+import CommentSheet from '../components/CommentSheet';
 
 const BADGE = {
   achievement: ['#d1fae5', '#065f46', '🏆 Achievement'],
@@ -14,7 +17,12 @@ const BADGE = {
   general: ['#dbeafe', '#1e40af', '💬 General'],
 };
 
-function PostCard({ post, liked, onLike }) {
+function formatEventDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, myRsvp, onRsvp }) {
   const [bg, text, label] = BADGE[post.post_type] || BADGE.general;
   const author = getDisplayName(post.profiles, 'Someone');
   return (
@@ -38,9 +46,28 @@ function PostCard({ post, liked, onLike }) {
         </View>
       )}
 
+      {post.post_type === 'meetup' && (
+        <View style={styles.meetupBox}>
+          {post.event_date ? <Text style={styles.meetupDetail}>📅 {formatEventDate(post.event_date)}</Text> : null}
+          {post.location ? <Text style={styles.meetupDetail}>📍 {post.location}</Text> : null}
+          <Text style={styles.meetupDetail}>👥 {goingCount ?? 0} going</Text>
+          <TouchableOpacity
+            style={[styles.joinBtn, myRsvp === 'going' && styles.joinBtnActive]}
+            onPress={() => onRsvp(post.id, 'going')}
+          >
+            <Text style={[styles.joinBtnText, myRsvp === 'going' && styles.joinBtnTextActive]}>
+              {myRsvp === 'going' ? "✓ You're going" : 'Join Meetup'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.postActions}>
         <TouchableOpacity style={styles.postAction} onPress={() => onLike(post.id, post.likes ?? 0)}>
           <Text style={styles.postActionText}>{liked ? '❤️' : '🤍'} {post.likes ?? 0}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.postAction} onPress={() => onComment(post.id)}>
+          <Text style={styles.postActionText}>💬 {commentCount ?? 0}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -53,6 +80,9 @@ export default function TribeScreen() {
   const { posts, loading, createPost } = useTribePostsV2(userId);
   const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
   const { likedIds, toggleLike } = usePostLikesV2(userId, postIds, 'tribe');
+  const commentState = usePostCommentsV2(userId);
+  const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvpV2(userId, meetupPostIds);
 
   const [localLikes, setLocalLikes] = useState({});
   const [filter, setFilter] = useState('all');
@@ -60,8 +90,12 @@ export default function TribeScreen() {
   const [postType, setPostType] = useState('general');
   const [content, setContent] = useState('');
   const [milestone, setMilestone] = useState('');
+  const [eventDateText, setEventDateText] = useState('');
+  const [eventTimeText, setEventTimeText] = useState('');
+  const [location, setLocation] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [nudge, setNudge] = useState(null);
+  const [commentPostId, setCommentPostId] = useState(null);
 
   const filtered = filter === 'all' ? posts : posts.filter((p) => p.post_type === filter);
   const postedToday = posts.filter((p) => p.created_at?.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
@@ -71,21 +105,39 @@ export default function TribeScreen() {
     toggleLike(postId, currentLikes, (id, newCount) => setLocalLikes((prev) => ({ ...prev, [id]: newCount })), owner);
   }
 
+  async function handleRsvp(postId, status) {
+    const { error } = await toggleRsvp(postId, status);
+    if (error) setNudge({ title: "Couldn't update your RSVP", message: 'Try again.' });
+  }
+
   async function submitPost() {
     if (!content.trim()) { setNudge({ title: 'Add some text', message: 'Write something before posting.' }); return; }
+    let eventDateIso = null;
+    if (postType === 'meetup') {
+      if (!eventDateText.trim() || !eventTimeText.trim()) {
+        setNudge({ title: 'Add a date and time', message: 'Meetups need a date (YYYY-MM-DD) and time (HH:MM) so people know when to show up.' });
+        return;
+      }
+      const parsed = new Date(`${eventDateText.trim()}T${eventTimeText.trim()}`);
+      if (Number.isNaN(parsed.getTime())) {
+        setNudge({ title: "That date didn't parse", message: 'Use YYYY-MM-DD for the date and HH:MM (24hr) for the time.' });
+        return;
+      }
+      eventDateIso = parsed.toISOString();
+    }
     setSubmitting(true);
     const { error, moderation } = await createPost({
       content: content.trim(),
       post_type: postType,
       milestone: postType === 'achievement' ? milestone.trim() : null,
+      event_date: eventDateIso,
+      location: postType === 'meetup' ? location.trim() : null,
     });
     setSubmitting(false);
     if (moderation) { setNudge({ title: 'Hold on', message: moderation.message }); return; }
     if (error) { setNudge({ title: "Couldn't post", message: 'Try again in a moment.' }); return; }
     setShowModal(false);
-    setContent('');
-    setMilestone('');
-    setPostType('general');
+    setContent(''); setMilestone(''); setEventDateText(''); setEventTimeText(''); setLocation(''); setPostType('general');
   }
 
   if (loading) {
@@ -133,6 +185,11 @@ export default function TribeScreen() {
               post={{ ...post, likes: localLikes[post.id] ?? post.likes }}
               liked={likedIds.has(post.id)}
               onLike={handleLike}
+              onComment={setCommentPostId}
+              commentCount={commentState.commentsByPost[post.id]?.length ?? post.comments_count ?? 0}
+              goingCount={goingCounts[post.id]}
+              myRsvp={myRsvps[post.id]}
+              onRsvp={handleRsvp}
             />
           ))
         )}
@@ -165,12 +222,22 @@ export default function TribeScreen() {
                 <TextInput style={styles.inputField} value={milestone} onChangeText={setMilestone} placeholder="What did you hit?" placeholderTextColor="#9ca3af" />
               </>
             )}
+            {postType === 'meetup' && (
+              <>
+                <Text style={styles.fieldLabel}>Date (YYYY-MM-DD)</Text>
+                <TextInput style={styles.inputField} value={eventDateText} onChangeText={setEventDateText} placeholder="2026-11-02" placeholderTextColor="#9ca3af" />
+                <Text style={styles.fieldLabel}>Time (24hr, HH:MM)</Text>
+                <TextInput style={styles.inputField} value={eventTimeText} onChangeText={setEventTimeText} placeholder="06:00" placeholderTextColor="#9ca3af" />
+                <Text style={styles.fieldLabel}>Location</Text>
+                <TextInput style={styles.inputField} value={location} onChangeText={setLocation} placeholder="Where's it happening?" placeholderTextColor="#9ca3af" />
+              </>
+            )}
             <Text style={styles.fieldLabel}>What's on your mind?</Text>
             <TextInput
               style={styles.textarea}
               multiline
               numberOfLines={6}
-              placeholder="Share your thoughts or an achievement..."
+              placeholder="Share your thoughts, achievements, or organize a meetup..."
               value={content}
               onChangeText={setContent}
               placeholderTextColor="#9ca3af"
@@ -179,6 +246,15 @@ export default function TribeScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+
+      <CommentSheet
+        visible={!!commentPostId}
+        postId={commentPostId}
+        postType="tribe"
+        ownerTable="tribe_posts"
+        commentState={commentState}
+        onClose={() => setCommentPostId(null)}
+      />
 
       <NudgeModal visible={!!nudge} title={nudge?.title} message={nudge?.message} onClose={() => setNudge(null)} />
     </SafeAreaView>
@@ -218,6 +294,13 @@ const styles = StyleSheet.create({
 
   milestone: { backgroundColor: '#FFF4E8', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, alignSelf: 'flex-start', marginBottom: 12 },
   milestoneText: { color: '#92400e', fontWeight: '600', fontSize: 13 },
+
+  meetupBox: { backgroundColor: '#FFF4E8', borderRadius: 12, padding: 14, borderLeftWidth: 4, borderLeftColor: '#FF7A00', marginBottom: 12 },
+  meetupDetail: { color: '#78350f', fontSize: 13, marginBottom: 4 },
+  joinBtn: { backgroundColor: '#FF7A00', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 8 },
+  joinBtnActive: { backgroundColor: '#10b981' },
+  joinBtnText: { color: '#fff', fontWeight: '700' },
+  joinBtnTextActive: { color: '#fff' },
 
   postActions: { flexDirection: 'row', gap: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#e5e7eb' },
   postAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },

@@ -37,7 +37,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: () => <Text style={{ fontSize: 22 }}>{icons[route.name]}</Text>,
-        tabBarActiveTintColor: '#667eea',
+        tabBarActiveTintColor: '#FF7A00',
         tabBarInactiveTintColor: '#9ca3af',
         tabBarStyle: {
           backgroundColor: '#fff',
@@ -48,10 +48,10 @@ function MainTabs() {
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         headerStyle: { backgroundColor: '#fff', shadowColor: 'transparent', elevation: 0, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
-        headerTitleStyle: { fontWeight: 'bold', fontSize: 20, color: '#667eea' },
+        headerTitleStyle: { fontWeight: 'bold', fontSize: 20, color: '#FF7A00' },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'GoalTracker' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'ActPar' }} />
       <Tab.Screen name="Goals" component={GoalsScreen} options={{ title: 'Goals' }} />
       <Tab.Screen name="Connections" component={ConnectionsScreen} />
       <Tab.Screen name="Tribe" component={TribeScreen} options={{ title: 'Tribe' }} />

@@ -6,7 +6,7 @@ import { useConnectionsV2 } from '../hooks/useConnectionsV2';
 import { getDisplayName } from '../lib/displayName';
 import NudgeModal from '../components/NudgeModal';
 
-const BG_COLORS = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'];
+const BG_COLORS = ['#FF7A00', '#E06400', '#1E3A5F', '#FFA64D', '#10b981'];
 
 export default function ConnectionsScreen() {
   const { session } = useContext(AuthContext);

@@ -21,7 +21,7 @@ export function useTribePostsV2(userId) {
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
-  const createPost = useCallback(async ({ content, post_type, milestone }) => {
+  const createPost = useCallback(async ({ content, post_type, milestone, event_date, location }) => {
     if (!userId) return { data: null, error: new Error('Not authenticated') };
     const modResult = checkText(content);
     if (!modResult.ok) return { data: null, error: null, moderation: modResult };
@@ -37,6 +37,8 @@ export function useTribePostsV2(userId) {
         content,
         post_type,
         milestone: milestone || null,
+        event_date: event_date || null,
+        location: location || null,
       })
       .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .single();

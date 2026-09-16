@@ -1,11 +1,14 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { usePactV2 } from '../hooks/usePactV2';
+import { usePostCommentsV2 } from '../hooks/usePostCommentsV2';
 import { getDisplayName } from '../lib/displayName';
 import { timeAgo } from '../lib/timeAgo';
 import NudgeModal from '../components/NudgeModal';
+import ConfirmModal from '../components/ConfirmModal';
+import CommentSheet from '../components/CommentSheet';
 
 const BADGE_STYLE = {
   update: ['rgba(30,58,95,0.1)', '#1E3A5F', '📊 Update'],
@@ -19,12 +22,17 @@ const ROLE_BADGE = { founder: '👑', 'co-lead': '⭐' };
 export default function PactScreen() {
   const { session } = useContext(AuthContext);
   const userId = session?.user?.id;
-  const { myPacts, pact, members, rules, posts, myRole, openPacts, loading, createPact, joinPactOpen, joinPactByCode, createPost, leavePact } = usePactV2(userId);
+  const { myPacts, pact, members, rules, posts, myRole, openPacts, loading, createPact, joinPactOpen, joinPactByCode, createPost, leavePact, addRule, removeMember } = usePactV2(userId);
+  const commentState = usePostCommentsV2(userId);
+  const canManage = myRole === 'founder' || myRole === 'co-lead';
 
   const [feedFilter, setFeedFilter] = useState('all');
   const [showPost, setShowPost] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoinCode, setShowJoinCode] = useState(false);
+  const [commentPostId, setCommentPostId] = useState(null);
+  const [newRuleText, setNewRuleText] = useState('');
+  const [removeTarget, setRemoveTarget] = useState(null);
   const [postType, setPostType] = useState('update');
   const [content, setContent] = useState('');
   const [newName, setNewName] = useState('');
@@ -56,6 +64,21 @@ export default function PactScreen() {
     setShowCreate(false);
     setNewName('');
     setNewDesc('');
+  }
+
+  async function submitRule() {
+    if (!newRuleText.trim()) return;
+    const { error, moderation } = await addRule(newRuleText.trim());
+    if (moderation) { setNudge({ title: 'Hold on', message: moderation.message }); return; }
+    if (error) { setNudge({ title: "Couldn't add that rule", message: 'Try again.' }); return; }
+    setNewRuleText('');
+  }
+
+  async function confirmRemoveMember() {
+    if (!removeTarget) return;
+    const { error } = await removeMember(removeTarget.user_id);
+    setRemoveTarget(null);
+    if (error) setNudge({ title: "Couldn't remove that member", message: 'Try again.' });
   }
 
   async function submitJoinCode() {
@@ -181,6 +204,11 @@ export default function PactScreen() {
                 </View>
                 <Text style={styles.memberName} numberOfLines={1}>{getDisplayName(m.profiles, 'Member').split(' ')[0]}</Text>
                 <Text style={styles.memberRole}>{m.role}</Text>
+                {canManage && m.user_id !== userId && m.role !== 'founder' && (
+                  <TouchableOpacity onPress={() => setRemoveTarget(m)}>
+                    <Text style={styles.removeMemberText}>Remove</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ))}
           </ScrollView>
@@ -216,21 +244,40 @@ export default function PactScreen() {
                   </View>
                 </View>
                 <Text style={styles.postText}>{post.content}</Text>
+                <View style={styles.postActions}>
+                  <TouchableOpacity style={styles.postAction} onPress={() => setCommentPostId(post.id)}>
+                    <Text style={styles.postActionText}>💬 {commentState.commentsByPost[post.id]?.length ?? 0}</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             );
           })}
         </View>
 
-        {rules.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📋 Pact Rules</Text>
-            {rules.map((r, i) => (
-              <View key={r.id} style={styles.ruleItem}>
-                <Text style={styles.ruleText}>{i + 1}. {r.rule_text}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📋 Pact Rules</Text>
+          {rules.length === 0 && <Text style={styles.emptySub}>No rules yet.</Text>}
+          {rules.map((r, i) => (
+            <View key={r.id} style={styles.ruleItem}>
+              <Text style={styles.ruleText}>{i + 1}. {r.rule_text}</Text>
+            </View>
+          ))}
+          {canManage && (
+            <View style={styles.addRuleRow}>
+              <TextInput
+                style={styles.addRuleInput}
+                placeholder="Add a rule..."
+                placeholderTextColor="#9ca3af"
+                value={newRuleText}
+                onChangeText={setNewRuleText}
+                onSubmitEditing={submitRule}
+              />
+              <TouchableOpacity style={styles.addRuleBtn} onPress={submitRule}>
+                <Text style={styles.addRuleBtnText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
 
         {myPacts.length > 1 && (
           <View style={styles.section}>
@@ -268,6 +315,25 @@ export default function PactScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+
+      <CommentSheet
+        visible={!!commentPostId}
+        postId={commentPostId}
+        postType="pact"
+        ownerTable="pact_posts"
+        commentState={commentState}
+        onClose={() => setCommentPostId(null)}
+      />
+
+      <ConfirmModal
+        visible={!!removeTarget}
+        title={`Remove ${removeTarget ? getDisplayName(removeTarget.profiles, 'this member') : ''}?`}
+        message="They'll lose access to this pact's posts and rules."
+        confirmLabel="Remove"
+        destructive
+        onConfirm={confirmRemoveMember}
+        onCancel={() => setRemoveTarget(null)}
+      />
 
       <NudgeModal visible={!!nudge} title={nudge?.title} message={nudge?.message ?? ' '} onClose={() => setNudge(null)} />
     </SafeAreaView>
@@ -313,6 +379,7 @@ const styles = StyleSheet.create({
   memberBadge: { fontSize: 18 },
   memberName: { color: '#2B1D14', fontSize: 12, fontWeight: '600', textAlign: 'center' },
   memberRole: { color: '#7A6F63', fontSize: 10, textAlign: 'center' },
+  removeMemberText: { color: '#dc2626', fontSize: 10, marginTop: 4, fontWeight: '600' },
 
   createPostBtn: { backgroundColor: '#FF7A00', borderRadius: 12, padding: 14, alignItems: 'center' },
   createPostText: { color: '#fff', fontWeight: '700', fontSize: 16 },
@@ -329,7 +396,15 @@ const styles = StyleSheet.create({
   postTime: { fontSize: 12, color: '#7A6F63' },
   postBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   postBadgeText: { fontSize: 11, fontWeight: '700' },
-  postText: { color: '#2B1D14', fontSize: 14, lineHeight: 21 },
+  postText: { color: '#2B1D14', fontSize: 14, lineHeight: 21, marginBottom: 10 },
+  postActions: { flexDirection: 'row', gap: 16, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,122,0,0.1)' },
+  postAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  postActionText: { color: '#7A6F63', fontSize: 13, fontWeight: '500' },
+
+  addRuleRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  addRuleInput: { flex: 1, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 10, padding: 10, fontSize: 14, color: '#2B1D14' },
+  addRuleBtn: { backgroundColor: '#FF7A00', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' },
+  addRuleBtnText: { color: '#fff', fontWeight: '700' },
 
   ruleItem: { backgroundColor: '#fff', borderLeftWidth: 3, borderLeftColor: '#FF7A00', borderRadius: 8, padding: 12, marginBottom: 8 },
   ruleText: { color: '#2B1D14', fontSize: 14 },

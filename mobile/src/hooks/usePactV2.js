@@ -169,6 +169,25 @@ export function usePactV2(userId) {
     return { data, error };
   }, [pact, userId, members]);
 
+  const addRule = useCallback(async (ruleText) => {
+    if (!pact) return { error: new Error('No pact selected') };
+    const modCheck = checkText(ruleText);
+    if (!modCheck.ok) return { error: null, moderation: modCheck };
+    const { data, error } = await supabase
+      .from('pact_rules')
+      .insert({ pact_id: pact.id, rule_text: ruleText, position: rules.length })
+      .select().single();
+    if (!error) setRules((prev) => [...prev, data]);
+    return { error };
+  }, [pact, rules]);
+
+  const removeMember = useCallback(async (targetUserId) => {
+    if (!pact) return { error: new Error('No pact selected') };
+    const { error } = await supabase.from('pact_members').delete().eq('pact_id', pact.id).eq('user_id', targetUserId);
+    if (!error) setMembers((prev) => prev.filter((m) => m.user_id !== targetUserId));
+    return { error };
+  }, [pact]);
+
   const leavePact = useCallback(async () => {
     if (!pact || !userId) return { error: new Error('No pact selected') };
     const { error } = await supabase.from('pact_members').delete().eq('pact_id', pact.id).eq('user_id', userId);
@@ -183,6 +202,7 @@ export function usePactV2(userId) {
   return {
     myPacts, pact, members, rules, posts, myRole, openPacts, loading,
     switchPact, createPact, joinPactOpen, joinPactByCode, createPost, leavePact,
+    addRule, removeMember,
     refetch: fetchAll,
   };
 }
