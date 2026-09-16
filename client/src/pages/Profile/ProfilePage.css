@@ -713,7 +713,7 @@
   outline: none;
 }
 .add-goal-reminder-select:focus { border-color: var(--color-primary); }
-.add-goal-reminder-select option { background: #1f2937; color: #fff; }
+.add-goal-reminder-select option { background: var(--color-text); color: #fff; }
 
 .goal-cat-chip {
   padding: 4px 9px;
@@ -1031,7 +1031,7 @@
 .day-count {
   display: grid;
   justify-items: center;
-  background: rgba(31, 41, 55, 0.85);
+  background: var(--color-text);
   color: #ffffff;
   padding: 10px 16px;
   border-radius: 16px;
@@ -2211,7 +2211,7 @@
   display: flex;
   align-items: baseline;
   gap: 3px;
-  background: rgba(31, 41, 55, 0.85);
+  background: var(--color-text);
   color: #ffffff;
   padding: 8px 12px;
   border-radius: 14px;
@@ -2934,7 +2934,7 @@
   display: flex; align-items: center; justify-content: center; padding: 16px;
 }
 .journey-modal {
-  background: #1f2937; border-radius: 20px;
+  background: var(--color-text); border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.1);
   padding: 28px 24px; width: 100%; max-width: 420px;
   position: relative; display: flex; flex-direction: column; gap: 16px;
