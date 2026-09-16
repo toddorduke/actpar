@@ -2,8 +2,7 @@ import React, { useContext, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
-import { useConnectionsV2 } from '../hooks/useConnectionsV2';
-import { getDisplayName } from '../lib/displayName';
+import { useConnections, getDisplayName } from '@actpar/shared';
 import NudgeModal from '../components/NudgeModal';
 
 const BG_COLORS = ['#FF7A00', '#E06400', '#1E3A5F', '#FFA64D', '#10b981'];
@@ -14,7 +13,7 @@ export default function ConnectionsScreen() {
   const {
     browseProfiles, incomingSparks, acceptedConnections, loading,
     sendSpark, acceptSpark, declineSpark, skipProfile,
-  } = useConnectionsV2(userId);
+  } = useConnections(userId);
 
   const [alert, setAlert] = useState(null);
   const [sparkMessage, setSparkMessage] = useState('');

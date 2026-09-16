@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { getSupabaseClient } from '../lib/supabaseClient.js';
 
-// Direct port of client/src/hooks/useMeetupRsvp.js.
-export function useMeetupRsvpV2(userId, meetupPostIds) {
+/**
+ * Fetches RSVP data for a list of meetup post IDs.
+ * Returns going counts per post and the current user's RSVP status per post.
+ */
+export function useMeetupRsvp(userId, meetupPostIds) {
   const [goingCounts, setGoingCounts] = useState({});
   const [myRsvps, setMyRsvps] = useState({});
   const [loading, setLoading] = useState(false);
@@ -12,7 +15,7 @@ export function useMeetupRsvpV2(userId, meetupPostIds) {
 
     async function fetch() {
       setLoading(true);
-      const { data } = await supabase
+      const { data } = await getSupabaseClient()
         .from('tribe_post_rsvps')
         .select('post_id, user_id, status')
         .in('post_id', meetupPostIds);
@@ -35,9 +38,11 @@ export function useMeetupRsvpV2(userId, meetupPostIds) {
 
   const toggleRsvp = useCallback(async (postId, status) => {
     if (!userId) return { error: null };
+    const supabase = getSupabaseClient();
     const current = myRsvps[postId] ?? null;
 
     if (current === status) {
+      // Remove RSVP (toggle off)
       setMyRsvps((prev) => { const n = { ...prev }; delete n[postId]; return n; });
       if (status === 'going') setGoingCounts((prev) => ({ ...prev, [postId]: Math.max(0, (prev[postId] ?? 1) - 1) }));
       const { error } = await supabase.from('tribe_post_rsvps').delete().eq('post_id', postId).eq('user_id', userId);

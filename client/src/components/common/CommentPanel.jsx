@@ -1,15 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { usePostComments } from '../../hooks/usePostComments.js';
+import { usePostComments, getDisplayName, timeAgo } from '@actpar/shared';
 import { useToast } from './Toast.jsx';
 import Avatar from './Avatar.jsx';
-import { timeAgo } from '../../utils/dateUtils.js';
-import { getDisplayName } from '../../utils/displayName.js';
 import './CommentPanel.css';
 
 export function useCommentState(posts = []) {
-  const { commentsByPost, loadingPost, fetchComments, addComment, deleteComment } = usePostComments();
+  const { user } = useContext(AuthContext);
+  const { commentsByPost, loadingPost, fetchComments, addComment, deleteComment } = usePostComments(user?.id);
   const [openPanels, setOpenPanels] = useState({});
 
   // Seed db-backed counts so they show immediately without opening the panel

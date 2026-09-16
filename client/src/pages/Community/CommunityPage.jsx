@@ -2,19 +2,18 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useCommunities } from '../../hooks/useCommunities.js';
-import { useTribePosts } from '../../hooks/useTribePosts.js';
-import { usePostLikes } from '../../hooks/usePostLikes.js';
+import { useTribePosts, usePostLikes, useMeetupRsvp } from '@actpar/shared';
 import { useCommunityEvents } from '../../hooks/useCommunityEvents.js';
 import { useCommunityChat } from '../../hooks/useCommunityChat.js';
 import { useCommunityChallenges } from '../../hooks/useCommunityChallenges.js';
 import { useGoals } from '../../hooks/useGoals.js';
+import { track, Events } from '../../lib/analytics.js';
 import InspirationStrip from '../../components/common/InspirationStrip.jsx';
 import { getInspirationQuery } from '../../lib/inspiration.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
-import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
 import ReportModal from '../../components/common/ReportModal.jsx';
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx';
 import { supabase } from '../../lib/supabase.js';
@@ -82,7 +81,9 @@ const POST_TRUNCATE = 300;
 // ── Feed Tab ─────────────────────────────────────────────
 function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory }) {
   const { user } = useContext(AuthContext);
-  const { posts, loading, createPost } = useTribePosts(communityId);
+  const { posts, loading, createPost } = useTribePosts(user?.id, communityId, {
+    onPostCreated: (post_type) => track(Events.POST_CREATED, { post_type }),
+  });
   const { goals } = useGoals();
   const inspiration = useMemo(
     () => getInspirationQuery({ goals, communityCategory }),
@@ -94,12 +95,12 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
   const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
   useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
-  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(user?.id, meetupPostIds);
   async function handleRsvp(postId, status) {
     const { error } = await toggleRsvp(postId, status);
     if (error) toast("Couldn't update your RSVP — try again.", 'error');
   }
-  const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'tribe');
+  const { likedIds, toggleLike, toggling } = usePostLikes(user?.id, postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   function handleLike(id, currentLikes) {
     const post = posts.find((p) => p.id === id);

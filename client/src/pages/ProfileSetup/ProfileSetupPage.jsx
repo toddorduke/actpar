@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { useProfile } from '../../hooks/useProfile.js';
+import { useProfile } from '@actpar/shared';
 import { useGoals } from '../../hooks/useGoals.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
@@ -32,7 +32,7 @@ const STEPS = [
 
 export default function ProfileSetupPage() {
   const { user } = useContext(AuthContext);
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile(user?.id);
   const { addGoal } = useGoals();
   const navigate = useNavigate();
   const toast = useToast();

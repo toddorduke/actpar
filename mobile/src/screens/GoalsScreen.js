@@ -2,7 +2,7 @@ import React, { useContext, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl, TextInput } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useGoalsV2 } from '../hooks/useGoalsV2';
-import { useGoalProgressV2 } from '../hooks/useGoalProgressV2';
+import { useGoalProgress, getLiveStreak } from '@actpar/shared';
 import { INTEREST_CONFIG } from '../lib/contentSources';
 import { durationLabel } from '../lib/goalDurations';
 import AddGoalModal from './AddGoalModal';
@@ -10,7 +10,6 @@ import EditGoalModal from './EditGoalModal';
 import GoalEndPromptModal from './GoalEndPromptModal';
 import NudgeModal from '../components/NudgeModal';
 import ConfirmModal from '../components/ConfirmModal';
-import { getLiveStreak } from '../lib/streak';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -29,8 +28,7 @@ export default function GoalsScreen() {
     createGoal, checkIn, pauseGoal, resumeGoal, completeGoal, archiveGoal, extendGoal, editGoal, refetch,
   } = useGoalsV2(userId);
 
-  const numericGoals = useMemo(() => activeGoals.filter((g) => g.goal_type === 'numeric'), [activeGoals]);
-  const { progressMap, logProgress } = useGoalProgressV2(userId, numericGoals);
+  const { progressMap, logProgress } = useGoalProgress(userId, activeGoals);
   const [progressInputs, setProgressInputs] = useState({});
 
   const [showAdd, setShowAdd] = useState(false);

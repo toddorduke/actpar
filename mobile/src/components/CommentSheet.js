@@ -2,8 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
-import { getDisplayName } from '../lib/displayName';
-import { timeAgo } from '../lib/timeAgo';
+import { getDisplayName, timeAgo } from '@actpar/shared';
 
 // Mobile equivalent of client/src/components/common/CommentPanel.jsx --
 // a bottom-sheet modal instead of an inline panel, works for both Tribe

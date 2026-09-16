@@ -1,0 +1,11 @@
+{
+  "name": "@actpar/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "description": "Business logic shared between client/ (web) and mobile/ (React Native) -- hooks, matching/streak/content-moderation rules, and other platform-agnostic code. UI stays separate per platform; only the 'brains' live here. See lib/supabaseClient.js for how each app wires in its own Supabase client.",
+  "peerDependencies": {
+    "react": "*"
+  }
+}

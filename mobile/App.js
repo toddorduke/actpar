@@ -18,7 +18,7 @@ import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import { registerForPushNotifications } from './src/lib/pushNotifications';
 import { useNotificationsV2 } from './src/hooks/useNotificationsV2';
 import ConnectionMatchModal from './src/components/ConnectionMatchModal';
-import { getDisplayName } from './src/lib/displayName';
+import { getDisplayName } from '@actpar/shared';
 
 const Tab = createBottomTabNavigator();
 

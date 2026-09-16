@@ -3,14 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useGoals } from '../../hooks/useGoals.js';
 import { usePartnerships } from '../../hooks/usePartnerships.js';
-import { useProfile } from '../../hooks/useProfile.js';
 import { useJournal } from '../../hooks/useJournal.js';
 import { useMedia } from '../../hooks/useMedia.js';
 import { useReflections, DEFAULT_QUESTIONS } from '../../hooks/useReflections.js';
-import { useTribePosts } from '../../hooks/useTribePosts.js';
+import { useTribePosts, useGoalProgress, useProfile } from '@actpar/shared';
+import { track, Events } from '../../lib/analytics.js';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
-import { useGoalProgress } from '../../hooks/useGoalProgress.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
 import { usePushNotifications } from '../../hooks/usePushNotifications.js';
 import { useConnectionActivity, isMilestone } from '../../hooks/useConnectionActivity.js';
@@ -324,13 +323,15 @@ const HomePage = () => {
   const toast = useToast();
 
   // — Hooks —
-  const { profile, loading: profileLoading, updateProfile } = useProfile();
+  const { profile, loading: profileLoading, updateProfile } = useProfile(user?.id);
   const { createOrAdopt } = useCustomCategories(profile?.id);
   const { reflections, affirmations, saveAnswer, saveAffirmation } = useReflections();
   const { goals, loading: goalsLoading, updateTier, addGoal, checkIn, deleteGoal, completeGoal } = useGoals();
-  const { progressMap, logProgress } = useGoalProgress(goals);
+  const { progressMap, logProgress } = useGoalProgress(user?.id, goals);
   const { entries, loading: journalLoading, createEntry, deleteEntry } = useJournal();
-  const { posts, loading: postsLoading, createPost } = useTribePosts();
+  const { posts, loading: postsLoading, createPost } = useTribePosts(user?.id, null, {
+    onPostCreated: (post_type) => track(Events.POST_CREATED, { post_type }),
+  });
   const { photos, videos, uploadFile, deleteMedia } = useMedia();
   const { acceptedConnections } = useConnections();
   const { partnerships, partnerSide, linkGoal, endJourney } = usePartnerships();

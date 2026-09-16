@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { useProfile } from '../../hooks/useProfile.js';
+import { useProfile } from '@actpar/shared';
 import { useToast } from '../../components/common/Toast.jsx';
 import { usePushNotifications } from '../../hooks/usePushNotifications.js';
 import { useCustomCategories } from '../../hooks/useCustomCategories.js';
@@ -81,7 +81,7 @@ const PRO_PERKS = [
 
 export default function SettingsPage() {
   const { user, logout } = useContext(AuthContext);
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile(user?.id);
   const navigate = useNavigate();
   const toast = useToast();
   const avatarInputRef = useRef(null);

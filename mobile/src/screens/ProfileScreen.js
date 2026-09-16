@@ -3,10 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
-import { useProfileV2 } from '../hooks/useProfileV2';
 import { useGoalsV2 } from '../hooks/useGoalsV2';
-import { useConnectionsV2 } from '../hooks/useConnectionsV2';
-import { getDisplayName } from '../lib/displayName';
+import { useProfile, useConnections, getDisplayName } from '@actpar/shared';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function ProfileScreen() {
@@ -14,9 +12,9 @@ export default function ProfileScreen() {
   const { session, signOut } = useContext(AuthContext);
   const userId = session?.user?.id;
 
-  const { profile, loading } = useProfileV2(userId);
+  const { profile, loading } = useProfile(userId);
   const { goals } = useGoalsV2(userId);
-  const { acceptedConnections } = useConnectionsV2(userId);
+  const { acceptedConnections } = useConnections(userId);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const bestStreak = goals.reduce((max, g) => Math.max(max, g.day_count ?? 0), 0);

@@ -4,8 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { useGoalsV2 } from '../hooks/useGoalsV2';
-import { useConnectionsV2 } from '../hooks/useConnectionsV2';
-import { useProfileV2 } from '../hooks/useProfileV2';
+import { useProfile, useConnections } from '@actpar/shared';
 
 const COLORS = ['#FF7A00', '#E06400', '#10b981', '#1E3A5F'];
 
@@ -18,9 +17,9 @@ export default function HomeScreen() {
   const { session } = useContext(AuthContext);
   const userId = session?.user?.id;
 
-  const { profile } = useProfileV2(userId);
+  const { profile } = useProfile(userId);
   const { goals, loading: goalsLoading } = useGoalsV2(userId);
-  const { acceptedConnections } = useConnectionsV2(userId);
+  const { acceptedConnections } = useConnections(userId);
 
   const habitGoals = useMemo(() => goals.filter((g) => g.goal_type !== 'numeric'), [goals]);
   const today = todayStr();

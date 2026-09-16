@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { computeCheckInStreak } from '../lib/streak';
+import { computeCheckInStreak } from '@actpar/shared';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);

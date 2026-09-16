@@ -1,9 +1,10 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../context/AuthContext.jsx';
-import { supabase } from '../lib/supabase.js';
+import { useCallback, useEffect, useState } from 'react';
+import { getSupabaseClient } from '../lib/supabaseClient.js';
 
-// Excludes phone and stripe_customer_id — internal/unused fields that should
-// never round-trip through the client (see profiles RLS: SELECT is public).
+// Excludes phone and stripe_customer_id -- internal/unused fields that
+// should never round-trip through the client (see profiles RLS: SELECT is
+// public). coach_* columns are included for web's coach-profile editing;
+// mobile just won't touch them (no coach UI there, marketplace disabled).
 const PROFILE_COLUMNS = `
   id, first_name, last_name, alter_ego_name, city, account_type, gender, age,
   avatar_url, bio, created_at, tagline, onboarding_complete, reflection_questions,
@@ -17,17 +18,18 @@ const PROFILE_COLUMNS = `
   milestones_count, referred_by
 `;
 
-export const useProfile = (userId = null) => {
-  const { user } = useContext(AuthContext);
-  const targetId = userId ?? user?.id;
-
+// userId: the signed-in user (needed for updateProfile, and as the default
+// fetch target). viewUserId: pass this to view someone *else's* profile
+// (e.g. UserProfilePage) -- when set, it's fetched instead of userId's own.
+export function useProfile(userId, viewUserId = null) {
+  const targetId = viewUserId ?? userId;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
     if (!targetId) return;
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await getSupabaseClient()
       .from('profiles')
       .select(PROFILE_COLUMNS)
       .eq('id', targetId)
@@ -39,15 +41,16 @@ export const useProfile = (userId = null) => {
   useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
   const updateProfile = useCallback(async (updates) => {
-    const { data, error } = await supabase
+    if (!userId) return { error: new Error('Not authenticated') };
+    const { data, error } = await getSupabaseClient()
       .from('profiles')
       .update(updates)
-      .eq('id', user.id)
+      .eq('id', userId)
       .select(PROFILE_COLUMNS)
       .single();
     if (!error) setProfile(data);
     return { data, error };
-  }, [user]);
+  }, [userId]);
 
   return { profile, loading, updateProfile, refetch: fetchProfile };
-};
+}

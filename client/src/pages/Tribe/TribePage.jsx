@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useCommunities } from '../../hooks/useCommunities.js';
-import { useProfile } from '../../hooks/useProfile.js';
+import { useProfile } from '@actpar/shared';
 import { supabase } from '../../lib/supabase.js';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
@@ -11,7 +11,7 @@ import './TribePage.css';
 export default function TribePage() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { profile } = useProfile();
+  const { profile } = useProfile(user?.id);
   const { myCommunities, communities, myMemberships, createCommunity, joinCommunity } = useCommunities();
   const toast = useToast();
 

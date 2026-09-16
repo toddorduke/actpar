@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { usePact } from '../../hooks/usePact.js';
-import { usePostLikes } from '../../hooks/usePostLikes.js';
+import { usePact, usePostLikes, getDisplayName } from '@actpar/shared';
 import { useToast } from '../../components/common/Toast.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import ReportModal from '../../components/common/ReportModal.jsx';
 import PostCard from '../../components/common/PostCard.jsx';
 import { supabase } from '../../lib/supabase.js';
-import { getDisplayName } from '../../utils/displayName.js';
 import './PactPage.css';
 
 const PACT_BADGE_MAP = {
@@ -199,10 +197,10 @@ export default function PactPage() {
     switchPact, createPact, joinPactOpen, joinPactByCode, toggleOpen,
     addRule, updateRule, deleteRule, createPost,
     removeMember, updateMemberRole, leavePact, deletePact,
-  } = usePact(activePactId);
+  } = usePact(user?.id, activePactId);
 
   const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
-  const { likedIds, toggleLike, toggling } = usePostLikes(postIds, 'pact');
+  const { likedIds, toggleLike, toggling } = usePostLikes(user?.id, postIds, 'pact');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
 
   function handlePactLike(id, currentLikes) {

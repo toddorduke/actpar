@@ -20,8 +20,8 @@ export function usePartnerships() {
         *,
         requester:profiles!partnerships_requester_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name),
         receiver:profiles!partnerships_receiver_id_fkey(id, first_name, last_name, avatar_url, alter_ego_name),
-        goal1:goals!partnerships_goal_id_1_fkey(id, title, day_count, last_checked_in),
-        goal2:goals!partnerships_goal_id_2_fkey(id, title, day_count, last_checked_in)
+        goal1:goals_v2!partnerships_goal_id_1_fkey(id, title, day_count, last_checked_in),
+        goal2:goals_v2!partnerships_goal_id_2_fkey(id, title, day_count, last_checked_in)
       `)
       .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`)
       .neq('status', 'ended')

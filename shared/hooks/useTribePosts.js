@@ -1,17 +1,19 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../context/AuthContext.jsx';
-import { supabase } from '../lib/supabase.js';
-import { checkText } from '../utils/contentModeration.js';
-import { track, Events } from '../lib/analytics.js';
+import { useCallback, useEffect, useState } from 'react';
+import { getSupabaseClient } from '../lib/supabaseClient.js';
+import { checkText } from '../lib/contentModeration.js';
 
 // `paginate: true` switches from the one-shot 200-post fetch to real
-// cursor-based paging (used by the Feed/Explore page's infinite scroll).
-// Left off (the default), every other caller keeps its existing behavior
-// unchanged -- several of them do their own client-side "load more" over
-// the full in-memory batch, which depends on that batch already holding
-// everything up to the 200 cap.
-export const useTribePosts = (communityId = null, { paginate = false, pageSize = 20 } = {}) => {
-  const { user } = useContext(AuthContext);
+// cursor-based paging (used by the web Feed/Explore page's infinite
+// scroll). Left off (the default), every other caller keeps its existing
+// behavior unchanged -- several of them do their own client-side "load
+// more" over the full in-memory batch, which depends on that batch
+// already holding everything up to the 200 cap.
+//
+// onPostCreated: optional (postType) => void, called after a successful
+// post -- web wires this to its posthog `track()` call; mobile has no
+// analytics yet and can just omit it. Kept out of this package so shared
+// code doesn't depend on a web-only analytics library.
+export function useTribePosts(userId, communityId = null, { paginate = false, pageSize = 20, onPostCreated } = {}) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -19,7 +21,7 @@ export const useTribePosts = (communityId = null, { paginate = false, pageSize =
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
-    let query = supabase
+    let query = getSupabaseClient()
       .from('tribe_posts')
       .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .order('created_at', { ascending: false })
@@ -47,7 +49,7 @@ export const useTribePosts = (communityId = null, { paginate = false, pageSize =
     // boundary post once they span a page edge. Order and cursor on the
     // compound (created_at, id) so the sort is a strict total order.
     const cursor = posts[posts.length - 1];
-    let query = supabase
+    let query = getSupabaseClient()
       .from('tribe_posts')
       .select('*, profiles!tribe_posts_user_id_fkey(first_name, last_name, alter_ego_name, avatar_url, id)')
       .order('created_at', { ascending: false })
@@ -66,6 +68,7 @@ export const useTribePosts = (communityId = null, { paginate = false, pageSize =
   }, [paginate, loadingMore, hasMore, posts, communityId, pageSize]);
 
   const createPost = useCallback(async ({ content, post_type, milestone, community_id, media_url, event_date, location }) => {
+    if (!userId) return { data: null, error: new Error('Not authenticated') };
     const modResult = checkText(content);
     if (!modResult.ok) return { data: null, error: null, moderation: modResult };
     if (milestone) {
@@ -77,10 +80,10 @@ export const useTribePosts = (communityId = null, { paginate = false, pageSize =
       if (!locationCheck.ok) return { data: null, error: null, moderation: locationCheck };
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('tribe_posts')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         content,
         post_type,
         milestone: milestone || null,
@@ -93,12 +96,13 @@ export const useTribePosts = (communityId = null, { paginate = false, pageSize =
       .single();
     if (!error) {
       setPosts((prev) => [data, ...prev]);
-      track(Events.POST_CREATED, { post_type });
+      onPostCreated?.(post_type);
     }
     return { data, error };
-  }, [user]);
+  }, [userId, onPostCreated]);
 
   const deletePost = useCallback(async (postId) => {
+    const supabase = getSupabaseClient();
     const mediaUrl = posts.find((p) => p.id === postId)?.media_url;
     const { error } = await supabase.from('tribe_posts').delete().eq('id', postId);
     if (!error) {
@@ -112,4 +116,4 @@ export const useTribePosts = (communityId = null, { paginate = false, pageSize =
   }, [posts]);
 
   return { posts, loading, loadingMore, hasMore, loadMore, createPost, deletePost, refetch: fetchPosts };
-};
+}

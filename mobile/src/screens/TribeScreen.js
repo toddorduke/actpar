@@ -2,12 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
-import { useTribePostsV2 } from '../hooks/useTribePostsV2';
-import { usePostLikesV2 } from '../hooks/usePostLikesV2';
-import { usePostCommentsV2 } from '../hooks/usePostCommentsV2';
-import { useMeetupRsvpV2 } from '../hooks/useMeetupRsvpV2';
-import { getDisplayName } from '../lib/displayName';
-import { timeAgo } from '../lib/timeAgo';
+import { useTribePosts, usePostLikes, usePostComments, useMeetupRsvp, getDisplayName, timeAgo } from '@actpar/shared';
 import NudgeModal from '../components/NudgeModal';
 import CommentSheet from '../components/CommentSheet';
 
@@ -77,12 +72,12 @@ function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, my
 export default function TribeScreen() {
   const { session } = useContext(AuthContext);
   const userId = session?.user?.id;
-  const { posts, loading, createPost } = useTribePostsV2(userId);
+  const { posts, loading, createPost } = useTribePosts(userId);
   const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
-  const { likedIds, toggleLike } = usePostLikesV2(userId, postIds, 'tribe');
-  const commentState = usePostCommentsV2(userId);
+  const { likedIds, toggleLike } = usePostLikes(userId, postIds, 'tribe');
+  const commentState = usePostComments(userId);
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
-  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvpV2(userId, meetupPostIds);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(userId, meetupPostIds);
 
   const [localLikes, setLocalLikes] = useState({});
   const [filter, setFilter] = useState('all');

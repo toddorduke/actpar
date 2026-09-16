@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
 import { supabase } from '../../lib/supabase.js';
-import { useTribePosts } from '../../hooks/useTribePosts.js';
+import { useTribePosts, usePostLikes, useMeetupRsvp } from '@actpar/shared';
 import { useCommunities } from '../../hooks/useCommunities.js';
-import { usePostLikes } from '../../hooks/usePostLikes.js';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
-import { useMeetupRsvp } from '../../hooks/useMeetupRsvp.js';
+import { track, Events } from '../../lib/analytics.js';
 import { scanMediaUrl } from '../../utils/contentModeration.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
@@ -584,14 +583,17 @@ export default function FeedPage() {
   const { user }                              = useContext(AuthContext);
   const toast                                 = useToast();
   const { acceptedConnections }               = useConnections();
-  const { posts, loading, loadingMore, hasMore, loadMore, createPost, deletePost } = useTribePosts(null, { paginate: true, pageSize: 20 });
+  const { posts, loading, loadingMore, hasMore, loadMore, createPost, deletePost } = useTribePosts(user?.id, null, {
+    paginate: true, pageSize: 20,
+    onPostCreated: (post_type) => track(Events.POST_CREATED, { post_type }),
+  });
   const postIds                               = useMemo(() => posts.map((p) => p.id), [posts]);
-  const { likedIds, toggleLike, toggling }    = usePostLikes(postIds, 'tribe');
+  const { likedIds, toggleLike, toggling }    = usePostLikes(user?.id, postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
   const commentState                          = useCommentState(posts);
   const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
-  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(meetupPostIds);
+  const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(user?.id, meetupPostIds);
   async function handleRsvp(postId, status) {
     const { error } = await toggleRsvp(postId, status);
     if (error) toast("Couldn't update your RSVP — try again.", 'error');

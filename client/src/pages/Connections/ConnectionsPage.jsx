@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
-import { useProfile } from '../../hooks/useProfile.js';
+import { useProfile } from '@actpar/shared';
 import { useBlock } from '../../hooks/useBlock.js';
 import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { supabase } from '../../lib/supabase.js';
@@ -30,7 +30,7 @@ export default function ConnectionsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useContext(AuthContext);
-  const { profile: myProfile } = useProfile();
+  const { profile: myProfile } = useProfile(user?.id);
   const toast = useToast();
   const [celebrate, setCelebrate] = useState(null);
 

@@ -1,9 +1,10 @@
 /**
  * Content Moderation Utility (text only)
- * Ports client/src/utils/contentModeration.js's checkText/checkUsername --
- * pure client-side logic, no external API, safe to run unchanged on mobile.
- * Media moderation (scanMediaUrl) isn't ported -- mobile posts are text-only
- * for now, no image/video upload from this app yet.
+ * checkText/checkUsername -- pure logic, no external API, shared by web and
+ * mobile. Media moderation (file-type/size validation, scanMediaUrl) stays
+ * in client/src/utils/contentModeration.js -- it's built on the browser's
+ * File API and calls the Sightengine media-scan service, neither of which
+ * applies to mobile yet (no image/video upload there).
  */
 
 const BLOCKED_WORDS = [

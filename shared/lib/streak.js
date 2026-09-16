@@ -1,8 +1,7 @@
-// Mirror of client/src/utils/streak.js -- real consecutive-day streak with
-// 1 forgiven miss per calendar week (a "grace day"). Both web and mobile
-// write/read the same goals_v2.day_count/last_checked_in/grace_used_week
-// fields, so this logic must stay identical on both sides. If you change
-// one, change the other.
+// Real consecutive-day streak with 1 forgiven miss per calendar week (a
+// "grace day"). goals.day_count only ever incremented before this and was
+// mislabeled as a "streak" everywhere in the UI -- these functions are the
+// single source of truth for both writing (checkIn) and displaying it.
 
 const DAY_MS = 86400000;
 
@@ -14,14 +13,17 @@ function diffDays(aStr, bStr) {
   return Math.round((toDateOnly(aStr) - toDateOnly(bStr)) / DAY_MS);
 }
 
+// Monday (ISO week start) of the week containing dateStr, as 'YYYY-MM-DD'.
 export function mondayOf(dateStr) {
   const d = toDateOnly(dateStr);
-  const day = d.getUTCDay();
+  const day = d.getUTCDay(); // 0 = Sunday
   const diffToMonday = day === 0 ? 6 : day - 1;
   d.setUTCDate(d.getUTCDate() - diffToMonday);
   return d.toISOString().split('T')[0];
 }
 
+// Called from checkIn() at write time. Returns the new day_count and
+// whether this check-in consumed the week's grace day.
 export function computeCheckInStreak(goal, todayStr) {
   const prior = goal.day_count ?? 0;
   if (!goal.last_checked_in) {
@@ -38,12 +40,16 @@ export function computeCheckInStreak(goal, todayStr) {
   return { newCount: 1, graceUsedWeek: goal.grace_used_week ?? null, graceConsumed: false };
 }
 
+// Called at display/read time, for goals that haven't been touched today --
+// day_count only updates on the next check-in, so a streak that's already
+// effectively broken (or about to be, with no grace left) should read as 0
+// rather than showing a stale number that no longer reflects reality.
 export function getLiveStreak(goal, todayStr) {
   if (!goal.last_checked_in) return goal.day_count ?? 0;
   if (goal.last_checked_in === todayStr) return goal.day_count ?? 0;
   const gap = diffDays(todayStr, goal.last_checked_in);
-  if (gap <= 1) return goal.day_count ?? 0;
+  if (gap <= 1) return goal.day_count ?? 0; // still today's window to check in
   const thisWeek = mondayOf(todayStr);
-  if (gap === 2 && goal.grace_used_week !== thisWeek) return goal.day_count ?? 0;
-  return 0;
+  if (gap === 2 && goal.grace_used_week !== thisWeek) return goal.day_count ?? 0; // grace still covers it
+  return 0; // streak has lapsed; next check-in will restart it at 1
 }

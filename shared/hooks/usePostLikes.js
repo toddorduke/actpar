@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { createNotificationV2 } from './useNotificationsV2';
+import { getSupabaseClient } from '../lib/supabaseClient.js';
+import { createNotification } from './useNotifications.js';
 
-// Direct port of client/src/hooks/usePostLikes.js -- no React-DOM-specific
-// code there, so the logic carries over unchanged.
-export function usePostLikesV2(userId, postIds = [], postType = 'tribe') {
+export function usePostLikes(userId, postIds = [], postType = 'tribe') {
   const [likedIds, setLikedIds] = useState(new Set());
   const [toggling, setToggling] = useState(new Set());
 
   useEffect(() => {
     if (!userId || postIds.length === 0) return;
-    supabase
+    getSupabaseClient()
       .from('post_likes')
       .select('post_id')
       .eq('user_id', userId)
@@ -21,12 +19,15 @@ export function usePostLikesV2(userId, postIds = [], postType = 'tribe') {
       });
   }, [userId, postIds.join(','), postType]);
 
+  // postOwnerId — optional, used to notify the post author on like
   const toggleLike = useCallback(async (postId, currentLikeCount, onCountChange, postOwnerId = null) => {
     if (!userId || toggling.has(postId)) return;
+    const supabase = getSupabaseClient();
     setToggling((prev) => new Set([...prev, postId]));
 
     const alreadyLiked = likedIds.has(postId);
 
+    // Optimistic update
     setLikedIds((prev) => {
       const next = new Set(prev);
       alreadyLiked ? next.delete(postId) : next.add(postId);
@@ -41,18 +42,29 @@ export function usePostLikesV2(userId, postIds = [], postType = 'tribe') {
         .eq('post_id', postId)
         .eq('user_id', userId);
       if (error) {
+        // Roll back the optimistic update
         setLikedIds((prev) => new Set([...prev, postId]));
         onCountChange(postId, currentLikeCount);
       }
+      // The post_likes_count_trigger keeps the like count in sync — no
+      // separate RPC call needed (and the old ones had no ownership check).
     } else {
       const { error } = await supabase
         .from('post_likes')
         .insert({ post_id: postId, post_type: postType, user_id: userId });
       if (!error) {
+        // Notify post owner
         if (postOwnerId && postOwnerId !== userId) {
-          createNotificationV2({ userId: postOwnerId, actorId: userId, type: 'post_like', refId: postId, body: 'liked your post ❤️' });
+          createNotification({
+            userId: postOwnerId,
+            actorId: userId,
+            type: 'post_like',
+            refId: postId,
+            body: 'liked your post ❤️',
+          });
         }
       } else {
+        // Race condition — already liked, roll back
         setLikedIds((prev) => { const next = new Set(prev); next.delete(postId); return next; });
         onCountChange(postId, currentLikeCount);
       }

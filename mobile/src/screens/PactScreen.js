@@ -2,10 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
-import { usePactV2 } from '../hooks/usePactV2';
-import { usePostCommentsV2 } from '../hooks/usePostCommentsV2';
-import { getDisplayName } from '../lib/displayName';
-import { timeAgo } from '../lib/timeAgo';
+import { usePact, usePostComments, getDisplayName, timeAgo } from '@actpar/shared';
 import NudgeModal from '../components/NudgeModal';
 import ConfirmModal from '../components/ConfirmModal';
 import CommentSheet from '../components/CommentSheet';
@@ -22,8 +19,8 @@ const ROLE_BADGE = { founder: '👑', 'co-lead': '⭐' };
 export default function PactScreen() {
   const { session } = useContext(AuthContext);
   const userId = session?.user?.id;
-  const { myPacts, pact, members, rules, posts, myRole, openPacts, loading, createPact, joinPactOpen, joinPactByCode, createPost, leavePact, addRule, removeMember } = usePactV2(userId);
-  const commentState = usePostCommentsV2(userId);
+  const { myPacts, pact, members, rules, posts, myRole, openPacts, loading, createPact, joinPactOpen, joinPactByCode, createPost, leavePact, addRule, removeMember } = usePact(userId);
+  const commentState = usePostComments(userId);
   const canManage = myRole === 'founder' || myRole === 'co-lead';
 
   const [feedFilter, setFeedFilter] = useState('all');

@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useNavSlots } from '../../context/NavSlotsContext.jsx';
 import { useNotifications } from '../../hooks/useNotifications.js';
-import { useProfile } from '../../hooks/useProfile.js';
+import { useProfile } from '@actpar/shared';
 import { useConversations } from '../../hooks/useConversations.js';
 import { useToast } from './Toast.jsx';
 import Avatar from './Avatar.jsx';
@@ -105,7 +105,7 @@ const Navigation = () => {
   const mobileAvatarRef = useRef(null);
   const notifRef = useRef(null);
   const { notifications, unreadCount, markRead, markAllRead, deleteNotif } = useNotifications();
-  const { profile } = useProfile();
+  const { profile } = useProfile(user?.id);
   const { conversations } = useConversations();
   const unreadMessages = conversations.reduce((sum, c) => sum + (c.unread || 0), 0);
   const toast = useToast();

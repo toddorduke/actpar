@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { useProfile } from '../../hooks/useProfile.js';
+import { useProfile } from '@actpar/shared';
 import { useGoals } from '../../hooks/useGoals.js';
 import { supabase } from '../../lib/supabase.js';
 import { createNotification } from '../../hooks/useNotifications.js';
@@ -48,7 +48,7 @@ const TIER_META = [
 
 export default function OnboardingPage() {
   const { user } = useContext(AuthContext);
-  const { profile } = useProfile();
+  const { profile } = useProfile(user?.id);
   const { addGoal } = useGoals();
   const navigate = useNavigate();
   const toast = useToast();

@@ -1,6 +1,14 @@
 # ActPar
 
-React + Vite client (`client/`), Supabase Postgres/Auth/Storage/Edge Functions backend (`supabase/`).
+React + Vite web client (`client/`), React Native/Expo mobile app (`mobile/`), Supabase Postgres/Auth/Storage/Edge Functions backend (`supabase/`), and a shared business-logic package (`shared/`) consumed by both apps.
+
+## Shared code (`shared/`)
+
+Data-fetching hooks, matching/streak rules, and content moderation live in `shared/` (npm workspace `@actpar/shared`) and are used unchanged by both `client/` and `mobile/` — UI stays separate per platform, only the "brains" are shared. Each app calls `setSupabaseClient()` once at its own `src/lib/supabase.js`, right after creating its own client (different storage adapter, different env var names per platform) — every shared hook pulls the client from there via `getSupabaseClient()`, so shared code never imports a platform-specific Supabase module directly.
+
+Two hooks are deliberately *not* shared, despite being close cousins: `useGoals` (web does XP/analytics/milestone-broadcast-to-connections; mobile has pause/resume/archive/extend/edit lifecycle web doesn't) and the full `useNotifications` (web plays sounds via the Audio API; mobile's realtime subscription needs an explicit `setAuth()` call web doesn't hit the same way) — see the comment at the top of `shared/index.js` before "fixing" this duplication.
+
+**Setup**: `npm install` from the repo root (workspaces: `client`, `mobile`, `shared`) sets up the `@actpar/shared` symlink automatically. If you ever see `Cannot find module '@actpar/shared'` after a fresh clone, that's why — run the root install, not just `cd client && npm install`.
 
 ## Color system
 
