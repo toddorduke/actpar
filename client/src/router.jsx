@@ -35,11 +35,11 @@ const PageLoader = () => (
   <div style={{ minHeight: '100dvh', background: 'var(--color-background)' }} />
 );
 
-// The coach marketplace (browse, coach profiles, "Request a Coach") isn't
-// ready for a public rollout yet -- flip this back to true when it is.
-// There's no nav entry point into it already, but the routes themselves
-// were still directly reachable by URL, which isn't real hiding.
-const COACH_MARKETPLACE_ENABLED = false;
+// The coach marketplace (browse, coach profiles, "Request a Coach") --
+// flipped on for testing. A nav entry point was added in Navigation.jsx/
+// NavSlotsContext.jsx alongside this so it's actually reachable, not just
+// URL-accessible.
+const COACH_MARKETPLACE_ENABLED = true;
 
 // Redirects already-logged-in users away from auth pages
 const PublicOnlyRoute = ({ children }) => {

@@ -1044,7 +1044,7 @@ const MORE_TABS = [
   ['events', '📅 Events'],
   ['leaderboard', '🏆 Leaderboard'],
   ['members', '👥 Members'],
-  // ['chat', '💬 Chat'], -- hidden for now, not removed; see ChatTab below
+  ['chat', '💬 Chat'],
 ];
 
 export default function CommunityPage() {
