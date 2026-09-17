@@ -1,0 +1,21 @@
+-- "Members can like posts" (USING is_pact_member(pact_id), no owner check,
+-- no WITH CHECK) let ANY pact member overwrite ANY OTHER member's post
+-- content via a direct UPDATE -- not just toggle a like. Confirmed live
+-- and exploitable via a rolled-back transaction: a non-owner, non-founder
+-- member successfully rewrote another member's post.content.
+--
+-- The name is misleading -- likes never actually flow through this
+-- policy. They go through the post_likes table, and update_post_likes_count()
+-- (a SECURITY DEFINER trigger on post_likes) is what writes the resulting
+-- count back to pact_posts.likes, bypassing this table's RLS entirely, as
+-- SECURITY DEFINER functions do. Confirmed via a full grep of client/src,
+-- mobile/src, and shared/ that nothing anywhere calls
+-- supabase.from('pact_posts').update(...) -- the only legitimate UPDATE
+-- path is pact_posts_update (owner-only), which stays untouched and
+-- already covers post-editing by the author.
+--
+-- Verified both directions with a rolled-back transaction simulating each
+-- user via SET LOCAL ROLE authenticated + set_config('request.jwt.claims', ...):
+-- a non-owner member's UPDATE is now silently blocked (0 rows affected),
+-- while the real post owner's own edit still succeeds normally.
+DROP POLICY "Members can like posts" ON public.pact_posts;
