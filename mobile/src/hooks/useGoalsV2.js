@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { computeCheckInStreak } from '@actpar/shared';
+import { computeCheckInStreak, checkText } from '@actpar/shared';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -51,6 +51,12 @@ export function useGoalsV2(userId) {
   const atCap = activeGoals.length >= activeCap;
 
   async function createGoal({ title, tag, frequency, durationDays, goalType = 'habit', targetValue, targetUnit, targetPeriod }) {
+    // web's useGoals checks title/description the same way (see
+    // client/src/hooks/useGoals.js) -- mobile has no description field to
+    // check, but title needed the same guard and never had it.
+    const titleCheck = checkText(title);
+    if (!titleCheck.ok) return { data: null, error: { code: 'MODERATION', message: titleCheck.message } };
+
     const isNumeric = goalType === 'numeric';
     const endsAt = !isNumeric && durationDays
       ? new Date(Date.now() + durationDays * 86400000).toISOString()
