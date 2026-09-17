@@ -34,7 +34,8 @@
           "icon": "./assets/adaptive-icon.png",
           "color": "#FF7A00"
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "extra": {
       "eas": {

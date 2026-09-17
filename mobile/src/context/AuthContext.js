@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { identifyUserForErrors } from '../lib/errorReporting';
 
 export const AuthContext = createContext({ session: null, loading: true });
 
@@ -14,6 +15,7 @@ export function AuthProvider({ children }) {
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
+      identifyUserForErrors(newSession?.user?.id ?? null);
     });
     return () => listener.subscription.unsubscribe();
   }, []);

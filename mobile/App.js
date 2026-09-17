@@ -20,7 +20,11 @@ import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import { registerForPushNotifications } from './src/lib/pushNotifications';
 import { useNotificationsV2 } from './src/hooks/useNotificationsV2';
 import ConnectionMatchModal from './src/components/ConnectionMatchModal';
+import ErrorBoundary from './src/components/ErrorBoundary';
+import { initErrorReporting } from './src/lib/errorReporting';
 import { getDisplayName } from '@actpar/shared';
+
+initErrorReporting();
 
 const Tab = createBottomTabNavigator();
 const ProfileStackNav = createStackNavigator();
@@ -134,11 +138,13 @@ function Root() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Root />
-      </NavigationContainer>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <NavigationContainer>
+          <StatusBar style="dark" />
+          <Root />
+        </NavigationContainer>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
