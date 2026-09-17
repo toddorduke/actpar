@@ -1,4 +1,5 @@
 import React from 'react';
+import { reportError } from '../../lib/errorReporting.js';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -12,6 +13,7 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     console.error('[ErrorBoundary]', error, info);
+    reportError(error, { componentStack: info?.componentStack });
   }
 
   render() {
@@ -39,8 +41,8 @@ export default class ErrorBoundary extends React.Component {
         <button
           onClick={() => window.location.reload()}
           style={{
-            background: '#f59e0b',
-            color: '#000',
+            background: 'var(--color-primary)',
+            color: '#fff',
             border: 'none',
             borderRadius: '20px',
             padding: '12px 28px',

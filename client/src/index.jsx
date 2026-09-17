@@ -3,10 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { initAnalytics } from './lib/analytics.js';
+import { initErrorReporting } from './lib/errorReporting.js';
 import './assets/styles/variables.css';
 import './assets/styles/globals.css';
 
 initAnalytics();
+initErrorReporting();
 
 const container = document.getElementById('root');
 const root = createRoot(container);
