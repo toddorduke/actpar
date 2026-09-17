@@ -3,9 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { usePact, usePostComments, getDisplayName, timeAgo } from '@actpar/shared';
+import { useBlock } from '../hooks/useBlock';
 import NudgeModal from '../components/NudgeModal';
 import ConfirmModal from '../components/ConfirmModal';
 import CommentSheet from '../components/CommentSheet';
+import PostActionsSheet from '../components/PostActionsSheet';
+import ReportModal from '../components/ReportModal';
 
 const BADGE_STYLE = {
   update: ['rgba(30,58,95,0.1)', '#1E3A5F', '📊 Update'],
@@ -19,7 +22,9 @@ const ROLE_BADGE = { founder: '👑', 'co-lead': '⭐' };
 export default function PactScreen() {
   const { session } = useContext(AuthContext);
   const userId = session?.user?.id;
-  const { myPacts, pact, members, rules, posts, myRole, openPacts, loading, createPact, joinPactOpen, joinPactByCode, createPost, leavePact, addRule, removeMember } = usePact(userId);
+  const { myPacts, pact, members, rules, posts: allPosts, myRole, openPacts, loading, createPact, joinPactOpen, joinPactByCode, createPost, leavePact, addRule, removeMember } = usePact(userId);
+  const { isBlocked, blockUser } = useBlock();
+  const posts = useMemo(() => allPosts.filter((p) => !isBlocked(p.user_id)), [allPosts, isBlocked]);
   const commentState = usePostComments(userId);
   const canManage = myRole === 'founder' || myRole === 'co-lead';
 
@@ -37,6 +42,9 @@ export default function PactScreen() {
   const [inviteCode, setInviteCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [nudge, setNudge] = useState(null);
+  const [actionsFor, setActionsFor] = useState(null); // { post, authorName }
+  const [reportTarget, setReportTarget] = useState(null); // { postId, userId }
+  const [blockTarget, setBlockTarget] = useState(null); // { userId, name }
 
   const filtered = feedFilter === 'all' ? posts : posts.filter((p) => p.post_type === feedFilter);
 
@@ -228,17 +236,21 @@ export default function PactScreen() {
             <Text style={styles.emptySub}>No posts yet — share the first update.</Text>
           ) : filtered.map((post) => {
             const [bg, color, label] = BADGE_STYLE[post.post_type] || BADGE_STYLE.update;
+            const authorName = getDisplayName(post.profiles, 'Member');
             return (
               <View key={post.id} style={styles.postCard}>
                 <View style={styles.postHeader}>
                   <View style={styles.postAvatar} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.postAuthor}>{getDisplayName(post.profiles, 'Member')}</Text>
+                    <Text style={styles.postAuthor}>{authorName}</Text>
                     <Text style={styles.postTime}>{timeAgo(post.created_at)}</Text>
                   </View>
                   <View style={[styles.postBadge, { backgroundColor: bg }]}>
                     <Text style={[styles.postBadgeText, { color }]}>{label}</Text>
                   </View>
+                  <TouchableOpacity style={styles.postMoreBtn} onPress={() => setActionsFor({ post, authorName })}>
+                    <Text style={styles.postMoreText}>⋯</Text>
+                  </TouchableOpacity>
                 </View>
                 <Text style={styles.postText}>{post.content}</Text>
                 <View style={styles.postActions}>
@@ -332,6 +344,46 @@ export default function PactScreen() {
         onCancel={() => setRemoveTarget(null)}
       />
 
+      <PostActionsSheet
+        visible={!!actionsFor}
+        authorName={actionsFor?.authorName}
+        onReport={() => {
+          setReportTarget({ postId: actionsFor.post.id, userId: actionsFor.post.user_id });
+          setActionsFor(null);
+        }}
+        onBlock={() => {
+          setBlockTarget({ userId: actionsFor.post.user_id, name: actionsFor.authorName });
+          setActionsFor(null);
+        }}
+        onClose={() => setActionsFor(null)}
+      />
+
+      <ReportModal
+        visible={!!reportTarget}
+        postId={reportTarget?.postId}
+        reportedUserId={reportTarget?.userId}
+        onClose={() => setReportTarget(null)}
+        onSubmitted={({ error }) => {
+          setReportTarget(null);
+          setNudge(error ? { title: "Couldn't submit", message: error } : { title: 'Thanks for the report', message: "Our team will review it shortly." });
+        }}
+      />
+
+      <ConfirmModal
+        visible={!!blockTarget}
+        title={`Block ${blockTarget?.name ?? 'this user'}?`}
+        message="You won't see their posts anymore, and they won't be able to contact you. You can undo this later from Settings."
+        confirmLabel="Block"
+        destructive
+        onConfirm={async () => {
+          const target = blockTarget;
+          setBlockTarget(null);
+          const { error } = await blockUser(target.userId);
+          if (error) setNudge({ title: "Couldn't block", message: 'Try again in a moment.' });
+        }}
+        onCancel={() => setBlockTarget(null)}
+      />
+
       <NudgeModal visible={!!nudge} title={nudge?.title} message={nudge?.message ?? ' '} onClose={() => setNudge(null)} />
     </SafeAreaView>
   );
@@ -393,6 +445,8 @@ const styles = StyleSheet.create({
   postTime: { fontSize: 12, color: '#7A6F63' },
   postBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   postBadgeText: { fontSize: 11, fontWeight: '700' },
+  postMoreBtn: { paddingHorizontal: 8, paddingVertical: 4, marginLeft: 4 },
+  postMoreText: { fontSize: 20, color: '#7A6F63', fontWeight: '700' },
   postText: { color: '#2B1D14', fontSize: 14, lineHeight: 21, marginBottom: 10 },
   postActions: { flexDirection: 'row', gap: 16, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,122,0,0.1)' },
   postAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },

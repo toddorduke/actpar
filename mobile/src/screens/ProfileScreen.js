@@ -88,6 +88,10 @@ export default function ProfileScreen() {
           )}
         </View>
 
+        <TouchableOpacity style={styles.settingsBtn} onPress={() => navigation.navigate('Settings')}>
+          <Text style={styles.settingsText}>⚙️ Settings</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.signOutBtn} onPress={() => setConfirmSignOut(true)}>
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
@@ -138,6 +142,9 @@ const styles = StyleSheet.create({
   goalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 8 },
   goalTitle: { fontSize: 14, color: '#2B1D14', fontWeight: '500', flex: 1 },
   goalDays: { fontSize: 14, fontWeight: '700', color: '#FF7A00' },
+
+  settingsBtn: { marginHorizontal: 16, alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 4 },
+  settingsText: { color: '#2B1D14', fontWeight: '600', fontSize: 14 },
 
   signOutBtn: { marginHorizontal: 16, alignItems: 'center', padding: 14 },
   signOutText: { color: '#dc2626', fontWeight: '600', fontSize: 14 },

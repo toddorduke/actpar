@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, ActivityIndicator } from 'react-native';
 import * as Notifications from 'expo-notifications';
@@ -11,6 +12,7 @@ import ConnectionsScreen from './src/screens/ConnectionsScreen';
 import TribeScreen from './src/screens/TribeScreen';
 import PactScreen from './src/screens/PactScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import GoalsScreen from './src/screens/GoalsScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -21,6 +23,25 @@ import ConnectionMatchModal from './src/components/ConnectionMatchModal';
 import { getDisplayName } from '@actpar/shared';
 
 const Tab = createBottomTabNavigator();
+const ProfileStackNav = createStackNavigator();
+
+// Settings isn't a tab of its own -- it's reached by drilling in from
+// Profile, same relationship as web's header-avatar -> /settings. Nesting a
+// stack here (rather than adding an 8th tab) is what lets ProfileScreen's
+// `navigation.navigate('Settings')` resolve.
+function ProfileStack() {
+  return (
+    <ProfileStackNav.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: '#fff', shadowColor: 'transparent', elevation: 0, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
+        headerTitleStyle: { fontWeight: 'bold', fontSize: 20, color: '#FF7A00' },
+      }}
+    >
+      <ProfileStackNav.Screen name="ProfileMain" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings', headerTitleStyle: { fontWeight: 'bold', fontSize: 18, color: '#2B1D14' } }} />
+    </ProfileStackNav.Navigator>
+  );
+}
 
 const icons = {
   Home: '🏠',
@@ -57,7 +78,7 @@ function MainTabs() {
       <Tab.Screen name="Tribe" component={TribeScreen} options={{ title: 'Tribe' }} />
       <Tab.Screen name="Pact" component={PactScreen} options={{ title: 'The Pact' }} />
       <Tab.Screen name="Notifications" component={NotificationsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ProfileStack} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }

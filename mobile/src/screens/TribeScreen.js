@@ -3,8 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { useTribePosts, usePostLikes, usePostComments, useMeetupRsvp, getDisplayName, timeAgo } from '@actpar/shared';
+import { useBlock } from '../hooks/useBlock';
 import NudgeModal from '../components/NudgeModal';
 import CommentSheet from '../components/CommentSheet';
+import PostActionsSheet from '../components/PostActionsSheet';
+import ReportModal from '../components/ReportModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 const BADGE = {
   achievement: ['#d1fae5', '#065f46', '🏆 Achievement'],
@@ -17,7 +21,7 @@ function formatEventDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, myRsvp, onRsvp }) {
+function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, myRsvp, onRsvp, onMore }) {
   const [bg, text, label] = BADGE[post.post_type] || BADGE.general;
   const author = getDisplayName(post.profiles, 'Someone');
   return (
@@ -31,6 +35,9 @@ function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, my
         <View style={[styles.postBadge, { backgroundColor: bg }]}>
           <Text style={[styles.postBadgeText, { color: text }]}>{label}</Text>
         </View>
+        <TouchableOpacity style={styles.postMoreBtn} onPress={() => onMore(post, author)}>
+          <Text style={styles.postMoreText}>⋯</Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.postText}>{post.content}</Text>
@@ -72,7 +79,9 @@ function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, my
 export default function TribeScreen() {
   const { session } = useContext(AuthContext);
   const userId = session?.user?.id;
-  const { posts, loading, createPost } = useTribePosts(userId);
+  const { posts: allPosts, loading, createPost } = useTribePosts(userId);
+  const { isBlocked, blockUser } = useBlock();
+  const posts = useMemo(() => allPosts.filter((p) => !isBlocked(p.user_id)), [allPosts, isBlocked]);
   const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
   const { likedIds, toggleLike } = usePostLikes(userId, postIds, 'tribe');
   const commentState = usePostComments(userId);
@@ -91,6 +100,9 @@ export default function TribeScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [nudge, setNudge] = useState(null);
   const [commentPostId, setCommentPostId] = useState(null);
+  const [actionsFor, setActionsFor] = useState(null); // { post, authorName }
+  const [reportTarget, setReportTarget] = useState(null); // { postId, userId }
+  const [blockTarget, setBlockTarget] = useState(null); // { userId, name }
 
   const filtered = filter === 'all' ? posts : posts.filter((p) => p.post_type === filter);
   const postedToday = posts.filter((p) => p.created_at?.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
@@ -185,6 +197,7 @@ export default function TribeScreen() {
               goingCount={goingCounts[post.id]}
               myRsvp={myRsvps[post.id]}
               onRsvp={handleRsvp}
+              onMore={(p, authorName) => setActionsFor({ post: p, authorName })}
             />
           ))
         )}
@@ -252,6 +265,46 @@ export default function TribeScreen() {
       />
 
       <NudgeModal visible={!!nudge} title={nudge?.title} message={nudge?.message} onClose={() => setNudge(null)} />
+
+      <PostActionsSheet
+        visible={!!actionsFor}
+        authorName={actionsFor?.authorName}
+        onReport={() => {
+          setReportTarget({ postId: actionsFor.post.id, userId: actionsFor.post.user_id });
+          setActionsFor(null);
+        }}
+        onBlock={() => {
+          setBlockTarget({ userId: actionsFor.post.user_id, name: actionsFor.authorName });
+          setActionsFor(null);
+        }}
+        onClose={() => setActionsFor(null)}
+      />
+
+      <ReportModal
+        visible={!!reportTarget}
+        postId={reportTarget?.postId}
+        reportedUserId={reportTarget?.userId}
+        onClose={() => setReportTarget(null)}
+        onSubmitted={({ error }) => {
+          setReportTarget(null);
+          setNudge(error ? { title: "Couldn't submit", message: error } : { title: 'Thanks for the report', message: "Our team will review it shortly." });
+        }}
+      />
+
+      <ConfirmModal
+        visible={!!blockTarget}
+        title={`Block ${blockTarget?.name ?? 'this user'}?`}
+        message="You won't see their posts anymore, and they won't be able to contact you. You can undo this later from Settings."
+        confirmLabel="Block"
+        destructive
+        onConfirm={async () => {
+          const target = blockTarget;
+          setBlockTarget(null);
+          const { error } = await blockUser(target.userId);
+          if (error) setNudge({ title: "Couldn't block", message: 'Try again in a moment.' });
+        }}
+        onCancel={() => setBlockTarget(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -285,6 +338,8 @@ const styles = StyleSheet.create({
   postTime: { fontSize: 12, color: '#6b7280' },
   postBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   postBadgeText: { fontSize: 12, fontWeight: '600' },
+  postMoreBtn: { paddingHorizontal: 8, paddingVertical: 4, marginLeft: 4 },
+  postMoreText: { fontSize: 20, color: '#9ca3af', fontWeight: '700' },
   postText: { color: '#374151', fontSize: 15, lineHeight: 22, marginBottom: 12 },
 
   milestone: { backgroundColor: '#FFF4E8', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, alignSelf: 'flex-start', marginBottom: 12 },
