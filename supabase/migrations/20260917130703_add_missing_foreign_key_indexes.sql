@@ -1,0 +1,64 @@
+-- 57 foreign key columns with no covering index (the auth_rls_initplan/
+-- multiple_permissive_policies migrations just before this one left the
+-- advisor's separate unindexed_foreign_keys lint at 41 untouched). Cheap
+-- and safe at current row counts, real cost avoided once these tables see
+-- real join/filter volume. IF NOT EXISTS with dedicated names makes this
+-- safe to re-run even if a column turns out to already be covered by some
+-- other composite index under a different name.
+CREATE INDEX IF NOT EXISTS idx_admin_audit_log_admin_id ON public.admin_audit_log (admin_id);
+CREATE INDEX IF NOT EXISTS idx_blocked_users_blocked_id ON public.blocked_users (blocked_id);
+CREATE INDEX IF NOT EXISTS idx_blocked_users_blocker_id ON public.blocked_users (blocker_id);
+CREATE INDEX IF NOT EXISTS idx_challenge_entries_challenge_id ON public.challenge_entries (challenge_id);
+CREATE INDEX IF NOT EXISTS idx_challenge_entries_user_id ON public.challenge_entries (user_id);
+CREATE INDEX IF NOT EXISTS idx_coach_requests_user_id ON public.coach_requests (user_id);
+CREATE INDEX IF NOT EXISTS idx_communities_created_by ON public.communities (created_by);
+CREATE INDEX IF NOT EXISTS idx_communities_pinned_post_id ON public.communities (pinned_post_id);
+CREATE INDEX IF NOT EXISTS idx_community_challenges_community_id ON public.community_challenges (community_id);
+CREATE INDEX IF NOT EXISTS idx_community_challenges_created_by ON public.community_challenges (created_by);
+CREATE INDEX IF NOT EXISTS idx_community_events_community_id ON public.community_events (community_id);
+CREATE INDEX IF NOT EXISTS idx_community_events_created_by ON public.community_events (created_by);
+CREATE INDEX IF NOT EXISTS idx_community_memberships_community_id ON public.community_memberships (community_id);
+CREATE INDEX IF NOT EXISTS idx_community_memberships_user_id ON public.community_memberships (user_id);
+CREATE INDEX IF NOT EXISTS idx_community_messages_community_id ON public.community_messages (community_id);
+CREATE INDEX IF NOT EXISTS idx_community_messages_user_id ON public.community_messages (user_id);
+CREATE INDEX IF NOT EXISTS idx_connections_receiver_id ON public.connections (receiver_id);
+CREATE INDEX IF NOT EXISTS idx_connections_requester_id ON public.connections (requester_id);
+CREATE INDEX IF NOT EXISTS idx_custom_categories_created_by ON public.custom_categories (created_by);
+CREATE INDEX IF NOT EXISTS idx_direct_messages_receiver_id ON public.direct_messages (receiver_id);
+CREATE INDEX IF NOT EXISTS idx_direct_messages_sender_id ON public.direct_messages (sender_id);
+CREATE INDEX IF NOT EXISTS idx_event_rsvps_event_id ON public.event_rsvps (event_id);
+CREATE INDEX IF NOT EXISTS idx_event_rsvps_user_id ON public.event_rsvps (user_id);
+CREATE INDEX IF NOT EXISTS idx_expo_push_tokens_user_id ON public.expo_push_tokens (user_id);
+CREATE INDEX IF NOT EXISTS idx_goal_checkins_v2_goal_id ON public.goal_checkins_v2 (goal_id);
+CREATE INDEX IF NOT EXISTS idx_goal_checkins_v2_user_id ON public.goal_checkins_v2 (user_id);
+CREATE INDEX IF NOT EXISTS idx_goal_edits_v2_goal_id ON public.goal_edits_v2 (goal_id);
+CREATE INDEX IF NOT EXISTS idx_goal_edits_v2_user_id ON public.goal_edits_v2 (user_id);
+CREATE INDEX IF NOT EXISTS idx_goal_lifecycle_events_goal_id ON public.goal_lifecycle_events (goal_id);
+CREATE INDEX IF NOT EXISTS idx_goal_lifecycle_events_user_id ON public.goal_lifecycle_events (user_id);
+CREATE INDEX IF NOT EXISTS idx_goal_progress_v2_goal_id ON public.goal_progress_v2 (goal_id);
+CREATE INDEX IF NOT EXISTS idx_goal_progress_v2_user_id ON public.goal_progress_v2 (user_id);
+CREATE INDEX IF NOT EXISTS idx_goals_v2_user_id ON public.goals_v2 (user_id);
+CREATE INDEX IF NOT EXISTS idx_issue_reports_user_id ON public.issue_reports (user_id);
+CREATE INDEX IF NOT EXISTS idx_journal_entries_user_id ON public.journal_entries (user_id);
+CREATE INDEX IF NOT EXISTS idx_media_user_id ON public.media (user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_actor_id ON public.notifications (actor_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications (user_id);
+CREATE INDEX IF NOT EXISTS idx_pact_posts_pact_id ON public.pact_posts (pact_id);
+CREATE INDEX IF NOT EXISTS idx_pact_posts_user_id ON public.pact_posts (user_id);
+CREATE INDEX IF NOT EXISTS idx_pact_rules_pact_id ON public.pact_rules (pact_id);
+CREATE INDEX IF NOT EXISTS idx_pacts_created_by ON public.pacts (created_by);
+CREATE INDEX IF NOT EXISTS idx_partnerships_goal_id_1 ON public.partnerships (goal_id_1);
+CREATE INDEX IF NOT EXISTS idx_partnerships_goal_id_2 ON public.partnerships (goal_id_2);
+CREATE INDEX IF NOT EXISTS idx_partnerships_receiver_id ON public.partnerships (receiver_id);
+CREATE INDEX IF NOT EXISTS idx_partnerships_requester_id ON public.partnerships (requester_id);
+CREATE INDEX IF NOT EXISTS idx_post_reactions_post_id ON public.post_reactions (post_id);
+CREATE INDEX IF NOT EXISTS idx_post_reactions_user_id ON public.post_reactions (user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_referred_by ON public.profiles (referred_by);
+CREATE INDEX IF NOT EXISTS idx_reflections_user_id ON public.reflections (user_id);
+CREATE INDEX IF NOT EXISTS idx_reports_post_id ON public.reports (post_id);
+CREATE INDEX IF NOT EXISTS idx_reports_reported_user_id ON public.reports (reported_user_id);
+CREATE INDEX IF NOT EXISTS idx_reports_reporter_id ON public.reports (reporter_id);
+CREATE INDEX IF NOT EXISTS idx_tribe_post_rsvps_post_id ON public.tribe_post_rsvps (post_id);
+CREATE INDEX IF NOT EXISTS idx_tribe_post_rsvps_user_id ON public.tribe_post_rsvps (user_id);
+CREATE INDEX IF NOT EXISTS idx_tribe_posts_community_id ON public.tribe_posts (community_id);
+CREATE INDEX IF NOT EXISTS idx_tribe_posts_user_id ON public.tribe_posts (user_id);
