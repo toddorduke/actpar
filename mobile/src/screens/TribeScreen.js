@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { useTribePosts, usePostLikes, usePostComments, useMeetupRsvp, getDisplayName, timeAgo } from '@actpar/shared';
@@ -7,6 +7,7 @@ import { useBlock } from '../hooks/useBlock';
 import NudgeModal from '../components/NudgeModal';
 import CommentSheet from '../components/CommentSheet';
 import PostActionsSheet from '../components/PostActionsSheet';
+import { FeedSkeleton } from '../components/Skeleton';
 import ReportModal from '../components/ReportModal';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -150,7 +151,9 @@ export default function TribeScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator style={{ marginTop: 60 }} color="#FF7A00" />
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <FeedSkeleton />
+        </ScrollView>
       </SafeAreaView>
     );
   }

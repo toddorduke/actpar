@@ -13,6 +13,7 @@ import ReportModal from '../../components/common/ReportModal.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import PostCard from '../../components/common/PostCard.jsx';
+import { FeedSkeleton } from '../../components/common/Skeleton.jsx';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import './TribeCommunityPage.css';
@@ -250,7 +251,7 @@ export default function TribeCommunityPage() {
             const isLoading = circleLoading || postsLoading;
             return (
               <div className="feed-container">
-                {isLoading && <div className="feed-empty">Loading...</div>}
+                {isLoading && <FeedSkeleton />}
                 {!isLoading && acceptedConnections.length === 0 && (
                   <button type="button" className="feed-empty feed-empty-cta" onClick={() => navigate('/connections')}>
                     Connect with people to see their activity here →
@@ -323,7 +324,7 @@ export default function TribeCommunityPage() {
           {/* Posts feed */}
           {feedTab !== 'circle' && (
           <div className="feed-container">
-            {postsLoading && <div className="feed-empty">Loading posts...</div>}
+            {postsLoading && <FeedSkeleton />}
             {!postsLoading && allDisplayedPosts.length === 0 && (
               <button type="button" className="feed-empty feed-empty-cta" onClick={() => setShowModal(true)}>
                 {emptyMessage}

@@ -22,6 +22,7 @@ import { timeAgo, formatEventDate } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import { getLiveStreak } from '../../utils/streak.js';
 import { guessCommunityEmoji, guessCommunityCategory } from '../../utils/communityCategory.js';
+import { FeedSkeleton } from '../../components/common/Skeleton.jsx';
 
 const CHALLENGE_PRESETS = {
   fitness: [
@@ -186,7 +187,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
         </div>
       )}
 
-      {loading && <div className="comm-empty">Loading posts...</div>}
+      {loading && <FeedSkeleton />}
       {!loading && posts.length === 0 && (
         <>
           <button type="button" className="comm-empty comm-empty-cta" onClick={() => composeRef.current?.focus()}>
