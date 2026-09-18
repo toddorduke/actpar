@@ -379,6 +379,21 @@
   border: 1px dashed #d1d5db;
 }
 
+/* Empty states that are actually clickable (button, not div) */
+.feed-empty-cta {
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.feed-empty-cta:hover {
+  border-color: var(--color-primary-end);
+  color: var(--color-primary-end);
+}
+
 /* Feed */
 .main-feed { min-width: 0; }
 .feed-container { display: flex; flex-direction: column; gap: 20px; min-width: 0; }

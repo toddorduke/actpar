@@ -252,7 +252,9 @@ export default function TribeCommunityPage() {
               <div className="feed-container">
                 {isLoading && <div className="feed-empty">Loading...</div>}
                 {!isLoading && acceptedConnections.length === 0 && (
-                  <div className="feed-empty">Connect with people on the Sparks page to see their activity here.</div>
+                  <button type="button" className="feed-empty feed-empty-cta" onClick={() => navigate('/connections')}>
+                    Connect with people to see their activity here →
+                  </button>
                 )}
                 {!isLoading && acceptedConnections.length > 0 && merged.length === 0 && (
                   <div className="feed-empty">No activity yet from your connections — check back soon!</div>
@@ -323,7 +325,9 @@ export default function TribeCommunityPage() {
           <div className="feed-container">
             {postsLoading && <div className="feed-empty">Loading posts...</div>}
             {!postsLoading && allDisplayedPosts.length === 0 && (
-              <div className="feed-empty">{emptyMessage}</div>
+              <button type="button" className="feed-empty feed-empty-cta" onClick={() => setShowModal(true)}>
+                {emptyMessage}
+              </button>
             )}
             {displayedPosts.map((post) => (
               <PostCard

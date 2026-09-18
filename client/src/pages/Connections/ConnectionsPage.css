@@ -1250,6 +1250,21 @@
   margin: 0;
 }
 
+.mn-empty-cta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.mn-empty-cta:hover {
+  color: var(--color-primary-end);
+}
+
 /* Row layout (incoming/sent) */
 .mn-row {
   display: flex;

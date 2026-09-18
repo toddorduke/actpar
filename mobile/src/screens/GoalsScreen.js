@@ -116,7 +116,9 @@ export default function GoalsScreen() {
       <Text style={styles.framingCopy}>We limit goals on purpose. A few at a time is where people actually finish.</Text>
 
       {!loading && activeGoals.length === 0 && (
-        <Text style={styles.empty}>No active goals yet — add one to get started.</Text>
+        <TouchableOpacity onPress={() => setShowAdd(true)}>
+          <Text style={styles.empty}>No active goals yet — tap to add one.</Text>
+        </TouchableOpacity>
       )}
 
       {activeGoals.map((goal) => {

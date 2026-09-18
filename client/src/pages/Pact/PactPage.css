@@ -1035,6 +1035,19 @@
   background: var(--color-surface);
   border-radius: 16px;
   border: 1px dashed rgba(30, 58, 95,0.2);
+  width: 100%;
+}
+
+.feed-empty-pact-cta {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.feed-empty-pact-cta:hover {
+  border-color: var(--color-trust-end);
+  color: var(--color-trust-end);
 }
 
 /* ── Submit btn disabled ── */

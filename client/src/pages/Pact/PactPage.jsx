@@ -667,9 +667,13 @@ export default function PactPage() {
           </div>
           <div className="feed-container">
             {filteredPosts.length === 0 ? (
-              <div className="feed-empty-pact">
-                {posts.length === 0 ? 'No posts yet — be the first to share!' : 'No posts match this filter.'}
-              </div>
+              posts.length === 0 ? (
+                <button type="button" className="feed-empty-pact feed-empty-pact-cta" onClick={() => setShowPostModal(true)}>
+                  No posts yet — be the first to share! →
+                </button>
+              ) : (
+                <div className="feed-empty-pact">No posts match this filter.</div>
+              )
             ) : (
               filteredPosts.map((post) => (
                 <PostCard

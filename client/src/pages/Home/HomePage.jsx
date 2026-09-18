@@ -554,6 +554,7 @@ const HomePage = () => {
 
   // Add goal form
   const addGoalRef = useRef(null);
+  const journalFormRef = useRef(null);
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [newGoalCategory, setNewGoalCategory] = useState('');
   const [newGoalType, setNewGoalType] = useState('habit');
@@ -1490,7 +1491,13 @@ const HomePage = () => {
                 </div>
                 {goalsLoading && <p className="goals-empty">Loading goals...</p>}
                 {!goalsLoading && goals.length === 0 && (
-                  <p className="goals-empty">No goals yet — add one using the form on the right!</p>
+                  <button
+                    type="button"
+                    className="goals-empty goals-empty-cta"
+                    onClick={() => addGoalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  >
+                    No goals yet — add your first one →
+                  </button>
                 )}
                 {!goalsLoading && goals.length > 0 && (
                   <div className="pyramid-container">
@@ -1536,7 +1543,9 @@ const HomePage = () => {
                 </div>
                 {activityLoading && <p className="home-empty">Loading...</p>}
                 {!activityLoading && acceptedConnections.length === 0 && (
-                  <p className="home-empty">Connect with people on the Connections page to see their activity here.</p>
+                  <button type="button" className="home-empty goals-empty-cta" onClick={() => navigate('/connections')}>
+                    Connect with people to see their activity here →
+                  </button>
                 )}
                 {!activityLoading && acceptedConnections.length > 0 && activity.length === 0 && (
                   <p className="home-empty">No activity in the last 3 days — check back soon!</p>
@@ -1715,7 +1724,7 @@ const HomePage = () => {
                 </div>
                 {profile?.bio
                   ? <p className="about-me-bio">{profile.bio}</p>
-                  : <p className="about-me-empty">No bio yet — click Edit to add one.</p>
+                  : <button type="button" className="about-me-empty goals-empty-cta" onClick={() => setEditing(true)}>No bio yet — click to add one.</button>
                 }
                 {(profile?.city || profile?.state) && (
                   <div className="about-me-location">📍 {[profile.city, profile.state].filter(Boolean).join(', ')}</div>
@@ -1867,7 +1876,7 @@ const HomePage = () => {
                 </svg>
                 <h2>New Entry</h2>
               </div>
-              <form className="journal-form" onSubmit={handleSaveEntry}>
+              <form className="journal-form" ref={journalFormRef} onSubmit={handleSaveEntry}>
                 <input type="text" className="journal-subject" placeholder="Subject..." value={journalSubject} onChange={(e) => setJournalSubject(e.target.value)} required />
                 <textarea className="journal-body" placeholder="Write your thoughts, reflections, or anything on your mind..." value={journalBody} onChange={(e) => setJournalBody(e.target.value)} rows={8} required />
                 <div className="journal-form-footer">
@@ -1887,7 +1896,15 @@ const HomePage = () => {
                 <h2>Past Entries</h2>
               </div>
               {journalLoading && <p className="goals-empty">Loading entries...</p>}
-              {!journalLoading && entries.length === 0 && <p className="goals-empty">No journal entries yet — write your first one above!</p>}
+              {!journalLoading && entries.length === 0 && (
+                <button
+                  type="button"
+                  className="goals-empty goals-empty-cta"
+                  onClick={() => journalFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                >
+                  No journal entries yet — write your first one →
+                </button>
+              )}
               <div className="journal-entries-list">
                 {entries.map((entry) => (
                   <div key={entry.id} className="journal-entry-card">
@@ -1920,7 +1937,11 @@ const HomePage = () => {
               <h2>My Community Posts</h2>
             </div>
             {myPostsLoading && <p className="goals-empty">Loading posts...</p>}
-            {!myPostsLoading && myOwnPosts.length === 0 && <p className="goals-empty">You haven't posted to the community yet — head to Tribe to share something!</p>}
+            {!myPostsLoading && myOwnPosts.length === 0 && (
+              <button type="button" className="goals-empty goals-empty-cta" onClick={() => navigate('/tribe-community')}>
+                You haven't posted yet — share something →
+              </button>
+            )}
             <div className="my-posts-list">
               {myOwnPosts.map((post) => {
                 const typeLabel = post.post_type === 'achievement' ? '🏆 Achievement' : post.post_type === 'meetup' ? '📅 Meetup' : '💬 General';
@@ -1964,7 +1985,7 @@ const HomePage = () => {
                 <h2>Daily Reflections</h2>
               </div>
               {reflections.length === 0
-                ? <p className="goals-empty">No reflections saved yet — answer the daily questions on the Overview tab.</p>
+                ? <button type="button" className="goals-empty goals-empty-cta" onClick={() => setActiveTab('overview')}>No reflections saved yet — answer today's questions →</button>
                 : (
                   <div className="reflections-tab-list">
                     {reflections.map((r) => (
@@ -1991,7 +2012,7 @@ const HomePage = () => {
                 <h2>Affirmations</h2>
               </div>
               {affirmations.length === 0
-                ? <p className="goals-empty">No affirmations saved yet — start the 30-day challenge on the Overview tab.</p>
+                ? <button type="button" className="goals-empty goals-empty-cta" onClick={() => setActiveTab('overview')}>No affirmations saved yet — start the 30-day challenge →</button>
                 : (
                   <div className="reflections-tab-list">
                     {affirmations.map((a, i) => (

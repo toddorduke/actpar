@@ -39,7 +39,7 @@ function ConversationList({ conversations, selectedId, onSelect, onNewMessage, l
       {!loading && conversations.length === 0 && (
         <div className="conv-empty">
           <p>No messages yet.</p>
-          <p>Message a connection to get started!</p>
+          <button type="button" className="conv-empty-cta" onClick={onNewMessage}>Message a connection to get started →</button>
         </div>
       )}
 

@@ -233,7 +233,9 @@ export default function PactScreen() {
           </ScrollView>
 
           {filtered.length === 0 ? (
-            <Text style={styles.emptySub}>No posts yet — share the first update.</Text>
+            <TouchableOpacity onPress={() => setShowPost(true)}>
+              <Text style={styles.emptySub}>No posts yet — tap to share the first update.</Text>
+            </TouchableOpacity>
           ) : filtered.map((post) => {
             const [bg, color, label] = BADGE_STYLE[post.post_type] || BADGE_STYLE.update;
             const authorName = getDisplayName(post.profiles, 'Member');

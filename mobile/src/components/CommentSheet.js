@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
@@ -14,6 +14,7 @@ export default function CommentSheet({ visible, postId, postType, ownerTable, co
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [modError, setModError] = useState('');
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (visible && postId && !commentsByPost[postId]) fetchComments(postId);
@@ -44,7 +45,9 @@ export default function CommentSheet({ visible, postId, postType, ownerTable, co
         {loading ? (
           <ActivityIndicator style={{ marginTop: 40 }} color="#FF7A00" />
         ) : comments.length === 0 ? (
-          <Text style={styles.empty}>No comments yet — be the first!</Text>
+          <TouchableOpacity onPress={() => inputRef.current?.focus()}>
+            <Text style={styles.empty}>No comments yet — tap to be the first!</Text>
+          </TouchableOpacity>
         ) : (
           <FlatList
             data={comments}
@@ -79,6 +82,7 @@ export default function CommentSheet({ visible, postId, postType, ownerTable, co
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.inputRow}>
             <TextInput
+              ref={inputRef}
               style={styles.input}
               placeholder="Write a comment..."
               placeholderTextColor="#9ca3af"

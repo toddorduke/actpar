@@ -280,6 +280,7 @@ export default function ConnectionsPage() {
   const [exitDir, setExitDir] = useState(null);
   const dragStart = useRef(null);
   const movedRef = useRef(false);
+  const discoverRef = useRef(null);
 
   function triggerExit(dir) {
     if (!currentProfile || exitDir) return;
@@ -609,11 +610,15 @@ export default function ConnectionsPage() {
           <div className="mn-section">
             <h3 className="mn-section-title">Connected ({acceptedConnections.length})</h3>
             {acceptedConnections.length === 0 && (
-              <p className="mn-empty">
+              <button
+                type="button"
+                className="mn-empty mn-empty-cta"
+                onClick={() => discoverRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              >
                 {(sentSparks.length + sentConnects.length) > 0
-                  ? 'Nobody has accepted yet — check back soon or try Discover to reach more people.'
-                  : 'No connections yet — head to Discover and send a spark to someone!'}
-              </p>
+                  ? 'Nobody has accepted yet — check back soon or try Discover to reach more people →'
+                  : 'No connections yet — head to Discover and send a spark →'}
+              </button>
             )}
             <div className="mn-connections-list">
               {acceptedConnections.map((c) => {
@@ -841,7 +846,7 @@ export default function ConnectionsPage() {
         </aside>
 
         {/* Card Stack */}
-        <main className="card-stack-container">
+        <main className="card-stack-container" ref={discoverRef}>
           {/* Mobile-only search bar */}
           <div className="mob-filter-bar">
             <input

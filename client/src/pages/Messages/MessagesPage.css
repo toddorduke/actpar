@@ -67,6 +67,20 @@
   line-height: 1.6;
 }
 
+.conv-empty-cta {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.conv-empty-cta:hover {
+  color: var(--color-primary-end);
+}
+
 .conv-item {
   display: flex;
   align-items: center;

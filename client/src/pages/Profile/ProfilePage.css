@@ -898,6 +898,24 @@
   text-align: center;
 }
 
+/* Empty states that are actually clickable (button, not p) reset the
+   default button chrome and add a hover cue so it still reads as text
+   at rest but signals "tap me" on interaction. */
+.goals-empty-cta {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.goals-empty-cta:hover {
+  color: var(--color-primary-end);
+}
+
 .goal-card {
   position: relative;
   border-radius: 20px;

@@ -529,6 +529,20 @@
   font-size: 0.95rem;
 }
 
+.comm-empty-cta {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.comm-empty-cta:hover {
+  color: var(--color-primary-end);
+}
+
 /* ── Shared form elements ───────────────────────────── */
 .comm-input {
   width: 100%;

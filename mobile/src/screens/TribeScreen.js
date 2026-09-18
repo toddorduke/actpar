@@ -181,10 +181,10 @@ export default function TribeScreen() {
         </ScrollView>
 
         {filtered.length === 0 ? (
-          <View style={styles.emptyCard}>
+          <TouchableOpacity style={styles.emptyCard} onPress={() => setShowModal(true)}>
             <Text style={styles.emptyIcon}>🎬</Text>
-            <Text style={styles.emptyText}>No posts yet — be the first to share.</Text>
-          </View>
+            <Text style={styles.emptyText}>No posts yet — tap to share the first one.</Text>
+          </TouchableOpacity>
         ) : (
           filtered.map((post) => (
             <PostCard

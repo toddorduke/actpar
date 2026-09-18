@@ -118,6 +118,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
   const [visibleCount, setVisibleCount] = useState(10);
   const [reportPostId, setReportPostId] = useState(null);
   const [reportedUserId, setReportedUserId] = useState(null);
+  const composeRef = useRef(null);
 
   async function submit() {
     if (!content.trim()) return;
@@ -156,6 +157,7 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
           ))}
         </div>
         <textarea
+          ref={composeRef}
           className="compose-textarea"
           placeholder="Share something with this community..."
           rows={3}
@@ -187,7 +189,9 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
       {loading && <div className="comm-empty">Loading posts...</div>}
       {!loading && posts.length === 0 && (
         <>
-          <div className="comm-empty">No posts yet — start the conversation above!</div>
+          <button type="button" className="comm-empty comm-empty-cta" onClick={() => composeRef.current?.focus()}>
+            No posts yet — start the conversation ↑
+          </button>
           {inspiration && <InspirationStrip query={inspiration.query} label={inspiration.label} />}
         </>
       )}
@@ -403,7 +407,11 @@ function EventsTab({ communityId, isAdmin }) {
       )}
 
       {loading && <div className="comm-empty">Loading events...</div>}
-      {!loading && upcoming.length === 0 && <div className="comm-empty">No upcoming events — create one above!</div>}
+      {!loading && upcoming.length === 0 && (
+        <button type="button" className="comm-empty comm-empty-cta" onClick={() => setShowForm(true)}>
+          No upcoming events — create the first one →
+        </button>
+      )}
 
       <div className="events-list">
         {upcoming.map((ev) => <EventCard key={ev.id} event={ev} myStatus={rsvps[ev.id]} onRsvp={rsvp} onDelete={isAdmin || ev.created_by === user?.id ? deleteEvent : null} />)}
@@ -716,7 +724,11 @@ function ChallengesTab({ communityId, communityName, communityDescription }) {
       )}
 
       {loading && <div className="comm-empty">Loading challenges...</div>}
-      {!loading && challenges.length === 0 && <div className="comm-empty">No challenges yet — set one for your community!</div>}
+      {!loading && challenges.length === 0 && (
+        <button type="button" className="comm-empty comm-empty-cta" onClick={() => setShowForm(true)}>
+          No challenges yet — start one for your community →
+        </button>
+      )}
 
       {challenges.map((ch) => {
         const total = (ch.challenge_entries ?? []).reduce((sum, e) => sum + Number(e.value), 0);
