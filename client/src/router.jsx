@@ -35,11 +35,12 @@ const PageLoader = () => (
   <div style={{ minHeight: '100dvh', background: 'var(--color-background)' }} />
 );
 
-// The coach marketplace (browse, coach profiles, "Request a Coach") --
-// flipped on for testing. A nav entry point was added in Navigation.jsx/
-// NavSlotsContext.jsx alongside this so it's actually reachable, not just
-// URL-accessible.
-const COACH_MARKETPLACE_ENABLED = true;
+// The coach marketplace (browse, coach profiles, "Request a Coach") isn't
+// ready for a public rollout yet -- flip this back to true when it is.
+// Was flipped on 2026-09-18 for user testing, then back off once the user
+// had seen it -- see NavSlotsContext.jsx's REMOVED_KEYS for the matching
+// nav-entry-point removal.
+const COACH_MARKETPLACE_ENABLED = false;
 
 // Redirects already-logged-in users away from auth pages
 const PublicOnlyRoute = ({ children }) => {

@@ -6,15 +6,20 @@ import React, { createContext, useContext, useState } from 'react';
 // definition, and never in DEFAULT_SLOTS. Added it to DEFAULT_SLOTS too
 // rather than wait for a third report of the same pattern -- see the v4/v5
 // bumps' notes on why the version needs to change for a DEFAULT_SLOTS
-// addition to actually reach anyone with a stored value already.
+// addition to actually reach anyone with a stored value already. No
+// further version bump needed for removing 'coach' below -- REMOVED_KEYS
+// already forces a reset to DEFAULT_SLOTS for anyone who has it stored.
 const STORAGE_KEY = 'actpar_nav_slots_v6';
-const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'coach', 'pact', 'ranks'];
+const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'pact', 'ranks'];
 
-// Keys that no longer exist — strip them from stored slots
-const REMOVED_KEYS = new Set([]);
+// Keys that no longer exist — strip them from stored slots. 'coach' was
+// only ever a testing entry point (COACH_MARKETPLACE_ENABLED went back to
+// false 2026-09-18 once the user had seen it) -- pact and ranks stay,
+// those were real orphaned-nav bugs, not deliberate hides.
+const REMOVED_KEYS = new Set(['coach']);
 
 // Valid keys come from NAV_POOL in Navigation.jsx — keep in sync
-const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe', 'feed', 'explore', 'coach', 'pact']);
+const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe', 'feed', 'explore', 'pact']);
 
 export const NavSlotsContext = createContext(null);
 
