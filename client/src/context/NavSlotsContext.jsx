@@ -1,16 +1,20 @@
 import React, { createContext, useContext, useState } from 'react';
 
-// Bumped to v4 -- adding 'coach' back to DEFAULT_SLOTS wouldn't otherwise
-// reach anyone whose browser already has a v3 value saved, since the
-// stored array takes precedence over DEFAULT_SLOTS once it exists.
-const STORAGE_KEY = 'actpar_nav_slots_v4';
-const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'coach'];
+// Bumped to v5 -- 'pact' was pulled from the nav pool the same way 'coach'
+// was (no flag, no comment, just silently dropped from NAV_POOL/
+// DEFAULT_SLOTS at some point) but its route was never actually disabled,
+// only reachable by clicking a pact_joined/pact_post notification. Adding
+// it back the same way coach was in v4 -- see that bump's note on why the
+// version needs to change for a DEFAULT_SLOTS addition to actually reach
+// anyone with a stored value already.
+const STORAGE_KEY = 'actpar_nav_slots_v5';
+const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'coach', 'pact'];
 
 // Keys that no longer exist — strip them from stored slots
-const REMOVED_KEYS = new Set(['pact']);
+const REMOVED_KEYS = new Set([]);
 
 // Valid keys come from NAV_POOL in Navigation.jsx — keep in sync
-const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe', 'feed', 'explore', 'coach']);
+const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe', 'feed', 'explore', 'coach', 'pact']);
 
 export const NavSlotsContext = createContext(null);
 
