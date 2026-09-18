@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
 
-// Bumped to v5 -- 'pact' was pulled from the nav pool the same way 'coach'
-// was (no flag, no comment, just silently dropped from NAV_POOL/
-// DEFAULT_SLOTS at some point) but its route was never actually disabled,
-// only reachable by clicking a pact_joined/pact_post notification. Adding
-// it back the same way coach was in v4 -- see that bump's note on why the
-// version needs to change for a DEFAULT_SLOTS addition to actually reach
-// anyone with a stored value already.
-const STORAGE_KEY = 'actpar_nav_slots_v5';
-const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'coach', 'pact'];
+// Bumped to v6 -- 'ranks' (Leaderboard) has the exact same problem pact
+// and coach did: a working NAV_POOL entry and a fully live /leaderboard
+// route, but zero links to it anywhere in the app outside NAV_POOL's own
+// definition, and never in DEFAULT_SLOTS. Added it to DEFAULT_SLOTS too
+// rather than wait for a third report of the same pattern -- see the v4/v5
+// bumps' notes on why the version needs to change for a DEFAULT_SLOTS
+// addition to actually reach anyone with a stored value already.
+const STORAGE_KEY = 'actpar_nav_slots_v6';
+const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'coach', 'pact', 'ranks'];
 
 // Keys that no longer exist — strip them from stored slots
 const REMOVED_KEYS = new Set([]);
