@@ -10,13 +10,16 @@ import React, { createContext, useContext, useState } from 'react';
 // further version bump needed for removing 'coach' below -- REMOVED_KEYS
 // already forces a reset to DEFAULT_SLOTS for anyone who has it stored.
 const STORAGE_KEY = 'actpar_nav_slots_v6';
-const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore', 'pact', 'ranks'];
+const DEFAULT_SLOTS = ['connect', 'feed', 'tribe', 'explore'];
 
-// Keys that no longer exist — strip them from stored slots. 'coach' was
-// only ever a testing entry point (COACH_MARKETPLACE_ENABLED went back to
-// false 2026-09-18 once the user had seen it) -- pact and ranks stay,
-// those were real orphaned-nav bugs, not deliberate hides.
-const REMOVED_KEYS = new Set(['coach']);
+// Keys that aren't shown right now — strip them from stored slots so a
+// tester's browser doesn't hang onto a stale config. 'coach' is the
+// deliberate-hide case (COACH_MARKETPLACE_ENABLED false). 'pact' and
+// 'ranks' were real orphaned-nav bugs, not deliberate hides -- their
+// NAV_POOL entries and routes stay fully intact, the user just asked to
+// hide them from the nav "for now" (2026-09-18) after testing, same
+// mechanism either way.
+const REMOVED_KEYS = new Set(['coach', 'pact', 'ranks']);
 
 // Valid keys come from NAV_POOL in Navigation.jsx — keep in sync
 const VALID_KEYS = new Set(['connect', 'messages', 'ranks', 'tribe', 'feed', 'explore', 'pact']);
