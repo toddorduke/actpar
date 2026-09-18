@@ -13,8 +13,10 @@
   --color-text: #2B1D14;
   --color-muted: #7A6F63;
   /* Ink-blue "trust" accent -- reserved narrowly for payment/pricing CTAs,
-     verified badges, and journal/reflection save actions. Not a general
-     secondary color. */
+     verified badges, journal/reflection save actions, and (2026-09-18)
+     The Pact's whole page + nav icon, since a small invite-only
+     accountability circle is a trust relationship, not a generic action.
+     Not a general secondary color. */
   --color-trust: #1E3A5F;
   --color-trust-end: #16293F;
   --gradient-primary: linear-gradient(135deg, #FF7A00 0%, #E06400 100%);

@@ -12,8 +12,13 @@ import { timeAgoShort } from '../../utils/dateUtils.js';
 import { getDisplayName } from '../../utils/displayName.js';
 import './Navigation.css';
 
-const buildClassName = ({ isActive }) => `nav-tab${isActive ? ' active' : ''}`;
-const buildBottomClassName = ({ isActive }) => `bottom-tab${isActive ? ' active' : ''}`;
+// The Pact gets its own accent (ink-blue/trust, not the shared orange
+// every other nav item uses) -- see Navigation.css's `.nav-tab-pact`/
+// `.bottom-tab-pact`. Small, invite-only accountability circles are a
+// trust relationship, not a generic action, so it reuses --color-trust
+// rather than introducing a fourth color.
+const buildClassName = ({ isActive }, to) => `nav-tab${isActive ? ' active' : ''}${to === '/pact' ? ' nav-tab-pact' : ''}`;
+const buildBottomClassName = ({ isActive }, to) => `bottom-tab${isActive ? ' active' : ''}${to === '/pact' ? ' bottom-tab-pact' : ''}`;
 
 function notifTypeBadge(notif) {
   if (notif.type === 'connection_request') {
@@ -310,7 +315,7 @@ const Navigation = () => {
 
           <div className="nav-tabs">
             {visibleItems.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={buildClassName}>
+              <NavLink key={item.to} to={item.to} end={item.end} className={(props) => buildClassName(props, item.to)}>
                 {item.icon}
                 {item.label}
               </NavLink>
@@ -409,7 +414,7 @@ const Navigation = () => {
       {user && (
         <nav className="bottom-nav">
           {visibleItems.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={buildBottomClassName}>
+            <NavLink key={item.to} to={item.to} end={item.end} className={(props) => buildBottomClassName(props, item.to)}>
               <span className="bottom-tab-inner">
                 {item.icon}
                 <span className="bottom-tab-label">{item.label}</span>

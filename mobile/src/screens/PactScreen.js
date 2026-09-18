@@ -98,7 +98,7 @@ export default function PactScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator style={{ marginTop: 60 }} color="#FF7A00" />
+        <ActivityIndicator style={{ marginTop: 60 }} color="#1E3A5F" />
       </SafeAreaView>
     );
   }
@@ -393,15 +393,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FBF6EE' },
   scroll: { padding: 16, paddingBottom: 30 },
 
-  pactHeader: { backgroundColor: '#fff', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,122,0,0.25)', marginBottom: 16, alignItems: 'flex-start' },
+  pactHeader: { backgroundColor: '#fff', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(30,58,95,0.25)', marginBottom: 16, alignItems: 'flex-start' },
   pactIcon: { fontSize: 40, marginBottom: 8 },
-  inviteBadge: { backgroundColor: 'rgba(255,122,0,0.12)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: '#FF7A00', marginBottom: 10 },
-  inviteBadgeText: { color: '#FF7A00', fontWeight: '600', fontSize: 13 },
+  inviteBadge: { backgroundColor: 'rgba(30,58,95,0.12)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: '#1E3A5F', marginBottom: 10 },
+  inviteBadgeText: { color: '#1E3A5F', fontWeight: '600', fontSize: 13 },
   pactName: { fontSize: 24, fontWeight: 'bold', color: '#2B1D14', marginBottom: 6 },
   pactDesc: { color: '#7A6F63', fontSize: 14, marginBottom: 16 },
   pactStats: { flexDirection: 'row', gap: 30, marginBottom: 14 },
   pactStat: { alignItems: 'center' },
-  pactStatNum: { fontSize: 20, fontWeight: 'bold', color: '#FF7A00' },
+  pactStatNum: { fontSize: 20, fontWeight: 'bold', color: '#1E3A5F' },
   pactStatLbl: { fontSize: 11, color: '#7A6F63', marginTop: 2 },
   codeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   codeLabel: { color: '#7A6F63', fontSize: 12 },
@@ -412,35 +412,35 @@ const styles = StyleSheet.create({
   emptySub: { color: '#7A6F63', fontSize: 14, marginBottom: 12 },
 
   actionsRow: { gap: 10, marginTop: 12 },
-  primaryBtn: { backgroundColor: '#FF7A00', borderRadius: 12, padding: 14, alignItems: 'center' },
+  primaryBtn: { backgroundColor: '#1E3A5F', borderRadius: 12, padding: 14, alignItems: 'center' },
   primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  secondaryBtn: { borderWidth: 1.5, borderColor: '#FF7A00', borderRadius: 12, padding: 14, alignItems: 'center' },
-  secondaryBtnText: { color: '#FF7A00', fontWeight: '700', fontSize: 15 },
+  secondaryBtn: { borderWidth: 1.5, borderColor: '#1E3A5F', borderRadius: 12, padding: 14, alignItems: 'center' },
+  secondaryBtnText: { color: '#1E3A5F', fontWeight: '700', fontSize: 15 },
 
   openPactCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10 },
   openPactName: { fontWeight: '700', color: '#2B1D14', fontSize: 15 },
   openPactDesc: { color: '#7A6F63', fontSize: 13, marginTop: 2 },
-  joinBtn: { backgroundColor: '#FF7A00', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 8 },
+  joinBtn: { backgroundColor: '#1E3A5F', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 8 },
   joinBtnText: { color: '#fff', fontWeight: '700' },
 
   memberChip: { alignItems: 'center', marginRight: 14, width: 70 },
-  memberAvatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#FF7A00', marginBottom: 6, justifyContent: 'center', alignItems: 'center' },
+  memberAvatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#1E3A5F', marginBottom: 6, justifyContent: 'center', alignItems: 'center' },
   memberBadge: { fontSize: 18 },
   memberName: { color: '#2B1D14', fontSize: 12, fontWeight: '600', textAlign: 'center' },
   memberRole: { color: '#7A6F63', fontSize: 10, textAlign: 'center' },
   removeMemberText: { color: '#dc2626', fontSize: 10, marginTop: 4, fontWeight: '600' },
 
-  createPostBtn: { backgroundColor: '#FF7A00', borderRadius: 12, padding: 14, alignItems: 'center' },
+  createPostBtn: { backgroundColor: '#1E3A5F', borderRadius: 12, padding: 14, alignItems: 'center' },
   createPostText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 
-  filterTab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,122,0,0.3)', marginRight: 8 },
-  filterTabActive: { backgroundColor: '#FF7A00', borderColor: '#FF7A00' },
+  filterTab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(30,58,95,0.3)', marginRight: 8 },
+  filterTabActive: { backgroundColor: '#1E3A5F', borderColor: '#1E3A5F' },
   filterTabText: { color: '#7A6F63', fontWeight: '600', fontSize: 13 },
   filterTabTextActive: { color: '#fff' },
 
-  postCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(255,122,0,0.15)' },
+  postCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(30,58,95,0.15)' },
   postHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  postAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#FFA64D', marginRight: 10 },
+  postAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#1E3A5F', marginRight: 10 },
   postAuthor: { fontWeight: '700', color: '#2B1D14', fontSize: 14 },
   postTime: { fontSize: 12, color: '#7A6F63' },
   postBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
@@ -448,16 +448,16 @@ const styles = StyleSheet.create({
   postMoreBtn: { paddingHorizontal: 8, paddingVertical: 4, marginLeft: 4 },
   postMoreText: { fontSize: 20, color: '#7A6F63', fontWeight: '700' },
   postText: { color: '#2B1D14', fontSize: 14, lineHeight: 21, marginBottom: 10 },
-  postActions: { flexDirection: 'row', gap: 16, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,122,0,0.1)' },
+  postActions: { flexDirection: 'row', gap: 16, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(30,58,95,0.1)' },
   postAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   postActionText: { color: '#7A6F63', fontSize: 13, fontWeight: '500' },
 
   addRuleRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
   addRuleInput: { flex: 1, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 10, padding: 10, fontSize: 14, color: '#2B1D14' },
-  addRuleBtn: { backgroundColor: '#FF7A00', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' },
+  addRuleBtn: { backgroundColor: '#1E3A5F', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' },
   addRuleBtnText: { color: '#fff', fontWeight: '700' },
 
-  ruleItem: { backgroundColor: '#fff', borderLeftWidth: 3, borderLeftColor: '#FF7A00', borderRadius: 8, padding: 12, marginBottom: 8 },
+  ruleItem: { backgroundColor: '#fff', borderLeftWidth: 3, borderLeftColor: '#1E3A5F', borderRadius: 8, padding: 12, marginBottom: 8 },
   ruleText: { color: '#2B1D14', fontSize: 14 },
 
   leaveBtn: { alignItems: 'center', padding: 14, marginBottom: 20 },
@@ -467,14 +467,14 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
   modalCancel: { color: '#6b7280', fontSize: 16 },
   modalTitle: { fontSize: 17, fontWeight: 'bold', color: '#1f2937' },
-  modalAction: { color: '#FF7A00', fontSize: 16, fontWeight: '700' },
+  modalAction: { color: '#1E3A5F', fontSize: 16, fontWeight: '700' },
   modalBody: { padding: 16 },
   fieldLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 8, marginTop: 16 },
   typeRow: { flexDirection: 'row', gap: 8 },
   typeBtn: { flex: 1, padding: 10, borderRadius: 10, borderWidth: 1.5, borderColor: '#e5e7eb', alignItems: 'center' },
-  typeBtnActive: { borderColor: '#FF7A00', backgroundColor: 'rgba(255,122,0,0.08)' },
+  typeBtnActive: { borderColor: '#1E3A5F', backgroundColor: 'rgba(30,58,95,0.08)' },
   typeBtnText: { color: '#6b7280', fontWeight: '600', fontSize: 12 },
-  typeBtnTextActive: { color: '#FF7A00' },
+  typeBtnTextActive: { color: '#1E3A5F' },
   textarea: { borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 12, padding: 14, fontSize: 15, color: '#1f2937', minHeight: 140 },
   inputField: { borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 12, padding: 14, fontSize: 15, color: '#1f2937' },
 });
