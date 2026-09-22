@@ -543,6 +543,17 @@
   color: var(--color-primary-end);
 }
 
+.comm-pulse {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  background: rgba(255, 122, 0, 0.1);
+  color: var(--color-primary-end);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
 /* ── Shared form elements ───────────────────────────── */
 .comm-input {
   width: 100%;

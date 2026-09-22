@@ -97,6 +97,10 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
   useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
   const meetupPostIds = useMemo(() => posts.filter((p) => p.post_type === 'meetup').map((p) => p.id), [posts]);
   const { goingCounts, myRsvps, toggleRsvp } = useMeetupRsvp(user?.id, meetupPostIds);
+  const postsToday = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return posts.filter((p) => p.created_at?.startsWith(today)).length;
+  }, [posts]);
   async function handleRsvp(postId, status) {
     const { error } = await toggleRsvp(postId, status);
     if (error) toast("Couldn't update your RSVP — try again.", 'error');
@@ -148,6 +152,9 @@ function FeedTab({ communityId, isAdmin, pinnedPostId, onPin, communityCategory 
 
   return (
     <div className="comm-feed">
+      {postsToday > 0 && (
+        <p className="comm-pulse">🔥 {postsToday} post{postsToday !== 1 ? 's' : ''} today</p>
+      )}
       {/* Compose */}
       <div className="comm-compose">
         <div className="compose-type-row">

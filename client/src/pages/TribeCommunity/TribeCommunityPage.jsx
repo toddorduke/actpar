@@ -156,6 +156,9 @@ export default function TribeCommunityPage() {
       <section className="page-header">
         <h1 className="page-title">Feed</h1>
         <p className="page-subtitle">Share your wins, support your people</p>
+        {postsToday > 0 && (
+          <p className="page-pulse">🔥 {postsToday} post{postsToday !== 1 ? 's' : ''} today</p>
+        )}
       </section>
 
       <div className="community-grid">
