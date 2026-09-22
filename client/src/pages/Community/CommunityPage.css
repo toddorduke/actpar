@@ -692,6 +692,12 @@
   flex-direction: column;
   gap: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.comm-post-card:hover {
+  box-shadow: var(--shadow-card);
+  border-color: rgba(255, 122, 0, 0.2);
 }
 
 .pinned-post { border-color: var(--color-primary-light); background: rgba(255, 122, 0, 0.05); }
