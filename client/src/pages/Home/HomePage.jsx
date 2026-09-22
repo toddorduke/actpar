@@ -6,7 +6,7 @@ import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { useJournal } from '../../hooks/useJournal.js';
 import { useMedia } from '../../hooks/useMedia.js';
 import { useReflections, DEFAULT_QUESTIONS } from '../../hooks/useReflections.js';
-import { useTribePosts, useGoalProgress, useProfile } from '@actpar/shared';
+import { useTribePosts, useGoalProgress, useGoalMetrics, useProfile } from '@actpar/shared';
 import { track, Events } from '../../lib/analytics.js';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
@@ -92,8 +92,179 @@ function getTodayStr() {
 
 // ── GoalCard ─────────────────────────────────────────────────────────────────
 
-const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogProgress, checkinDates = new Set(), onDelete, onComplete }) => {
+// value_type='time' metrics store seconds; everything else displays as-is.
+function formatMetricValue(value, metric) {
+  if (value === null || value === undefined) return '—';
+  if (metric.value_type === 'time') {
+    const total = Math.round(value);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+  return `${roundNum(value)}${metric.unit ? ` ${metric.unit}` : ''}`;
+}
+
+// Time metrics: lower is better (a faster split). Everything else: higher
+// is better (more reps, more weight, more distance). A reasonable default
+// across the kinds of things this is for -- not universally true for every
+// conceivable metric, but right often enough not to ask the user to
+// specify it themselves at creation time.
+function isBetter(value, currentBest, metric) {
+  if (currentBest === null || currentBest === undefined) return true;
+  return metric.value_type === 'time' ? value < currentBest : value > currentBest;
+}
+
+function LogSessionModal({ goal, metrics, onLogSession, onClose }) {
+  const [values, setValues] = useState({}); // metricId -> { min, sec } for time, or raw string for number
+  const [note, setNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
+
+  function setTimeField(metricId, field, val) {
+    setValues((prev) => ({ ...prev, [metricId]: { ...prev[metricId], [field]: val } }));
+  }
+  function setNumberField(metricId, val) {
+    setValues((prev) => ({ ...prev, [metricId]: val }));
+  }
+
+  async function handleSubmit() {
+    const entries = metrics.map((m) => {
+      const v = values[m.id];
+      if (m.value_type === 'time') {
+        const min = parseInt(v?.min, 10);
+        const sec = parseInt(v?.sec, 10);
+        if (Number.isNaN(min) && Number.isNaN(sec)) return { metricId: m.id, value: null };
+        return { metricId: m.id, value: (Number.isNaN(min) ? 0 : min) * 60 + (Number.isNaN(sec) ? 0 : sec) };
+      }
+      const num = parseFloat(v);
+      return { metricId: m.id, value: Number.isNaN(num) ? null : num };
+    });
+    if (entries.every((e) => e.value === null)) { toast('Log at least one station to save.', 'warning'); return; }
+    setSubmitting(true);
+    const { error, moderation } = await onLogSession(entries, note);
+    setSubmitting(false);
+    if (moderation) { toast(moderation.message, 'error'); return; }
+    if (error) { toast("Couldn't save that session — try again.", 'error'); return; }
+    toast('Session logged!', 'success', 2000);
+    onClose();
+  }
+
+  return (
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="log-session-modal">
+        <div className="log-session-header">
+          <h3>Log a Session — {goal.title}</h3>
+          <button className="close-modal" onClick={onClose}>×</button>
+        </div>
+        <p className="log-session-hint">Fill in whatever you covered today. Leave the rest blank — it's fine if a session doesn't hit every station.</p>
+        <div className="log-session-rows">
+          {metrics.map((m) => (
+            <div key={m.id} className="log-session-row">
+              <span className="log-session-metric-name">{m.name}</span>
+              {m.value_type === 'time' ? (
+                <div className="log-session-time-inputs">
+                  <input type="number" min="0" placeholder="min" className="log-session-time-input" value={values[m.id]?.min ?? ''} onChange={(e) => setTimeField(m.id, 'min', e.target.value)} />
+                  <span>:</span>
+                  <input type="number" min="0" max="59" placeholder="sec" className="log-session-time-input" value={values[m.id]?.sec ?? ''} onChange={(e) => setTimeField(m.id, 'sec', e.target.value)} />
+                </div>
+              ) : (
+                <div className="log-session-number-input-wrap">
+                  <input type="number" step="any" placeholder="0" className="log-session-number-input" value={values[m.id] ?? ''} onChange={(e) => setNumberField(m.id, e.target.value)} />
+                  {m.unit && <span className="log-session-unit">{m.unit}</span>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <input
+          type="text"
+          className="add-goal-input"
+          placeholder="How'd the session go? (optional)"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={200}
+        />
+        <button className="log-session-submit-btn" onClick={handleSubmit} disabled={submitting}>
+          {submitting ? 'Saving…' : 'Save Session'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MultiGoalCard({ goal, userId, onDelete }) {
+  const { metrics, loading, logSession } = useGoalMetrics(userId, goal.id);
+  const [showLogModal, setShowLogModal] = useState(false);
+
+  return (
+    <div className={`goal-card tier-${goal.tier ?? 3}`}>
+      <div className="goal-header">
+        <div>
+          <h3 className="goal-title">{goal.title}</h3>
+          {goal.description && <p className="goal-why">{goal.description}</p>}
+          {CATEGORY_LABELS[goal.tag] && (
+            <span className="goal-category-badge">{CATEGORY_LABELS[goal.tag]}</span>
+          )}
+        </div>
+        <div className="goal-meta">
+          <div className="multi-metric-count">{metrics.length} tracked</div>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="goals-empty">Loading…</p>
+      ) : metrics.length === 0 ? (
+        <p className="goals-empty">No metrics on this goal yet.</p>
+      ) : (
+        <div className="multi-metrics-list">
+          {metrics.map((m) => {
+            const last = m.logs[0];
+            const best = m.logs.reduce((acc, l) => (isBetter(l.value, acc, m) ? l.value : acc), null);
+            return (
+              <div key={m.id} className="multi-metric-summary-row">
+                <span className="multi-metric-summary-name">{m.name}</span>
+                <span className="multi-metric-summary-values">
+                  {last ? (
+                    <>
+                      <span className="multi-metric-last">{formatMetricValue(last.value, m)}</span>
+                      {best !== null && best !== last.value && (
+                        <span className="multi-metric-best">best {formatMetricValue(best, m)}</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="multi-metric-unlogged">not logged yet</span>
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <button className="log-session-btn" onClick={() => setShowLogModal(true)} disabled={metrics.length === 0}>
+        📋 Log a Session
+      </button>
+
+      <div className="goal-card-footer">
+        {onDelete && (
+          <button className="goal-footer-btn goal-delete-btn" onClick={() => onDelete(goal.id)}>
+            Remove Goal
+          </button>
+        )}
+      </div>
+
+      {showLogModal && (
+        <LogSessionModal goal={goal} metrics={metrics} onLogSession={logSession} onClose={() => setShowLogModal(false)} />
+      )}
+    </div>
+  );
+}
+
+const GoalCard = ({ goal, userId, animate, onTierChange, onCheckIn, progressData, onLogProgress, checkinDates = new Set(), onDelete, onComplete }) => {
   const isNumeric = goal.goal_type === 'numeric';
+  if (goal.goal_type === 'multi') {
+    return <MultiGoalCard goal={goal} userId={userId} onDelete={onDelete} />;
+  }
   const liveStreak = useMemo(() => getLiveStreak(goal, getTodayStr()), [goal]);
   const habitPct = useMemo(() => Math.min((liveStreak / 90) * 100, 100), [liveStreak]);
   const checkedInToday = goal.last_checked_in === getTodayStr();
@@ -103,6 +274,7 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
   const [logging, setLogging] = useState(false);
   const [showCheckinNote, setShowCheckinNote] = useState(false);
   const [checkinNote, setCheckinNote] = useState('');
+  const [showFullLog, setShowFullLog] = useState(false);
 
   const numericPct = useMemo(() => {
     if (!isNumeric || !goal.target_value) return 0;
@@ -246,6 +418,22 @@ const GoalCard = ({ goal, animate, onTierChange, onCheckIn, progressData, onLogP
             <div className="last-log-info">
               Last: +{lastEntry.value} {goal.target_unit} · {timeAgo(lastEntry.logged_at)}
               {lastEntry.note ? ` · "${lastEntry.note}"` : ''}
+            </div>
+          )}
+          {progressData?.entries?.length > 0 && (
+            <button type="button" className="view-log-toggle" onClick={() => setShowFullLog((v) => !v)}>
+              {showFullLog ? 'Hide log' : `View full log (${progressData.entries.length})`}
+            </button>
+          )}
+          {showFullLog && (
+            <div className="full-progress-log">
+              {progressData.entries.map((entry) => (
+                <div key={entry.id} className="full-progress-log-row">
+                  <span className="full-progress-log-value">+{entry.value} {goal.target_unit}</span>
+                  <span className="full-progress-log-date">{timeAgo(entry.logged_at)}</span>
+                  {entry.note && <span className="full-progress-log-note">"{entry.note}"</span>}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -564,6 +752,7 @@ const HomePage = () => {
   const [newGoalReminder, setNewGoalReminder] = useState('');
   const [newGoalWhy, setNewGoalWhy] = useState('');
   const [addingGoal, setAddingGoal] = useState(false);
+  const [newGoalMetrics, setNewGoalMetrics] = useState([]); // [{name, valueType, unit, targetValue}]
 
   // Looking For
   const [lookingFor, setLookingFor] = useState([]);
@@ -729,15 +918,24 @@ const HomePage = () => {
     e.preventDefault();
     if (!newGoalTitle.trim()) return;
     if (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget)) return;
+    if (newGoalType === 'multi' && newGoalMetrics.filter((m) => m.name.trim()).length === 0) return;
     setAddingGoal(true);
     const reminderUtcHour = newGoalReminder ? localTimeToUtcHour(newGoalReminder) : null;
-    const { error, moderation } = await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
+    const { error, moderation, metricsError } = await addGoal(newGoalTitle.trim(), newGoalCategory || null, {
       goal_type: newGoalType,
       target_value: newGoalType === 'numeric' ? parseFloat(newGoalTarget) : null,
       target_unit: newGoalType === 'numeric' ? newGoalUnit.trim() : null,
       target_period: newGoalType === 'numeric' ? newGoalPeriod : null,
       reminder_utc_hour: reminderUtcHour,
       description: newGoalWhy.trim() || null,
+      metrics: newGoalType === 'multi'
+        ? newGoalMetrics.filter((m) => m.name.trim()).map((m) => ({
+            name: m.name.trim(),
+            valueType: m.valueType,
+            unit: m.unit.trim(),
+            targetValue: m.targetValue ? parseFloat(m.targetValue) : null,
+          }))
+        : undefined,
     });
     if (moderation) { toast(moderation.message, 'error'); setAddingGoal(false); return; }
     if (error?.code === 'CAP_REACHED') {
@@ -752,7 +950,8 @@ const HomePage = () => {
       return;
     }
     if (error) { toast("Couldn't add that goal — try again.", 'error'); setAddingGoal(false); return; }
-    toast(`Goal added! +${XP_VALUES.GOAL_CREATED} XP`, 'success', 2000);
+    if (metricsError) { toast('Goal created, but one of the metrics failed to save — you can add it from the goal card.', 'warning', 5000); }
+    else { toast(`Goal added! +${XP_VALUES.GOAL_CREATED} XP`, 'success', 2000); }
     setNewGoalTitle('');
     setNewGoalCategory('');
     setNewGoalUnit('');
@@ -761,8 +960,20 @@ const HomePage = () => {
     setNewGoalType('habit');
     setNewGoalReminder('');
     setNewGoalWhy('');
+    setNewGoalMetrics([]);
     setAddingGoal(false);
   };
+
+  const HYROX_PRESET = [
+    { name: 'SkiErg 1000m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Sled Push 50m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Sled Pull 50m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Burpee Broad Jumps 80m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Rowing 1000m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Farmers Carry 200m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Sandbag Lunges 100m', valueType: 'time', unit: '', targetValue: '' },
+    { name: 'Wall Balls (100 reps)', valueType: 'time', unit: '', targetValue: '' },
+  ];
 
   async function handleSaveAnswer(index) {
     const q = activeQuestions[index];
@@ -1252,12 +1463,17 @@ const HomePage = () => {
                       className={`goal-type-btn${newGoalType === 'numeric' ? ' active' : ''}`}
                       onClick={() => setNewGoalType('numeric')}
                     >📊 Progress Goal</button>
+                    <button
+                      type="button"
+                      className={`goal-type-btn${newGoalType === 'multi' ? ' active' : ''}`}
+                      onClick={() => setNewGoalType('multi')}
+                    >🏋️ Multi-Metric</button>
                   </div>
                   <div className="add-goal-row">
                     <input
                       type="text"
                       className="add-goal-input"
-                      placeholder={newGoalType === 'habit' ? 'e.g. Attend church weekly' : 'e.g. Run more miles'}
+                      placeholder={newGoalType === 'habit' ? 'e.g. Attend church weekly' : newGoalType === 'multi' ? 'e.g. HYROX Training' : 'e.g. Run more miles'}
                       value={newGoalTitle}
                       onChange={(e) => setNewGoalTitle(e.target.value)}
                       required
@@ -1265,7 +1481,11 @@ const HomePage = () => {
                     <button
                       type="submit"
                       className="add-goal-btn"
-                      disabled={addingGoal || (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget))}
+                      disabled={
+                        addingGoal ||
+                        (newGoalType === 'numeric' && (!newGoalUnit.trim() || !newGoalTarget)) ||
+                        (newGoalType === 'multi' && newGoalMetrics.filter((m) => m.name.trim()).length === 0)
+                      }
                     >
                       {addingGoal ? '...' : 'Add'}
                     </button>
@@ -1296,6 +1516,58 @@ const HomePage = () => {
                           <button key={val} type="button" className={`period-btn${newGoalPeriod === val ? ' active' : ''}`} onClick={() => setNewGoalPeriod(val)}>{lbl}</button>
                         ))}
                       </div>
+                    </div>
+                  )}
+                  {newGoalType === 'multi' && (
+                    <div className="multi-goal-fields">
+                      <p className="multi-goal-hint">
+                        Track several things under one goal instead of splitting them across your limited active-goal slots — a HYROX
+                        block, a lifting program's separate lifts, marathon splits, anything with more than one number worth tracking.
+                      </p>
+                      <button type="button" className="multi-preset-btn" onClick={() => setNewGoalMetrics(HYROX_PRESET.map((m) => ({ ...m })))}>
+                        ⚡ Load HYROX stations
+                      </button>
+                      {newGoalMetrics.map((m, i) => (
+                        <div key={i} className="multi-metric-row">
+                          <input
+                            type="text"
+                            className="add-goal-input multi-metric-name"
+                            placeholder="e.g. Sled Push 50m"
+                            value={m.name}
+                            onChange={(e) => setNewGoalMetrics((prev) => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
+                          />
+                          <select
+                            className="multi-metric-type"
+                            value={m.valueType}
+                            onChange={(e) => setNewGoalMetrics((prev) => prev.map((x, xi) => xi === i ? { ...x, valueType: e.target.value } : x))}
+                          >
+                            <option value="time">Time</option>
+                            <option value="number">Number</option>
+                          </select>
+                          {m.valueType === 'number' && (
+                            <input
+                              type="text"
+                              className="add-goal-input multi-metric-unit"
+                              placeholder="unit"
+                              value={m.unit}
+                              onChange={(e) => setNewGoalMetrics((prev) => prev.map((x, xi) => xi === i ? { ...x, unit: e.target.value } : x))}
+                            />
+                          )}
+                          <button
+                            type="button"
+                            className="multi-metric-remove"
+                            onClick={() => setNewGoalMetrics((prev) => prev.filter((_, xi) => xi !== i))}
+                            aria-label="Remove metric"
+                          >×</button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        className="multi-metric-add-btn"
+                        onClick={() => setNewGoalMetrics((prev) => [...prev, { name: '', valueType: 'time', unit: '', targetValue: '' }])}
+                      >
+                        + Add a metric
+                      </button>
                     </div>
                   )}
                   <div className="add-goal-categories">
@@ -1513,6 +1785,7 @@ const HomePage = () => {
                               <GoalCard
                                 key={goal.id}
                                 goal={goal}
+                                userId={user?.id}
                                 animate={animateGoals}
                                 onTierChange={updateTier}
                                 onCheckIn={handleGoalCheckIn}

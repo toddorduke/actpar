@@ -27,4 +27,5 @@ export { usePostComments } from './hooks/usePostComments.js';
 export { useMeetupRsvp } from './hooks/useMeetupRsvp.js';
 export { usePact } from './hooks/usePact.js';
 export { useGoalProgress } from './hooks/useGoalProgress.js';
+export { useGoalMetrics } from './hooks/useGoalMetrics.js';
 export { createNotification } from './hooks/useNotifications.js';

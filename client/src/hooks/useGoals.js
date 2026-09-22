@@ -35,10 +35,20 @@ export const useGoals = () => {
     if (!user) return { error: 'Not authenticated' };
     const titleCheck = checkText(title);
     if (!titleCheck.ok) return { data: null, error: null, moderation: titleCheck };
-    const { goal_type = 'habit', target_value, target_unit, target_period, tier, reminder_utc_hour, description } = options;
+    const { goal_type = 'habit', target_value, target_unit, target_period, tier, reminder_utc_hour, description, metrics } = options;
     if (description) {
       const whyCheck = checkText(description);
       if (!whyCheck.ok) return { data: null, error: null, moderation: whyCheck };
+    }
+    // 'multi' goals are a lightweight container -- frequency/target_*
+    // all stay null, same as 'numeric', since the actual targets live
+    // per-metric on goal_metrics_v2 instead. See addGoal's `metrics`
+    // option below.
+    if (goal_type === 'multi' && metrics?.length) {
+      for (const m of metrics) {
+        const metricNameCheck = checkText(m.name);
+        if (!metricNameCheck.ok) return { data: null, error: null, moderation: metricNameCheck };
+      }
     }
     const { data, error } = await supabase
       .from('goals_v2')
@@ -47,7 +57,7 @@ export const useGoals = () => {
         title,
         tag: category ?? 'custom',
         goal_type,
-        frequency: goal_type === 'numeric' ? null : 'daily',
+        frequency: (goal_type === 'numeric' || goal_type === 'multi') ? null : 'daily',
         tier: tier ?? null,
         target_value: target_value ?? null,
         target_unit: target_unit ?? null,
@@ -62,6 +72,22 @@ export const useGoals = () => {
         return { data: null, error: { code: 'CAP_REACHED' } };
       }
       return { data: null, error };
+    }
+    if (goal_type === 'multi' && metrics?.length) {
+      const { error: metricsError } = await supabase.from('goal_metrics_v2').insert(
+        metrics.map((m, i) => ({
+          goal_id: data.id,
+          user_id: user.id,
+          name: m.name.trim(),
+          value_type: m.valueType,
+          unit: m.valueType === 'time' ? null : (m.unit || null),
+          target_value: m.targetValue ?? null,
+          position: i,
+        }))
+      );
+      // The goal itself was created fine even if a metric row failed --
+      // don't roll that back, just surface it so the UI can say so.
+      if (metricsError) return { data, error: null, metricsError };
     }
     setGoals((prev) => [...prev, data]);
     track(Events.GOAL_CREATED, { tier: tier ?? null, category, goal_type });
