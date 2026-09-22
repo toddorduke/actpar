@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { useConnections, getDisplayName } from '@actpar/shared';
 import NudgeModal from '../components/NudgeModal';
+import Avatar from '../components/Avatar';
 
 const BG_COLORS = ['#FF7A00', '#E06400', '#1E3A5F', '#FFA64D', '#10b981'];
 
@@ -52,7 +53,7 @@ export default function ConnectionsScreen() {
               const name = getDisplayName(s.profiles, 'Someone');
               return (
                 <View key={s.requester_id} style={styles.sparkRow}>
-                  <View style={styles.sparkAvatar} />
+                  <Avatar url={s.profiles?.avatar_url} name={name} size={44} style={styles.sparkAvatar} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.sparkName}>{name}</Text>
                     {s.spark_message && <Text style={styles.sparkMsg} numberOfLines={2}>"{s.spark_message}"</Text>}
@@ -81,7 +82,13 @@ export default function ConnectionsScreen() {
           ) : (
             <View style={styles.card}>
               <View style={[styles.cardTop, { backgroundColor: BG_COLORS[browseProfiles.length % BG_COLORS.length] }]}>
-                <View style={styles.cardAvatar} />
+                {current.avatar_url ? (
+                  <Image source={{ uri: current.avatar_url }} style={styles.cardAvatar} />
+                ) : (
+                  <View style={styles.cardAvatar}>
+                    <Text style={styles.cardAvatarInitials}>{getDisplayName(current).charAt(0).toUpperCase()}</Text>
+                  </View>
+                )}
               </View>
               <View style={styles.cardBody}>
                 <Text style={styles.cardName}>{getDisplayName(current)}</Text>
@@ -168,7 +175,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 17, fontWeight: 'bold', color: '#1f2937', marginBottom: 12 },
 
   sparkRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF4E8', borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#FFA64D' },
-  sparkAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FF7A00', marginRight: 12 },
+  sparkAvatar: { marginRight: 12 },
   sparkName: { fontWeight: '700', color: '#1f2937', fontSize: 15 },
   sparkMsg: { color: '#7A6F63', fontSize: 13, marginTop: 2 },
   acceptBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#10b981', alignItems: 'center', justifyContent: 'center', marginRight: 6 },
@@ -178,7 +185,8 @@ const styles = StyleSheet.create({
 
   card: { backgroundColor: '#fff', borderRadius: 20, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, elevation: 4 },
   cardTop: { height: 160, alignItems: 'center', justifyContent: 'center' },
-  cardAvatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.3)', borderWidth: 4, borderColor: '#fff' },
+  cardAvatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.3)', borderWidth: 4, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  cardAvatarInitials: { fontSize: 40, fontWeight: '700', color: '#fff' },
   cardBody: { padding: 20 },
   cardName: { fontSize: 24, fontWeight: 'bold', color: '#1f2937', marginBottom: 4 },
   cardCity: { fontSize: 14, color: '#7A6F63', marginBottom: 4 },

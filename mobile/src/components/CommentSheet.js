@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, FlatList, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../context/AuthContext';
 import { getDisplayName, timeAgo } from '@actpar/shared';
+import Avatar from './Avatar';
 
 // Mobile equivalent of client/src/components/common/CommentPanel.jsx --
 // a bottom-sheet modal instead of an inline panel, works for both Tribe
@@ -58,7 +59,7 @@ export default function CommentSheet({ visible, postId, postType, ownerTable, co
               const isOwn = item.user_id === userId;
               return (
                 <View style={styles.commentRow}>
-                  <View style={styles.avatar} />
+                  <Avatar url={item.profiles?.avatar_url} name={name} size={30} style={styles.avatar} />
                   <View style={{ flex: 1 }}>
                     <View style={styles.commentMeta}>
                       <Text style={styles.author}>{name}</Text>
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
   empty: { textAlign: 'center', color: '#7A6F63', marginTop: 40, fontSize: 14 },
   list: { flex: 1, padding: 16 },
   commentRow: { flexDirection: 'row', marginBottom: 16 },
-  avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#FFA64D', marginRight: 10 },
+  avatar: { marginRight: 10 },
   commentMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
   author: { fontWeight: '700', color: '#2B1D14', fontSize: 13 },
   time: { color: '#7A6F63', fontSize: 11 },

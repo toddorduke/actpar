@@ -9,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import CommentSheet from '../components/CommentSheet';
 import PostActionsSheet from '../components/PostActionsSheet';
 import ReportModal from '../components/ReportModal';
+import Avatar from '../components/Avatar';
 
 const BADGE_STYLE = {
   update: ['rgba(30,58,95,0.1)', '#1E3A5F', '📊 Update'],
@@ -204,7 +205,8 @@ export default function PactScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {members.map((m) => (
               <View key={m.user_id} style={styles.memberChip}>
-                <View style={styles.memberAvatar}>
+                <View style={styles.memberAvatarWrap}>
+                  <Avatar url={m.profiles?.avatar_url} name={getDisplayName(m.profiles, 'Member')} size={52} />
                   {ROLE_BADGE[m.role] ? <Text style={styles.memberBadge}>{ROLE_BADGE[m.role]}</Text> : null}
                 </View>
                 <Text style={styles.memberName} numberOfLines={1}>{getDisplayName(m.profiles, 'Member').split(' ')[0]}</Text>
@@ -242,7 +244,7 @@ export default function PactScreen() {
             return (
               <View key={post.id} style={styles.postCard}>
                 <View style={styles.postHeader}>
-                  <View style={styles.postAvatar} />
+                  <Avatar url={post.profiles?.avatar_url} name={authorName} size={42} style={styles.postAvatar} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.postAuthor}>{authorName}</Text>
                     <Text style={styles.postTime}>{timeAgo(post.created_at)}</Text>
@@ -426,8 +428,8 @@ const styles = StyleSheet.create({
   joinBtnText: { color: '#fff', fontWeight: '700' },
 
   memberChip: { alignItems: 'center', marginRight: 14, width: 70 },
-  memberAvatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#1E3A5F', marginBottom: 6, justifyContent: 'center', alignItems: 'center' },
-  memberBadge: { fontSize: 18 },
+  memberAvatarWrap: { marginBottom: 6, position: 'relative' },
+  memberBadge: { position: 'absolute', bottom: -2, right: -2, fontSize: 16 },
   memberName: { color: '#2B1D14', fontSize: 12, fontWeight: '600', textAlign: 'center' },
   memberRole: { color: '#7A6F63', fontSize: 10, textAlign: 'center' },
   removeMemberText: { color: '#dc2626', fontSize: 10, marginTop: 4, fontWeight: '600' },
@@ -442,7 +444,7 @@ const styles = StyleSheet.create({
 
   postCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(30,58,95,0.15)' },
   postHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  postAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#1E3A5F', marginRight: 10 },
+  postAvatar: { marginRight: 10 },
   postAuthor: { fontWeight: '700', color: '#2B1D14', fontSize: 14 },
   postTime: { fontSize: 12, color: '#7A6F63' },
   postBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },

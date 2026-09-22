@@ -6,6 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useGoalsV2 } from '../hooks/useGoalsV2';
 import { useProfile, useConnections, getDisplayName } from '@actpar/shared';
 import ConfirmModal from '../components/ConfirmModal';
+import Avatar from '../components/Avatar';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -34,7 +35,9 @@ export default function ProfileScreen() {
         <View style={styles.profileHeader}>
           <View style={styles.coverBg} />
           <View style={styles.avatarContainer}>
-            <View style={styles.avatar} />
+            <View style={styles.avatarBorder}>
+              <Avatar url={profile?.avatar_url} name={getDisplayName(profile, 'You')} size={80} />
+            </View>
           </View>
           <Text style={styles.userName}>{getDisplayName(profile, 'You')}</Text>
           {profile?.tagline ? <Text style={styles.userTagline}>{profile.tagline}</Text> : null}
@@ -64,7 +67,7 @@ export default function ProfileScreen() {
             <View style={styles.tribeRow}>
               {acceptedConnections.map((c) => (
                 <View key={c.partnerId} style={styles.tribeChip}>
-                  <View style={styles.tribeAvatar} />
+                  <Avatar url={c.partnerProfile?.avatar_url} name={getDisplayName(c.partnerProfile, 'Partner')} size={48} style={{ marginBottom: 4 }} />
                   <Text style={styles.tribeName} numberOfLines={1}>{getDisplayName(c.partnerProfile, 'Partner').split(' ')[0]}</Text>
                 </View>
               ))}
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
   profileHeader: { backgroundColor: '#fff', alignItems: 'center', paddingBottom: 20, marginBottom: 16 },
   coverBg: { height: 100, width: '100%', backgroundColor: '#FF7A00' },
   avatarContainer: { marginTop: -40, marginBottom: 10 },
-  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFA64D', borderWidth: 4, borderColor: '#fff' },
+  avatarBorder: { width: 88, height: 88, borderRadius: 44, borderWidth: 4, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   userName: { fontSize: 22, fontWeight: 'bold', color: '#2B1D14', marginBottom: 4 },
   userTagline: { fontSize: 14, color: '#7A6F63', marginBottom: 4, textAlign: 'center', paddingHorizontal: 20 },
   userCity: { fontSize: 13, color: '#7A6F63' },
@@ -136,7 +139,6 @@ const styles = StyleSheet.create({
 
   tribeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   tribeChip: { alignItems: 'center', width: 60 },
-  tribeAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#FF7A00', marginBottom: 4 },
   tribeName: { fontSize: 11, color: '#374151', fontWeight: '500', textAlign: 'center' },
 
   goalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 8 },

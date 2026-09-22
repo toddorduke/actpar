@@ -8,6 +8,7 @@ import NudgeModal from '../components/NudgeModal';
 import CommentSheet from '../components/CommentSheet';
 import PostActionsSheet from '../components/PostActionsSheet';
 import { FeedSkeleton } from '../components/Skeleton';
+import Avatar from '../components/Avatar';
 import ReportModal from '../components/ReportModal';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -28,7 +29,7 @@ function PostCard({ post, liked, onLike, onComment, commentCount, goingCount, my
   return (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
-        <View style={styles.postAvatar} />
+        <Avatar url={post.profiles?.avatar_url} name={author} size={44} style={styles.postAvatar} />
         <View style={{ flex: 1 }}>
           <Text style={styles.postAuthor}>{author}</Text>
           <Text style={styles.postTime}>{timeAgo(post.created_at)}</Text>
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
 
   postCard: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 14, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
   postHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  postAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFA64D', marginRight: 10 },
+  postAvatar: { marginRight: 10 },
   postAuthor: { fontWeight: '700', color: '#1f2937', fontSize: 15 },
   postTime: { fontSize: 12, color: '#6b7280' },
   postBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
