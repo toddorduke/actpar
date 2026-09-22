@@ -752,6 +752,7 @@ const HomePage = () => {
       return;
     }
     if (error) { toast("Couldn't add that goal — try again.", 'error'); setAddingGoal(false); return; }
+    toast(`Goal added! +${XP_VALUES.GOAL_CREATED} XP`, 'success', 2000);
     setNewGoalTitle('');
     setNewGoalCategory('');
     setNewGoalUnit('');

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { useConnections } from '../../hooks/useConnections.js';
-import { useProfile } from '@actpar/shared';
+import { useProfile, XP_VALUES } from '@actpar/shared';
 import { useBlock } from '../../hooks/useBlock.js';
 import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { supabase } from '../../lib/supabase.js';
@@ -150,6 +150,7 @@ export default function ConnectionsPage() {
     const { error } = await proposeJourney(journeyModal.partnerId, journeyGoalId || null, deadlineUtcHour, deadlineDisplay);
     setProposing(false);
     if (error) { toast("Couldn't send that journey invite — try again.", 'error'); return; }
+    toast(`Journey invite sent! +${XP_VALUES.JOURNEY_STARTED} XP`, 'success', 2000);
     setJourneyModal(null);
     setJourneyGoalId('');
     setJourneyDeadlineHour('');
@@ -256,7 +257,8 @@ export default function ConnectionsPage() {
   async function handleConnect() {
     if (!currentProfile) return;
     const { error } = await sendSpark(currentProfile.id); // no message = regular connect
-    if (error) toast("Couldn't send that connection request — try again.", 'error');
+    if (error) { toast("Couldn't send that connection request — try again.", 'error'); return; }
+    toast(`Spark sent! +${XP_VALUES.SPARK_SENT} XP`, 'success', 2000);
   }
 
   function handleOpenSparkModal() {
@@ -329,7 +331,11 @@ export default function ConnectionsPage() {
     {sparkModalOpen && currentProfile && (
       <SparkModal
         profile={currentProfile}
-        onSend={(msg) => sendSpark(currentProfile.id, msg)}
+        onSend={async (msg) => {
+          const result = await sendSpark(currentProfile.id, msg);
+          if (!result.error && !result.moderation) toast(`Spark sent! +${XP_VALUES.SPARK_SENT} XP`, 'success', 2000);
+          return result;
+        }}
         onClose={() => setSparkModalOpen(false)}
       />
     )}
