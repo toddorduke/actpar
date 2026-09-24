@@ -125,6 +125,7 @@ export default function SettingsPage() {
   const [notifPact, setNotifPact] = useState(true);
   const [notifTribe, setNotifTribe] = useState(false);
   const [notifEmailMatch, setNotifEmailMatch] = useState(false);
+  const [notifAutoShareMilestones, setNotifAutoShareMilestones] = useState(false);
   const [savingNotifs, setSavingNotifs] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
 
@@ -171,6 +172,7 @@ export default function SettingsPage() {
       setNotifPact(prefs.pact ?? true);
       setNotifTribe(prefs.tribe ?? false);
       setNotifEmailMatch(prefs.email_match ?? false);
+      setNotifAutoShareMilestones(prefs.auto_share_milestones ?? false);
       // Coach fields
       setCoachSpecialty(profile.coach_specialty ?? '');
       setCoachTagline(profile.coach_tagline ?? '');
@@ -387,6 +389,7 @@ export default function SettingsPage() {
         pact: notifPact,
         tribe: notifTribe,
         email_match: notifEmailMatch,
+        auto_share_milestones: notifAutoShareMilestones,
       },
     });
     setSavingNotifs(false);
@@ -1006,6 +1009,7 @@ export default function SettingsPage() {
                   [notifSparks, setNotifSparks, 'Spark Requests', 'When someone sends you a spark connection'],
                   [notifTribe, setNotifTribe, 'Tribe Community', 'New posts in the community feed'],
                   [notifEmailMatch, setNotifEmailMatch, 'Email Me on New Connections', 'Get an email when someone accepts your connection request'],
+                  [notifAutoShareMilestones, setNotifAutoShareMilestones, 'Share Milestones to Feed', 'Auto-post a streak milestone or goal completion to the community Feed — off unless you turn it on'],
                 ].map(([val, setter, title, desc, extra]) => (
                   <div key={title} className="settings-toggle-row">
                     <div className="settings-toggle-info">

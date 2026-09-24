@@ -6,6 +6,10 @@ import { supabase } from '../../lib/supabase.js';
 import { useTribePosts, usePostLikes, useMeetupRsvp } from '@actpar/shared';
 import { useCommunities } from '../../hooks/useCommunities.js';
 import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
+import { useGoals } from '../../hooks/useGoals.js';
+import { useInspiration } from '../../hooks/useInspiration.js';
+import { getInspirationQuery } from '../../lib/inspiration.js';
+import InspirationStrip from '../../components/common/InspirationStrip.jsx';
 import { track, Events } from '../../lib/analytics.js';
 import { scanMediaUrl } from '../../utils/contentModeration.js';
 import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
@@ -185,6 +189,36 @@ function FeedCard({ post, liked, isToggling, likeCount, onLike, onOpenComments, 
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Curated stock photo/video matched to the viewer's own top goal, filling
+// the gaps between real posts so Explore doesn't run dry when the real
+// feed is quiet -- see InspirationStrip.jsx (Community page) for the
+// original version of this pattern and why it's never disguised as a
+// real post: no avatar, no author name, no like/comment/react actions,
+// just a clear label and a credit that links out to the source.
+function FeedInspirationCard({ item, label }) {
+  const isVideo = item.type === 'video';
+  return (
+    <div className="feed-card feed-inspiration-card">
+      {!isVideo && <img src={item.url} alt={item.alt} className="feed-media-bg" />}
+      {isVideo && <video src={item.videoUrl} poster={item.posterUrl} className="feed-media-bg" autoPlay muted loop playsInline />}
+      <div className="feed-card-scrim" />
+
+      <div className="feed-inspiration-tag">✨ Inspiration for {label}</div>
+
+      <div className="feed-inspiration-footer">
+        <a
+          className="feed-inspiration-credit"
+          href={item.pexelsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {isVideo ? 'Video' : 'Photo'} by {item.photographer} on Pexels ↗
+        </a>
       </div>
     </div>
   );
@@ -492,6 +526,11 @@ function PostSheet({ user, createPost, onClose, onUploadStart, onUploadProgress,
             onChange={(e) => setMilestone(e.target.value)}
           />
         )}
+        {postType === 'achievement' && !mediaFile && (
+          <button type="button" className="feed-post-photo-nudge" onClick={() => fileRef.current?.click()}>
+            📷 Got a photo or video of it? Add one — achievements with media stand out a lot more in Explore.
+          </button>
+        )}
 
         {/* Meetup details */}
         {postType === 'meetup' && (
@@ -587,6 +626,11 @@ export default function FeedPage() {
     paginate: true, pageSize: 20,
     onPostCreated: (post_type) => track(Events.POST_CREATED, { post_type }),
   });
+  // Matched to the viewer's own top goal -- see FeedInspirationCard above
+  // for why this is never disguised as a real post.
+  const { goals } = useGoals();
+  const inspiration = useMemo(() => getInspirationQuery({ goals }), [goals]);
+  const { items: inspirationItems } = useInspiration(inspiration?.query ?? null);
   const postIds                               = useMemo(() => posts.map((p) => p.id), [posts]);
   const { likedIds, toggleLike, toggling }    = usePostLikes(user?.id, postIds, 'tribe');
   const [localLikeCounts, setLocalLikeCounts] = useState({});
@@ -646,6 +690,24 @@ export default function FeedPage() {
       return sB - sA;
     });
   }, [posts, sortMode]);
+
+  // Intersperse a labeled inspiration card every few real posts so
+  // scrolling Explore doesn't run dry when the real feed is thin -- see
+  // FeedInspirationCard above. Cycles through whatever Pexels returned for
+  // the viewer's top goal rather than fetching a fresh batch per slot.
+  const INSPIRATION_INTERVAL = 5;
+  const feedItems = useMemo(() => {
+    if (!inspirationItems?.length) return rankedPosts.map((post) => ({ type: 'post', post, key: post.id }));
+    const out = [];
+    rankedPosts.forEach((post, i) => {
+      out.push({ type: 'post', post, key: post.id });
+      if ((i + 1) % INSPIRATION_INTERVAL === 0) {
+        const item = inspirationItems[Math.floor(i / INSPIRATION_INTERVAL) % inspirationItems.length];
+        out.push({ type: 'inspiration', item, key: `insp-${i}` });
+      }
+    });
+    return out;
+  }, [rankedPosts, inspirationItems]);
 
   // Upload progress state
   const [uploadBar, setUploadBar] = useState(null); // null | { status, progress }
@@ -722,6 +784,11 @@ export default function FeedPage() {
           <h3>Nothing here yet</h3>
           <p>Be the first to post.</p>
           <button className="feed-fab" onClick={() => setShowSheet(true)} aria-label="Create post">+</button>
+          {inspiration && (
+            <div style={{ width: 'min(340px, 90vw)' }}>
+              <InspirationStrip query={inspiration.query} label={inspiration.label} />
+            </div>
+          )}
           {showSheet && <PostSheet {...sheetProps} />}
         </div>
       </>
@@ -765,24 +832,26 @@ export default function FeedPage() {
       {/* Dark backdrop fills the screen behind the centered column on desktop */}
       <div className="feed-desktop-backdrop" />
       <div className="feed-page">
-        {rankedPosts.map((post) => (
+        {feedItems.map((entry) => entry.type === 'inspiration' ? (
+          <FeedInspirationCard key={entry.key} item={entry.item} label={inspiration.label} />
+        ) : (
           <FeedCard
-            key={post.id}
-            post={post}
-            liked={likedIds.has(post.id)}
-            isToggling={toggling.has(post.id)}
-            likeCount={localLikeCounts[post.id] ?? post.likes ?? 0}
+            key={entry.key}
+            post={entry.post}
+            liked={likedIds.has(entry.post.id)}
+            isToggling={toggling.has(entry.post.id)}
+            likeCount={localLikeCounts[entry.post.id] ?? entry.post.likes ?? 0}
             onLike={handleLike}
             onOpenComments={handleOpenComments}
-            commentCount={commentState.commentCount(post.id)}
+            commentCount={commentState.commentCount(entry.post.id)}
             onShare={setSharePost}
-            reactionCounts={reactionCounts[post.id]}
-            myReaction={myReactions[post.id]}
+            reactionCounts={reactionCounts[entry.post.id]}
+            myReaction={myReactions[entry.post.id]}
             onReact={toggleReaction}
             currentUserId={user?.id}
             onDelete={deletePost}
-            rsvpGoingCount={goingCounts[post.id]}
-            rsvpMyStatus={myRsvps[post.id] ?? null}
+            rsvpGoingCount={goingCounts[entry.post.id]}
+            rsvpMyStatus={myRsvps[entry.post.id] ?? null}
             onRsvp={handleRsvp}
           />
         ))}

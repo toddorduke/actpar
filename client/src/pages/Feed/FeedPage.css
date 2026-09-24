@@ -189,6 +189,41 @@
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
+/* ── Inspiration card — clearly not a real post: no author, no actions ── */
+.feed-inspiration-tag {
+  position: absolute;
+  top: 70px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 122, 0, 0.25);
+  border: 1px solid rgba(255, 122, 0, 0.45);
+  color: var(--color-primary-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.feed-inspiration-footer {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 40px;
+  z-index: 2;
+}
+
+.feed-inspiration-credit {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+}
+
+.feed-inspiration-credit:hover { color: rgba(255, 255, 255, 0.9); }
+
 /* ── Right-side action buttons (TikTok style) ── */
 .feed-actions {
   position: absolute;
@@ -711,6 +746,20 @@
 }
 
 .feed-post-milestone-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+
+.feed-post-photo-nudge {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 12px;
+  padding: 10px 14px;
+  background: rgba(255, 122, 0, 0.1);
+  border: 1px dashed rgba(255, 122, 0, 0.4);
+  border-radius: 10px;
+  color: var(--color-primary-light);
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
 
 .feed-post-textarea {
   display: block;

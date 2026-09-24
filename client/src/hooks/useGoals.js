@@ -11,6 +11,24 @@ const STREAK_MILESTONES = [7, 30, 60, 90];
 
 const todayStr = () => new Date().toISOString().split('T')[0];
 
+// Auto-posts a milestone to the community Feed -- but only if the user has
+// opted in (Settings > Notifications > "Share Milestones to Feed",
+// profiles.notification_prefs.auto_share_milestones). Off by default: this
+// posts on the user's behalf, so it needs an explicit yes, not an assumed
+// one. See the Feed-liveliness work this pairs with (inspiration cards +
+// this) for the full context.
+function maybeShareMilestonePost(userId, content, milestone) {
+  supabase
+    .from('profiles')
+    .select('notification_prefs')
+    .eq('id', userId)
+    .single()
+    .then(({ data: p }) => {
+      if (!p?.notification_prefs?.auto_share_milestones) return;
+      supabase.from('tribe_posts').insert({ user_id: userId, content, post_type: 'achievement', milestone });
+    });
+}
+
 export const useGoals = () => {
   const { user } = useContext(AuthContext);
   const [goals, setGoals] = useState([]);
@@ -163,6 +181,7 @@ export const useGoals = () => {
               });
             });
           });
+        maybeShareMilestonePost(user.id, `🔥 Hit a ${newCount}-day streak on "${goal.title}"!`, `${newCount}-day streak`);
       }
     }
     return { error, milestone, goalTitle: goal.title, graceConsumed };
@@ -229,9 +248,11 @@ export const useGoals = () => {
       track(Events.GOAL_COMPLETED, { day_count: goal.day_count ?? 0, category: goal.tag });
       setGoals((prev) => prev.filter((g) => g.id !== goalId));
       setCompletedGoals((prev) => [{ ...goal, status: 'completed', completed_at: now }, ...prev]);
+      const dayNote = goal.day_count ? ` ${goal.day_count} days of showing up.` : '';
+      maybeShareMilestonePost(user.id, `🎉 Completed "${goal.title}"!${dayNote}`, 'Goal completed');
     }
     return { error };
-  }, [goals]);
+  }, [goals, user]);
 
   return { goals, completedGoals, loading, addGoal, checkIn, backdatedCheckIn, updateProgress, updateTier, deleteGoal, completeGoal, refetch: fetchGoals };
 };
