@@ -1,7 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { usePostLikes } from '@actpar/shared';
+import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
+import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import Avatar from '../../components/common/Avatar.jsx';
 import { useToast } from '../../components/common/Toast.jsx';
 import { createNotification } from '../../hooks/useNotifications.js';
@@ -37,6 +40,38 @@ export default function UserProfilePage() {
   const [celebrateProfile, setCelebrateProfile] = useState(null);
   const [bannerBroken, setBannerBroken] = useState(false);
   const { blockUser, unblockUser, isBlocked } = useBlock();
+
+  // Comments/reactions/likes on this person's posts -- same shared infra
+  // Tribe/Pact/My-Posts use (see TribeCommunityPage.jsx / HomePage.jsx).
+  const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
+  const commentState = useCommentState(posts);
+  const { likedIds, toggleLike, toggling } = usePostLikes(user?.id, postIds, 'tribe');
+  const [likeCounts, setLikeCounts] = useState({});
+  const { counts: reactionCounts, myReactions, loadReactions, toggleReaction } = useReactions();
+  useEffect(() => { if (postIds.length) loadReactions(postIds); }, [postIds.join(',')]);
+  function handleLike(postId, currentCount, postOwnerId) {
+    toggleLike(postId, currentCount, (id, newCount) => {
+      setLikeCounts((prev) => ({ ...prev, [id]: newCount }));
+    }, postOwnerId);
+  }
+
+  // Media-tab items that trace back to a real post (id `post-<uuid>`) jump
+  // to that post in the Posts tab instead of just autoplaying with no way
+  // to see or add comments. Plain `media`-table uploads that were never
+  // shared as a post have no comment thread to jump to, so those stay a
+  // simple gallery.
+  const [highlightPostId, setHighlightPostId] = useState(null);
+  const postRefs = useRef({});
+  function jumpToPost(mediaItemId) {
+    if (!mediaItemId.startsWith('post-')) return;
+    const postId = mediaItemId.slice('post-'.length);
+    setActiveTab('posts');
+    setHighlightPostId(postId);
+    setTimeout(() => {
+      postRefs.current[postId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+    setTimeout(() => setHighlightPostId(null), 2000);
+  }
 
   useEffect(() => {
     if (!userId || userId === user?.id) {
@@ -419,8 +454,16 @@ export default function UserProfilePage() {
             {posts.length === 0 && <p className="up-empty">No posts yet.</p>}
             {posts.map((post) => {
               const isVideo = post.media_url && /\.(mp4|mov|webm|quicktime)/i.test(post.media_url);
+              const liked = likedIds.has(post.id);
+              const likeCount = likeCounts[post.id] ?? post.likes ?? 0;
+              const commentsOpen = !!commentState.openPanels[post.id];
+              const commentCount = commentState.commentCount(post.id);
               return (
-                <div key={post.id} className="up-post-card">
+                <div
+                  key={post.id}
+                  ref={(el) => { postRefs.current[post.id] = el; }}
+                  className={`up-post-card${highlightPostId === post.id ? ' up-post-highlight' : ''}`}
+                >
                   <div className="up-post-header">
                     <Avatar url={profile.avatar_url} name={fullName} size={36} />
                     <div className="up-post-meta">
@@ -436,7 +479,52 @@ export default function UserProfilePage() {
                     </div>
                   )}
                   {post.content && <p className="up-post-content">{post.content}</p>}
-                  <div className="up-post-likes">♥ {post.likes ?? 0}</div>
+
+                  <div className="up-post-actions">
+                    <button
+                      type="button"
+                      className={`up-post-action-btn${liked ? ' liked' : ''}`}
+                      onClick={() => handleLike(post.id, likeCount, post.user_id)}
+                      disabled={toggling.has(post.id)}
+                    >
+                      {liked ? '❤️' : '🤍'} {likeCount || ''}
+                    </button>
+                    <button
+                      type="button"
+                      className={`up-post-action-btn${commentsOpen ? ' active' : ''}`}
+                      onClick={() => commentState.togglePanel(post.id)}
+                    >
+                      💬 {commentCount > 0 ? commentCount : ''} Comment{commentCount !== 1 ? 's' : ''}
+                    </button>
+                  </div>
+
+                  <div className="up-post-reactions">
+                    {REACTION_EMOJIS.map(({ key, label }) => {
+                      const count = reactionCounts[post.id]?.[key] ?? 0;
+                      const active = myReactions[post.id] === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          className={`up-post-reaction-chip${active ? ' active' : ''}`}
+                          onClick={() => toggleReaction(post.id, key)}
+                        >
+                          {label}{count > 0 && <span className="up-post-reaction-count">{count}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {commentsOpen && (
+                    <CommentPanel
+                      postId={post.id}
+                      postType="tribe"
+                      comments={commentState.commentsByPost[post.id] ?? []}
+                      loading={!!commentState.loadingPost[post.id]}
+                      onAdd={commentState.addComment}
+                      onDelete={commentState.deleteComment}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -447,16 +535,24 @@ export default function UserProfilePage() {
         {activeTab === 'media' && (
           <div className="up-media-grid">
             {allMedia.length === 0 && <p className="up-empty">No photos or videos shared yet.</p>}
-            {allMedia.map((item) => (
-              <div key={item.id} className="up-media-item">
-                {item.file_type === 'video' ? (
-                  <video src={item.file_url} className="up-media-file" controls playsInline onError={(e) => { e.currentTarget.closest('.up-media-item').style.display = 'none'; }} />
-                ) : (
-                  <img src={item.file_url} alt={item.caption ?? ''} className="up-media-file" onError={(e) => { e.currentTarget.closest('.up-media-item').style.display = 'none'; }} />
-                )}
-                {item.caption && <div className="up-media-caption">{item.caption}</div>}
-              </div>
-            ))}
+            {allMedia.map((item) => {
+              const isFromPost = item.id.startsWith('post-');
+              return (
+                <div key={item.id} className="up-media-item">
+                  {item.file_type === 'video' ? (
+                    <video src={item.file_url} className="up-media-file" controls playsInline onError={(e) => { e.currentTarget.closest('.up-media-item').style.display = 'none'; }} />
+                  ) : (
+                    <img src={item.file_url} alt={item.caption ?? ''} className="up-media-file" onError={(e) => { e.currentTarget.closest('.up-media-item').style.display = 'none'; }} />
+                  )}
+                  {item.caption && <div className="up-media-caption">{item.caption}</div>}
+                  {isFromPost && (
+                    <button type="button" className="up-media-comments-btn" onClick={() => jumpToPost(item.id)}>
+                      💬 See comments
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 

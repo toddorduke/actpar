@@ -1754,6 +1754,54 @@
   display: block;
 }
 
+.my-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-post-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.my-post-action-btn:hover { border-color: var(--color-primary); }
+.my-post-action-btn.liked,
+.my-post-action-btn.active { border-color: var(--color-primary); color: var(--color-primary-end); }
+.my-post-action-btn:disabled { opacity: 0.6; cursor: default; }
+
+.my-post-reactions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.my-post-reaction-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.my-post-reaction-chip.active { border-color: var(--color-primary); background: rgba(255, 122, 0, 0.08); }
+.my-post-reaction-count { font-size: 0.75rem; font-weight: 700; color: var(--color-primary-end); }
+
 /* ── Media ────────────────────────────────────────────── */
 .photo-item-wrapper {
   position: relative;

@@ -6,7 +6,9 @@ import { usePartnerships } from '../../hooks/usePartnerships.js';
 import { useJournal } from '../../hooks/useJournal.js';
 import { useMedia } from '../../hooks/useMedia.js';
 import { useReflections, DEFAULT_QUESTIONS } from '../../hooks/useReflections.js';
-import { useTribePosts, useGoalProgress, useGoalMetrics, useProfile } from '@actpar/shared';
+import { useTribePosts, useGoalProgress, useGoalMetrics, useProfile, usePostLikes } from '@actpar/shared';
+import { useReactions, REACTION_EMOJIS } from '../../hooks/useReactions.js';
+import CommentPanel, { useCommentState } from '../../components/common/CommentPanel.jsx';
 import { track, Events } from '../../lib/analytics.js';
 import { useConnections } from '../../hooks/useConnections.js';
 import { useCommunities } from '../../hooks/useCommunities.js';
@@ -536,6 +538,19 @@ const HomePage = () => {
   }, [goals]);
   const [myOwnPosts, setMyOwnPosts] = useState([]);
   const [myPostsLoading, setMyPostsLoading] = useState(false);
+  // Comments/reactions/likes for "My Posts" -- same shared infra Tribe/Pact
+  // feeds use (see TribeCommunityPage.jsx), just not wired here before now.
+  const myPostIds = useMemo(() => myOwnPosts.map((p) => p.id), [myOwnPosts]);
+  const myPostCommentState = useCommentState(myOwnPosts);
+  const { likedIds: myPostLikedIds, toggleLike: toggleMyPostLike, toggling: myPostToggling } = usePostLikes(user?.id, myPostIds, 'tribe');
+  const [myPostLikeCounts, setMyPostLikeCounts] = useState({});
+  const { counts: myPostReactionCounts, myReactions: myPostMyReactions, loadReactions: loadMyPostReactions, toggleReaction: toggleMyPostReaction } = useReactions();
+  useEffect(() => { if (myPostIds.length) loadMyPostReactions(myPostIds); }, [myPostIds.join(',')]);
+  function handleMyPostLike(postId, currentCount) {
+    toggleMyPostLike(postId, currentCount, (id, newCount) => {
+      setMyPostLikeCounts((prev) => ({ ...prev, [id]: newCount }));
+    });
+  }
   const activeQuestions = profile?.reflection_questions ?? DEFAULT_QUESTIONS;
   const affirmationDayNumber = useMemo(() => {
     if (!profile?.affirmation_start_date) return null;
@@ -2219,6 +2234,11 @@ const HomePage = () => {
             <div className="my-posts-list">
               {myOwnPosts.map((post) => {
                 const typeLabel = post.post_type === 'achievement' ? '🏆 Achievement' : post.post_type === 'meetup' ? '📅 Meetup' : '💬 General';
+                const isVideo = post.media_url && /\.(mp4|mov|webm|quicktime)/i.test(post.media_url);
+                const liked = myPostLikedIds.has(post.id);
+                const likeCount = myPostLikeCounts[post.id] ?? post.likes ?? 0;
+                const commentsOpen = !!myPostCommentState.openPanels[post.id];
+                const commentCount = myPostCommentState.commentCount(post.id);
                 return (
                   <div key={post.id} className="my-post-card">
                     <div className="my-post-header">
@@ -2240,7 +2260,59 @@ const HomePage = () => {
                       </div>
                     )}
                     <p className="my-post-content">{post.content}</p>
-                    <div className="my-post-stats"><span>❤️ {post.likes} likes</span></div>
+                    {post.media_url && (
+                      <div className="my-post-media">
+                        {isVideo
+                          ? <video src={post.media_url} className="my-post-media-file" controls playsInline onError={(e) => { e.currentTarget.closest('.my-post-media').style.display = 'none'; }} />
+                          : <img src={post.media_url} alt="" className="my-post-media-file" onError={(e) => { e.currentTarget.closest('.my-post-media').style.display = 'none'; }} />}
+                      </div>
+                    )}
+
+                    <div className="my-post-actions">
+                      <button
+                        type="button"
+                        className={`my-post-action-btn${liked ? ' liked' : ''}`}
+                        onClick={() => handleMyPostLike(post.id, likeCount)}
+                        disabled={myPostToggling.has(post.id)}
+                      >
+                        {liked ? '❤️' : '🤍'} {likeCount || ''}
+                      </button>
+                      <button
+                        type="button"
+                        className={`my-post-action-btn${commentsOpen ? ' active' : ''}`}
+                        onClick={() => myPostCommentState.togglePanel(post.id)}
+                      >
+                        💬 {commentCount > 0 ? commentCount : ''} Comment{commentCount !== 1 ? 's' : ''}
+                      </button>
+                    </div>
+
+                    <div className="my-post-reactions">
+                      {REACTION_EMOJIS.map(({ key, label }) => {
+                        const count = myPostReactionCounts[post.id]?.[key] ?? 0;
+                        const active = myPostMyReactions[post.id] === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            className={`my-post-reaction-chip${active ? ' active' : ''}`}
+                            onClick={() => toggleMyPostReaction(post.id, key)}
+                          >
+                            {label}{count > 0 && <span className="my-post-reaction-count">{count}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {commentsOpen && (
+                      <CommentPanel
+                        postId={post.id}
+                        postType="tribe"
+                        comments={myPostCommentState.commentsByPost[post.id] ?? []}
+                        loading={!!myPostCommentState.loadingPost[post.id]}
+                        onAdd={myPostCommentState.addComment}
+                        onDelete={myPostCommentState.deleteComment}
+                      />
+                    )}
                   </div>
                 );
               })}
