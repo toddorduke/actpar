@@ -6,6 +6,7 @@ import { useGoalProgress, getLiveStreak } from '@actpar/shared';
 import { INTEREST_CONFIG } from '../lib/contentSources';
 import { durationLabel } from '../lib/goalDurations';
 import AddGoalModal from './AddGoalModal';
+import MultiGoalCard from '../components/MultiGoalCard';
 import EditGoalModal from './EditGoalModal';
 import GoalEndPromptModal from './GoalEndPromptModal';
 import NudgeModal from '../components/NudgeModal';
@@ -122,6 +123,21 @@ export default function GoalsScreen() {
       )}
 
       {activeGoals.map((goal) => {
+        if (goal.goal_type === 'multi') {
+          return (
+            <MultiGoalCard
+              key={goal.id}
+              goal={goal}
+              userId={userId}
+              tagLabel={tagLabel(goal.tag)}
+              onEdit={() => setEditingGoal(goal)}
+              onPause={() => pauseGoal(goal.id)}
+              onComplete={() => completeGoal(goal.id)}
+              onArchive={() => confirmArchive(goal.id)}
+            />
+          );
+        }
+
         const isNumeric = goal.goal_type === 'numeric';
         const checkedIn = !isNumeric && isCheckedInToday(goal.id);
         const streak = isNumeric ? null : getLiveStreak(goal, todayStr());

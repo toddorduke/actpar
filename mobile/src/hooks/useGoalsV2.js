@@ -50,15 +50,26 @@ export function useGoalsV2(userId) {
   const archivedGoals = goals.filter((g) => g.status === 'archived');
   const atCap = activeGoals.length >= activeCap;
 
-  async function createGoal({ title, tag, frequency, durationDays, goalType = 'habit', targetValue, targetUnit, targetPeriod }) {
+  async function createGoal({ title, tag, frequency, durationDays, goalType = 'habit', targetValue, targetUnit, targetPeriod, metrics }) {
     // web's useGoals checks title/description the same way (see
     // client/src/hooks/useGoals.js) -- mobile has no description field to
     // check, but title needed the same guard and never had it.
     const titleCheck = checkText(title);
     if (!titleCheck.ok) return { data: null, error: { code: 'MODERATION', message: titleCheck.message } };
+    if (goalType === 'multi' && metrics?.length) {
+      for (const m of metrics) {
+        const metricNameCheck = checkText(m.name);
+        if (!metricNameCheck.ok) return { data: null, error: { code: 'MODERATION', message: metricNameCheck.message } };
+      }
+    }
 
     const isNumeric = goalType === 'numeric';
-    const endsAt = !isNumeric && durationDays
+    // 'multi' is a lightweight container -- frequency/duration/target_*
+    // all stay null, same as 'numeric' -- see
+    // supabase/migrations/20260922165325_add_multi_metric_goal_type.sql.
+    // Targets live per-metric on goal_metrics_v2 instead.
+    const isMulti = goalType === 'multi';
+    const endsAt = !isNumeric && !isMulti && durationDays
       ? new Date(Date.now() + durationDays * 86400000).toISOString()
       : null;
     const { data, error } = await supabase
@@ -68,8 +79,8 @@ export function useGoalsV2(userId) {
         title,
         tag,
         goal_type: goalType,
-        frequency: isNumeric ? null : frequency,
-        duration_days: isNumeric ? null : durationDays,
+        frequency: (isNumeric || isMulti) ? null : frequency,
+        duration_days: (isNumeric || isMulti) ? null : durationDays,
         ends_at: endsAt,
         status: 'active',
         target_value: isNumeric ? targetValue : null,
@@ -85,6 +96,24 @@ export function useGoalsV2(userId) {
       }
       return { data: null, error };
     }
+
+    if (isMulti && metrics?.length) {
+      const { error: metricsError } = await supabase.from('goal_metrics_v2').insert(
+        metrics.map((m, i) => ({
+          goal_id: data.id,
+          user_id: userId,
+          name: m.name.trim(),
+          value_type: m.valueType,
+          unit: m.valueType === 'time' ? null : (m.unit || null),
+          target_value: m.targetValue ?? null,
+          position: i,
+        }))
+      );
+      // The goal itself was created fine even if a metric row failed --
+      // don't roll that back, just surface it so the UI can say so.
+      if (metricsError) { await fetchAll(); return { data, error: null, metricsError }; }
+    }
+
     await fetchAll();
     return { data, error: null };
   }

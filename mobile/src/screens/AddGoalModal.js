@@ -15,6 +15,17 @@ const PERIODS = [
   ['total', 'One-Time'],
 ];
 
+const HYROX_PRESET = [
+  { name: 'SkiErg 1000m', valueType: 'time', unit: '' },
+  { name: 'Sled Push 50m', valueType: 'time', unit: '' },
+  { name: 'Sled Pull 50m', valueType: 'time', unit: '' },
+  { name: 'Burpee Broad Jumps 80m', valueType: 'time', unit: '' },
+  { name: 'Rowing 1000m', valueType: 'time', unit: '' },
+  { name: 'Farmers Carry 200m', valueType: 'time', unit: '' },
+  { name: 'Sandbag Lunges 100m', valueType: 'time', unit: '' },
+  { name: 'Wall Balls (100 reps)', valueType: 'time', unit: '' },
+];
+
 export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPremium }) {
   const [goalType, setGoalType] = useState('habit');
   const [title, setTitle] = useState('');
@@ -26,6 +37,7 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
   const [targetPeriod, setTargetPeriod] = useState('weekly');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [metrics, setMetrics] = useState([]); // [{name, valueType, unit}]
 
   function selectTag(t) {
     setTag(t);
@@ -36,24 +48,28 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
 
   function reset() {
     setGoalType('habit'); setTitle(''); setTag(null); setFrequency(null); setDurationDays(undefined);
-    setTargetValue(''); setTargetUnit(''); setTargetPeriod('weekly'); setError(null);
+    setTargetValue(''); setTargetUnit(''); setTargetPeriod('weekly'); setError(null); setMetrics([]);
   }
 
   const isNumeric = goalType === 'numeric';
+  const isMulti = goalType === 'multi';
   const canSubmit = isNumeric
     ? title.trim() && tag && targetValue && targetUnit.trim()
+    : isMulti
+    ? title.trim() && tag && metrics.filter((m) => m.name.trim()).length > 0
     : title.trim() && tag && frequency;
 
   async function handleSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
     setError(null);
-    const { error: createError } = await onCreate({
+    const { error: createError, metricsError } = await onCreate({
       title: title.trim(), tag, goalType,
       frequency, durationDays,
       targetValue: isNumeric ? parseFloat(targetValue) : undefined,
       targetUnit: isNumeric ? targetUnit.trim() : undefined,
       targetPeriod: isNumeric ? targetPeriod : undefined,
+      metrics: isMulti ? metrics.filter((m) => m.name.trim()).map((m) => ({ name: m.name.trim(), valueType: m.valueType, unit: m.unit.trim() })) : undefined,
     });
     setSubmitting(false);
     if (createError?.code === 'CAP_REACHED') {
@@ -64,7 +80,9 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
       );
       return;
     }
+    if (createError?.code === 'MODERATION') { setError(createError.message); return; }
     if (createError) { setError(createError.message ?? 'Something went wrong.'); return; }
+    if (metricsError) { setError('Goal created, but one of the metrics failed to save — you can try adding it again from the goal.'); }
     reset();
     onClose();
   }
@@ -95,10 +113,18 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
           <TouchableOpacity style={[styles.pill, goalType === 'numeric' && styles.pillActive]} onPress={() => setGoalType('numeric')}>
             <Text style={[styles.pillText, goalType === 'numeric' && styles.pillTextActive]}>📊 Progress Goal</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.pill, goalType === 'multi' && styles.pillActive]} onPress={() => setGoalType('multi')}>
+            <Text style={[styles.pillText, goalType === 'multi' && styles.pillTextActive]}>🏋️ Multi-Metric</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.label}>What's the goal?</Text>
-        <TextInput style={styles.input} placeholder={isNumeric ? 'e.g. Save $500' : 'e.g. Walk 20 minutes'} value={title} onChangeText={setTitle} />
+        <TextInput
+          style={styles.input}
+          placeholder={isNumeric ? 'e.g. Save $500' : isMulti ? 'e.g. HYROX Training' : 'e.g. Walk 20 minutes'}
+          value={title}
+          onChangeText={setTitle}
+        />
 
         <Text style={styles.label}>Category</Text>
         <View style={styles.tagGrid}>
@@ -185,6 +211,59 @@ export default function AddGoalModal({ visible, onClose, onCreate, atCap, isPrem
           </>
         )}
 
+        {tag && isMulti && (
+          <>
+            <Text style={styles.label}>Metrics to track</Text>
+            <Text style={styles.hint}>Add each thing you want to log a number or time for — one goal, several stations.</Text>
+            <TouchableOpacity style={styles.presetBtn} onPress={() => setMetrics(HYROX_PRESET.map((m) => ({ ...m })))}>
+              <Text style={styles.presetBtnText}>⚡ Load HYROX stations</Text>
+            </TouchableOpacity>
+
+            {metrics.map((m, i) => (
+              <View key={i} style={styles.metricRow}>
+                <TextInput
+                  style={[styles.input, styles.metricNameInput]}
+                  placeholder="Metric name (e.g. SkiErg 1000m)"
+                  value={m.name}
+                  onChangeText={(v) => setMetrics((prev) => prev.map((row, idx) => (idx === i ? { ...row, name: v } : row)))}
+                />
+                <View style={styles.row}>
+                  <TouchableOpacity
+                    style={[styles.metricTypeBtn, m.valueType === 'time' && styles.pillActive]}
+                    onPress={() => setMetrics((prev) => prev.map((row, idx) => (idx === i ? { ...row, valueType: 'time' } : row)))}
+                  >
+                    <Text style={[styles.pillText, m.valueType === 'time' && styles.pillTextActive]}>⏱ Time</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.metricTypeBtn, m.valueType === 'number' && styles.pillActive]}
+                    onPress={() => setMetrics((prev) => prev.map((row, idx) => (idx === i ? { ...row, valueType: 'number' } : row)))}
+                  >
+                    <Text style={[styles.pillText, m.valueType === 'number' && styles.pillTextActive]}>🔢 Number</Text>
+                  </TouchableOpacity>
+                  {m.valueType === 'number' && (
+                    <TextInput
+                      style={[styles.input, styles.metricUnitInput]}
+                      placeholder="unit (reps, lbs…)"
+                      value={m.unit}
+                      onChangeText={(v) => setMetrics((prev) => prev.map((row, idx) => (idx === i ? { ...row, unit: v } : row)))}
+                    />
+                  )}
+                  <TouchableOpacity onPress={() => setMetrics((prev) => prev.filter((_, idx) => idx !== i))}>
+                    <Text style={styles.metricRemove}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+
+            <TouchableOpacity
+              style={styles.addMetricBtn}
+              onPress={() => setMetrics((prev) => [...prev, { name: '', valueType: 'time', unit: '' }])}
+            >
+              <Text style={styles.addMetricBtnText}>+ Add a metric</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
         {tag && showDisclaimer && (
           <Text style={styles.disclaimer}>{INTEREST_CONFIG[tag].disclaimer}</Text>
         )}
@@ -230,6 +309,15 @@ const styles = StyleSheet.create({
   durationBadge: { fontSize: 10, fontWeight: '600', color: '#7A6F63', marginTop: 4, textAlign: 'center' },
   durationBadgeActive: { color: '#E06400' },
   hint: { fontSize: 12, color: '#7A6F63', marginTop: 8, fontStyle: 'italic' },
+  presetBtn: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,122,0,0.08)', borderRadius: 999, borderWidth: 1.5, borderColor: '#FF7A00', paddingVertical: 8, paddingHorizontal: 14, marginTop: 10, marginBottom: 4 },
+  presetBtnText: { color: '#E06400', fontSize: 13, fontWeight: '700' },
+  metricRow: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e5e7eb', padding: 12, marginTop: 10 },
+  metricNameInput: { marginBottom: 8 },
+  metricTypeBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5, borderColor: '#e5e7eb', backgroundColor: '#fff' },
+  metricUnitInput: { flex: 1, paddingVertical: 8 },
+  metricRemove: { fontSize: 16, color: '#7A6F63', paddingHorizontal: 6, paddingVertical: 8 },
+  addMetricBtn: { alignSelf: 'flex-start', marginTop: 10 },
+  addMetricBtnText: { color: '#FF7A00', fontSize: 13, fontWeight: '700' },
   disclaimer: { fontSize: 11, color: '#7A6F63', marginTop: 14, lineHeight: 16 },
   error: { color: '#dc2626', fontSize: 13, marginTop: 12 },
   submitBtn: { backgroundColor: '#FF7A00', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 24 },
