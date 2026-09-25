@@ -783,6 +783,10 @@ const HomePage = () => {
   const [postLocation, setPostLocation] = useState('');
   const [postCommunityId, setPostCommunityId] = useState('');
   const [submittingPost, setSubmittingPost] = useState(false);
+  const [postMediaFile, setPostMediaFile] = useState(null);
+  const [postMediaPreviewUrl, setPostMediaPreviewUrl] = useState(null);
+  const [postMediaError, setPostMediaError] = useState('');
+  const postFileInputRef = useRef(null);
   const { myCommunities } = useCommunities();
 
   // Journal
@@ -1071,10 +1075,59 @@ const HomePage = () => {
     toast('Post deleted.', 'success');
   }
 
+  function pickPostMedia(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
+    const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
+    if (!isImage && !isVideo) { setPostMediaError('Unsupported file type.'); return; }
+    if (isImage && file.size > MAX_IMAGE_SIZE) { setPostMediaError('Photo too large (max 10 MB).'); return; }
+    if (isVideo && file.size > MAX_VIDEO_SIZE) { setPostMediaError('Video too large (max 50 MB).'); return; }
+    setPostMediaError('');
+    setPostMediaFile(file);
+    setPostMediaPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function removePostMedia() {
+    setPostMediaFile(null);
+    setPostMediaPreviewUrl(null);
+    setPostMediaError('');
+    if (postFileInputRef.current) postFileInputRef.current.value = '';
+  }
+
+  function closePostModal() {
+    setShowPostModal(false);
+    removePostMedia();
+  }
+
   async function handleSubmitPost() {
-    if (!postContent.trim()) return;
+    if (!postContent.trim() && !postMediaFile) return;
     if (postType === 'meetup' && !postEventDate) { toast('Add a date and time for the meetup.', 'warning'); return; }
     setSubmittingPost(true);
+
+    let media_url = null;
+    if (postMediaFile) {
+      const ext = postMediaFile.name.split('.').pop();
+      const path = `posts/${user.id}/${Date.now()}.${ext}`;
+      const { error: storageError } = await supabase.storage
+        .from('media')
+        .upload(path, postMediaFile, { cacheControl: '3600', upsert: false });
+      if (storageError) {
+        setSubmittingPost(false);
+        toast(`Couldn't upload that file: ${storageError.message}`, 'error');
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+      const mediaScan = await scanMediaUrl(urlData.publicUrl);
+      if (!mediaScan.ok) {
+        await supabase.storage.from('media').remove([path]);
+        setSubmittingPost(false);
+        toast(mediaScan.message, 'error');
+        return;
+      }
+      media_url = urlData.publicUrl;
+    }
+
     const { error, moderation } = await createPost({
       content: postContent,
       post_type: postType,
@@ -1082,6 +1135,7 @@ const HomePage = () => {
       event_date: postType === 'meetup' ? new Date(postEventDate).toISOString() : null,
       location: postType === 'meetup' ? postLocation : null,
       community_id: postType === 'meetup' && postCommunityId ? postCommunityId : null,
+      media_url,
     });
     setSubmittingPost(false);
     if (moderation) { toast(moderation.message, moderation.type === 'crisis' ? 'warning' : 'error', 7000); return; }
@@ -1093,6 +1147,7 @@ const HomePage = () => {
     setPostLocation('');
     setPostCommunityId('');
     setPostType('general');
+    removePostMedia();
     toast('Post shared to the community! 🎉', 'success');
   }
 
@@ -2432,11 +2487,11 @@ const HomePage = () => {
 
         {/* Create Post Modal */}
         {showPostModal && (
-          <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowPostModal(false)}>
+          <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closePostModal()}>
             <div className="upload-modal">
               <div className="upload-modal-header">
                 <h2>Create Post</h2>
-                <button className="upload-modal-close" onClick={() => setShowPostModal(false)}>×</button>
+                <button className="upload-modal-close" onClick={closePostModal}>×</button>
               </div>
               <div className="upload-modal-body">
                 <div className="upload-field">
@@ -2457,6 +2512,26 @@ const HomePage = () => {
                     <input type="text" className="upload-input" placeholder="e.g., 30-day streak, Lost 10 lbs..." value={postMilestone} onChange={(e) => setPostMilestone(e.target.value)} />
                   </div>
                 )}
+                <div className="upload-field">
+                  <label>Photo or video (optional)</label>
+                  {postMediaPreviewUrl ? (
+                    <div className="post-media-preview">
+                      {ALLOWED_VIDEO_TYPES.includes(postMediaFile?.type)
+                        ? <video src={postMediaPreviewUrl} className="post-media-preview-file" controls />
+                        : <img src={postMediaPreviewUrl} alt="preview" className="post-media-preview-file" />}
+                      <button type="button" className="post-media-preview-remove" onClick={removePostMedia}>✕</button>
+                    </div>
+                  ) : (
+                    <button type="button" className="post-media-attach-btn" onClick={() => postFileInputRef.current?.click()}>
+                      📷 Add a photo or video
+                    </button>
+                  )}
+                  {postType === 'achievement' && !postMediaFile && (
+                    <p className="post-media-nudge">Achievements with a photo or video stand out a lot more.</p>
+                  )}
+                  {postMediaError && <p className="post-media-error">{postMediaError}</p>}
+                  <input ref={postFileInputRef} type="file" accept="image/*,video/*" style={{ display: 'none' }} onChange={pickPostMedia} />
+                </div>
                 {postType === 'meetup' && (
                   <>
                     <div className="upload-field">
@@ -2480,8 +2555,8 @@ const HomePage = () => {
                     )}
                   </>
                 )}
-                <button className="upload-submit-btn" onClick={handleSubmitPost} disabled={submittingPost || !postContent.trim()}>
-                  {submittingPost ? 'Posting...' : 'Post to Community'}
+                <button className="upload-submit-btn" onClick={handleSubmitPost} disabled={submittingPost || (!postContent.trim() && !postMediaFile)}>
+                  {submittingPost ? (postMediaFile ? 'Uploading...' : 'Posting...') : 'Post to Community'}
                 </button>
               </div>
             </div>
